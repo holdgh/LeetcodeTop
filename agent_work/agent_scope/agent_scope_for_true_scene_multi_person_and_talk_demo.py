@@ -93,11 +93,9 @@ from enum import Enum
 """
 import asyncio
 import os
-import json
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 from agentscope.agent import ReActAgent
 from agentscope.message import Msg, TextBlock
-from agentscope.pipeline import MsgHub
 from agentscope.model import DashScopeChatModel
 from agentscope.formatter import DashScopeMultiAgentFormatter
 from sentence_transformers import SentenceTransformer
@@ -553,6 +551,7 @@ async def simulate_non_simultaneous_dialogs(agent_pool: AgentPool):
     await asyncio.gather(*batch3_tasks)
     logger.info("=== 第三批用户咨询结束 ===")
 
+
 # -------------------------- 主函数：启动服务 --------------------------
 async def main():
     # 1. 初始化Agent实例池（预创建5个实例对，最大扩容到20个）
@@ -572,6 +571,7 @@ async def main():
             await asyncio.sleep(3600)  # 持续运行
     except KeyboardInterrupt:
         logger.info("=== 服务正在关闭 ===")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
