@@ -8,6 +8,7 @@
 """
 import random
 import uuid
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -109,17 +110,6 @@ from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# -------------------------- 全局配置 --------------------------
-app = FastAPI(title="工业设备运维Agent服务端", version="1.0")
-
-# CORS配置（允许前端跨域）
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # 日志配置
 logging.basicConfig(level=logging.INFO)
@@ -547,12 +537,53 @@ class QueryResponse(BaseModel):
 agent_pool = AgentPool(min_size=5, max_size=20)
 
 
-@app.on_event("startup")
-async def startup_event():
+# @app.on_event("startup")
+# async def startup_event():
+#     """服务启动时初始化实例池和后台任务"""
+#     await agent_pool.init_pool()
+#     asyncio.create_task(agent_pool.clean_expired_pairs())  # 启动过期清理任务
+#     logger.info("服务启动完成，等待请求...")
+
+
+@asynccontextmanager
+async def init_setting(app: FastAPI):
+    """
+    生命周期事件lifespan：
+        - 您可以定义应用程序启动之前应执行的逻辑（代码）。这意味着在应用程序开始接收请求之前，此代码将执行一次。
+
+        - 同样，您可以定义应用程序关闭时应执行的逻辑（代码）。在这种情况下，在处理了可能的许多请求后，此代码将执行一次。
+
+    使用注意事项：
+        - 必须包含 yield：@asynccontextmanager 装饰的函数需要是异步生成器，通过 yield 语句将函数分为两部分：
+            -- yield 之前：服务启动时执行（替代原来的 startup 事件）；
+            -- yield 之后：服务关闭时执行（替代原来的 shutdown 事件，可选）。
+        - 后台任务的优雅关闭：保存 asyncio.create_task 返回的任务对象，在 yield 之后通过 cancel() 取消任务并等待结束，避免服务退出时残留未完成的任务。
+    """
     """服务启动时初始化实例池和后台任务"""
     await agent_pool.init_pool()
-    asyncio.create_task(agent_pool.clean_expired_pairs())  # 启动过期清理任务
+    # 启动后台任务（用变量保存任务，方便后续关闭）
+    clean_task = asyncio.create_task(agent_pool.clean_expired_pairs())
     logger.info("服务启动完成，等待请求...")
+
+    yield  # 关键：分割启动和关闭逻辑，程序会在此时开始处理请求
+
+    # 关闭逻辑（服务退出时执行，可选）
+    clean_task.cancel()  # 取消后台任务
+    await clean_task  # 等待任务结束
+    logger.info("服务已关闭，资源已释放")
+
+
+# -------------------------- 全局配置 --------------------------
+app = FastAPI(title="工业设备运维Agent服务端", version="1.0", lifespan=init_setting)
+
+# CORS配置（允许前端跨域）
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.post("/query", response_model=QueryResponse)
