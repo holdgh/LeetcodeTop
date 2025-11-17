@@ -8,6 +8,9 @@
 """
 import random
 from locust import FastHttpUser, task, between, tag
+from locust.contrib.fasthttp import FastHttpSession
+from locust.env import Environment
+from locust.log import setup_logging
 
 # 测试用问题池（覆盖运维场景，可按需扩展）
 FIRST_QUESTIONS = [
@@ -34,6 +37,51 @@ class MaintenanceAPITester(FastHttpUser):
     host = "http://localhost:8090"  # 你的API服务地址（默认8000端口）
     wait_time = between(1, 3)  # 用户两次请求间隔1-3秒（贴近真实操作）
     session_id = None  # 存储当前用户的会话ID（多轮对话关联）
+    """
+    1. connection_timeout - 连接建立超时
+        作用：限制 建立TCP连接 的最大时间
+        
+        包括：DNS解析 + TCP三次握手 + SSL握手（如果使用HTTPS）
+        
+        触发时机：从发起请求到建立完整连接的过程
+        
+    2. network_timeout - 网络操作超时
+        作用：限制 整个请求生命周期 的最大时间
+        
+        包括：连接建立 + 请求发送 + 等待响应 + 接收完整响应数据
+        
+        触发时机：从发起请求到接收完所有响应数据的整个过程
+    
+    超时配置思路：
+        # 请求时间线分析
+        [
+            "DNS解析": "0.1-1秒",
+            "TCP握手": "0.1-0.5秒", 
+            "SSL握手": "0.3-3秒",
+            "服务器处理": "10秒(平均)", 
+            "网络传输": "0.5-2秒"
+        ]
+        
+        # 所以：
+        connection_timeout ≥ DNS + TCP + SSL = 0.5-4.5秒 → 建议5-10秒
+        network_timeout ≥ 连接 + 处理 + 传输 = 11-17秒 → 建议25-30秒(P95/P99缓冲)
+    
+    对于 平均10秒响应时间 的API，在 FastHttpSession 中建议：
+        
+        场景	connection_timeout	network_timeout	说明
+        标准配置	10.0	30.0	推荐使用
+        网络环境差	15.0	45.0	高延迟网络
+        内网环境	5.0	25.0	低延迟网络
+        重要业务	15.0	60.0	不能失败的操作
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # ✅ 正确的方式：在初始化时设置客户端超时
+        # 设置超时
+        self.client.network_timeout = 90  # 整个请求超时，1.5*服务器api的P99或P95响应时长
+        self.client.connection_timeout = 90  # 连接建立超时
 
     @tag("首轮对话")
     @task(5)  # 权重5（出现概率最高，模拟多数用户首次咨询）

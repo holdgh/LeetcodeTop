@@ -12,8 +12,6 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from enum import Enum
 
-import redis
-
 """
 本地安装的agentscope版本为1.0.7，AgentScope 1.0.7 版本的关键特点
     Tools 使用方式：直接传递函数列表给 tools 参数
@@ -110,7 +108,6 @@ from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-
 # 日志配置
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -171,7 +168,19 @@ class MaintenanceDocRetriever:
             return pickle.load(f)
 
     def search(self, query: str, top_k: int = 3) -> ToolResponse:
-        # def search(self, query: str, top_k: int = 3) -> List[str]:
+        """
+        运维手册知识库检索工具，支持设备故障、操作规范查询
+        Args:
+            query: 用户输入与运维场景有关的问题
+            top_k: 检索数据时取前top_k个与用户输入最相关的分块
+        Returns:
+            与用户输入相关的分块内容列表
+        """
+        # == start-在工具中添加参数校验机制，避免模型调用时因确实入参而报错，同时提醒模型需传入参数 ==
+        # 参数校验：拒绝空字符串、纯空格
+        if not query or query.strip() == "":
+            return ToolResponse(content=[TextBlock(type='text', text="Error: 检索关键词不能为空，请提供具体查询内容")])
+        # == end ==
         """检索相关知识库内容"""
         query_vec = self.embedder.encode([query], convert_to_numpy=True).astype('float32')
         distances, indices = self.index.search(query_vec, top_k)
@@ -190,7 +199,6 @@ doc_retriever = MaintenanceDocRetriever()
 # 工具2：故障代码解析工具（结构化输出）
 # @tool
 def parse_error_code(device_model: str, error_code: str) -> ToolResponse:
-    # def parse_error_code(device_model: str, error_code: str) -> Dict[str, str]:  # 报错：The tool function must return a ToolResponse object, or an AsyncGenerator/Generator of ToolResponse objects, but got <class 'dict'>.
     """
     解析设备故障代码的详细信息
     Args:
@@ -239,7 +247,6 @@ def parse_error_code(device_model: str, error_code: str) -> ToolResponse:
 # 工具3：保养周期查询工具
 # @tool
 def query_maintenance_cycle(part_name: str) -> ToolResponse:
-    # def query_maintenance_cycle(part_name: str) -> str:
     """
     查询设备部件的保养周期
     Args:
@@ -266,6 +273,54 @@ class AgentInstanceState(Enum):
 
 
 # -------------------------- 3. 单个Agent实例封装（含检索+专家对） --------------------------
+# 定义全局的 pre_acting 钩子（用于所有检索助手实例）
+from typing import Dict, Any, Optional
+from agentscope.agent import ReActAgentBase
+
+
+def create_pre_acting_hook(max_tool_calls: int = 3):
+    """
+    创建实例级 pre_acting 钩子（带独立计数器，避免多实例冲突）
+    - max_tool_calls: 该 Agent 允许的最大工具调用次数
+    """
+    tool_call_count = 0  # 每个钩子实例独立计数（闭包变量）
+
+    def pre_acting_hook(agent: ReActAgent, kwargs: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        nonlocal tool_call_count  # 引用外部变量
+
+        # 1. 检查工具调用次数
+        tool_call_count += 1
+        if tool_call_count > max_tool_calls:
+            # 关键：向 Agent 内存添加系统提示，告知停止工具调用
+            stop_msg = Msg(
+                name="system",
+                content="工具调用次数已达上限（最多3次），请基于已获取的信息直接生成最终回答，无需继续调用工具。若信息不足，可告知用户当前能提供的相关内容。",
+                role="system"
+            )
+            agent.memory.add(stop_msg)  # 将提示加入 Agent 记忆
+            logger.info(f"Agent {agent.id} 工具调用达上限，停止调用并提示模型总结回答")
+            return None  # 返回 None → AgentScope 会终止本次工具调用
+        logger.info(f"Agent {agent.name}（{agent.id}）第 {tool_call_count} 次调用工具：{kwargs}")
+        # 2. 校验 search 工具的 query 参数
+        tool_name = kwargs.get("tool_name")
+        input_args = kwargs.get("input_args", {})
+        if tool_name == "search":
+            query = input_args.get("query", "").strip()
+            if not query:
+                # 向内存添加参数错误提示，引导模型补充 query
+                error_msg = Msg(
+                    name="system",
+                    content="search 工具必须传入非空的查询关键词（如“冷却系统维护 断电”），请补充关键词后再尝试调用；若无法补充，可基于现有信息回答用户问题。",
+                    role="system"
+                )
+                agent.memory.add(error_msg)
+                return None  # 终止本次空参数调用
+
+        return kwargs  # 校验通过，继续执行工具调用
+
+    return pre_acting_hook
+
+
 class AgentPair:
     """Agent实例对：包含一个检索Agent和一个专家Agent，绑定同一会话"""
 
@@ -275,14 +330,14 @@ class AgentPair:
         self.bind_time: Optional[datetime] = None  # 绑定会话的时间
         self.idle_timeout = timedelta(minutes=10)  # 空闲超时时间（10分钟无操作则释放）
         self.model = DashScopeChatModel(
-            model_name="qwen-max",
+            model_name="deepseek-v3.2-exp",
             api_key="sk-f61034a0afd64ffdab4be83a063b20e3",
             # api_key=os.getenv("DASHSCOPE_API_KEY"),
             # temperature=0.1  # 降低随机性，保证运维回答准确性
             generate_kwargs={
                 "temperature": 0.1,
                 "top_p": 0.8,
-                "max_tokens": 1500,
+                "max_tokens": 500,
                 "repetition_penalty": 1.1
             }
         )
@@ -291,14 +346,9 @@ class AgentPair:
         self.retriever = self._create_retriever_agent()
         self.expert = self._create_expert_agent()
 
-    def _get_event_loop(self):
-        """获取或创建事件循环"""
-        try:
-            return asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.new_event_loop()
-
     def _create_retriever_agent(self) -> ReActAgent:
+        # == start-添加工具调用次数限制 ==
+        # == end ==
         # 初始化工具箱实例
         toolkit = Toolkit()
         # 使用 register_tool_function 方法注册工具
@@ -318,6 +368,12 @@ class AgentPair:
             toolkit=toolkit
         )
         retriever.set_console_output_enabled(False)  # 禁用控制台输出智能体内容，由业务代码控制输出内容
+        # 3. 关键：为当前 Agent 实例注册 pre_acting 钩子（仅当前实例生效）
+        retriever.register_instance_hook(
+            hook_type="pre_acting",  # 钩子类型：工具调用前
+            hook_name="search_param_check",  # 钩子名称（唯一标识）
+            hook=create_pre_acting_hook(max_tool_calls=3)  # 传入带计数器的钩子
+        )
         return retriever
 
     def _create_expert_agent(self) -> ReActAgent:
@@ -409,13 +465,13 @@ class AgentPool:
 
             # 4. 已达最大容量→等待空闲实例（超时1分钟）
             logger.warning("实例池已达最大容量，用户会话排队中...")
-            return await self._wait_for_idle_pair(session_id)
+            return await self._wait_for_idle_pair(session_id, timeout=120)  # 排队时长增加到2分钟
 
     async def _wait_for_idle_pair(self, session_id: str, timeout: int = 60) -> AgentPair:
         """等待空闲实例（超时抛出异常）"""
         start_time = datetime.now()
         while datetime.now() - start_time < timedelta(seconds=timeout):
-            await asyncio.sleep(2)  # 每2秒检查一次
+            await asyncio.sleep(5)  # 每5秒检查一次
             async with self.lock:
                 idle_pairs = [p for p in self.pool if p.get_state() == AgentInstanceState.IDLE]
                 if idle_pairs:
@@ -427,28 +483,98 @@ class AgentPool:
         raise TimeoutError("当前咨询用户过多，请稍后重试")
 
     async def clean_expired_pairs(self):
-        """定期清理过期实例（解除绑定，回归空闲）"""
-        while True:
-            await asyncio.sleep(60)  # 每分钟检查一次
-            async with self.lock:
-                for agent_pair in self.pool:
-                    if agent_pair.get_state() == AgentInstanceState.EXPIRED:
-                        # 解除过期会话绑定
-                        expired_session = agent_pair.session_id
-                        if expired_session in self.session_map:
-                            del self.session_map[expired_session]
-                        await agent_pair.unbind_session()
-                        logger.info(f"清理过期实例绑定，会话 {expired_session} 已释放")
+        """
+        当前api服务重载时，此处会报错“asyncio.exceptions.CancelledError”。本质是「执行时机+异步任务取消机制」导致了报错——核心原因是：**服务重载时后台任务被强制取消，而 `asyncio.sleep` 是可取消的异步操作，取消时会直接抛出 `CancelledError`**。
 
-                # 缩容：若空闲实例过多，且超过最小容量→销毁多余实例
-                idle_count = len([p for p in self.pool if p.get_state() == AgentInstanceState.IDLE])
-                if idle_count > self.min_size and len(self.pool) > self.min_size:
-                    # 保留min_size个空闲实例，销毁其余
-                    idle_pairs = [p for p in self.pool if p.get_state() == AgentInstanceState.IDLE]
-                    redundant_pairs = idle_pairs[self.min_size:]
-                    for p in redundant_pairs:
-                        self.pool.remove(p)
-                    logger.info(f"实例池缩容，当前容量：{len(self.pool)}")
+        ### 先理清关键逻辑：为什么是 `asyncio.sleep` 触发报错？
+        我们把整个过程拆成3步，就能看懂因果：
+        1. **后台任务的运行状态**：你的 `clean_expired_pairs` 是个「无限循环+休眠」的异步任务，逻辑是：
+           ```python
+           async def clean_expired_pairs(self):
+               while True:  # 无限循环
+                   执行清理逻辑...
+                   await asyncio.sleep(60)  # 休眠60秒（等待下一次清理）
+           ```
+           大多数时间里，这个任务都处于 `asyncio.sleep(60)` 的「休眠等待状态」（而非执行计算）。
+
+        2. **服务重载触发任务取消**：当 FastAPI 检测到文件变更，触发自动重载时，会执行「关闭旧服务」流程：
+           - 你的 `lifespan` 关闭逻辑里调用了 `clean_task.cancel()`（主动取消后台任务）；
+           - 异步任务的「取消机制」是：如果任务正在执行「可取消的异步操作」（比如 `sleep`、网络请求等），会立刻中断该操作，并抛出 `CancelledError`。
+
+        3. **`asyncio.sleep` 成为报错的“触发点”**：
+           - 因为后台任务大部分时间都在 `await asyncio.sleep(60)` 休眠，此时取消任务，就会直接中断 `sleep`，抛出 `CancelledError`；
+           - 如果取消时，任务恰好正在执行「清理逻辑」（而非休眠），报错会出现在清理逻辑的某一步，但因为清理逻辑执行时间极短（毫秒级），所以几乎所有取消都会命中 `sleep` 阶段，表现为 `sleep` 触发报错。
+
+        简单说：`asyncio.sleep` 是后台任务的「主要等待环节」，也是异步取消机制的「主要触发点」——它不是报错的根源，只是刚好处于“被取消”的位置。
+
+
+        ### 再补充：为什么取消异步任务会抛这个错？
+        这是 Python `asyncio` 的「设计规则」：**异步任务被取消时，必须通过抛出 `CancelledError` 来通知任务“你被取消了”**，让任务有机会执行收尾操作（比如释放资源）。
+
+        - 同步任务被取消（比如线程 `thread.stop()`）是“暴力终止”，不会抛异常；
+        - 异步任务的取消是“协作式”的：通过 `task.cancel()` 发送取消信号，任务在执行可取消操作时（如 `sleep`、`await` 其他任务），会响应这个信号，抛出 `CancelledError`，让开发者在 `except` 中处理收尾。
+
+        你的代码中，`clean_expired_pairs` 没有处理 `CancelledError`，所以这个异常会向上传播，最终被 FastAPI 捕获，打印出你看到的报错日志。
+
+
+        ### 验证：如果没有 `asyncio.sleep`，还会报错吗？
+        如果把 `clean_expired_pairs` 改成“无休眠的忙循环”（不推荐，会占满CPU）：
+        ```python
+        async def clean_expired_pairs(self):
+            while True:
+                执行清理逻辑...
+                # 去掉 asyncio.sleep(60)
+        ```
+        此时取消任务时，因为没有「可取消的异步操作」，`CancelledError` 会在下次执行 `await` 操作时抛出——但如果是纯忙循环（无任何 `await`），任务会“无法响应取消信号”，一直运行直到服务强制退出，反而会导致资源泄漏。
+
+        所以 `asyncio.sleep` 是必要的（控制清理频率），报错的根源是「任务被取消时未处理异常」，而非 `sleep` 本身。
+
+
+        ### 最终结论
+        - 报错的直接触发点是 `await asyncio.sleep(60)`，但它不是“罪魁祸首”；
+        - 核心原因是「服务重载→后台任务被取消→`asyncio.sleep` 响应取消信号抛出 `CancelledError`→未被捕获」；
+        - 解决方法很简单：在 `clean_expired_pairs` 中捕获取消异常，让任务优雅退出：
+          ```python
+          async def clean_expired_pairs(self):
+              try:
+                  while True:
+                      # 原有清理逻辑...
+                      await asyncio.sleep(60)
+              except asyncio.CancelledError:
+                  # 处理收尾（可选），然后静默退出
+                  logger.info("后台清理任务已被取消，准备退出")
+                  return
+          ```
+
+        这样修改后，即使服务重载触发任务取消，也不会打印报错日志，服务会优雅重启。
+        """
+        """定期清理过期实例（解除绑定，回归空闲）"""
+        try:
+            while True:
+                await asyncio.sleep(30)  # 每半分钟检查一次
+                async with self.lock:
+                    for agent_pair in self.pool:
+                        if agent_pair.get_state() == AgentInstanceState.EXPIRED:
+                            # 解除过期会话绑定
+                            expired_session = agent_pair.session_id
+                            if expired_session in self.session_map:
+                                del self.session_map[expired_session]
+                            await agent_pair.unbind_session()
+                            logger.info(f"清理过期实例绑定，会话 {expired_session} 已释放")
+
+                    # 缩容：若空闲实例过多，且超过最小容量→销毁多余实例
+                    idle_count = len([p for p in self.pool if p.get_state() == AgentInstanceState.IDLE])
+                    if idle_count > self.min_size and len(self.pool) > self.min_size:
+                        # 保留min_size个空闲实例，销毁其余
+                        idle_pairs = [p for p in self.pool if p.get_state() == AgentInstanceState.IDLE]
+                        redundant_pairs = idle_pairs[self.min_size:]
+                        for p in redundant_pairs:
+                            self.pool.remove(p)
+                        logger.info(f"实例池缩容，当前容量：{len(self.pool)}")
+        except asyncio.CancelledError:
+            # 捕获任务取消异常，静默退出（无需报错）
+            logger.info("清理过期实例的后台任务已被取消（服务重载/关闭）")
+            return
 
 
 # -------------------------- 5. 会话管理与多用户服务 --------------------------
@@ -457,38 +583,6 @@ class SessionManager:
     def create_session() -> str:
         """创建新会话ID"""
         return f"session_{uuid.uuid4().hex[:8]}"
-
-
-async def user_dialog(session_id: str, agent_pool: AgentPool, questions: List[str]):
-    """单个用户多轮对话（复用Agent实例）"""
-    logger.info(f"\n【会话 {session_id}】用户开始咨询")
-    try:
-        for q in questions:
-            # 1. 获取绑定该会话的Agent实例对
-            agent_pair = await agent_pool.get_agent_pair(session_id)
-            retriever = agent_pair.retriever
-            expert = agent_pair.expert
-
-            # 2. 构造用户消息
-            user_msg = Msg(name="user", content=q, role="user")
-
-            # 3. 存入实例专属内存
-            await retriever.memory.add(user_msg)
-            await expert.memory.add(user_msg)
-            logger.info(f"【会话 {session_id}】发送：{q}")
-
-            # 4. 智能体协作处理
-            retriever_reply = await retriever.reply()
-            await expert.memory.add(retriever_reply)
-            expert_reply = await expert.reply()
-
-            # 5. 输出结果
-            logger.info(f"【会话 {session_id}】收到回复：{expert_reply.content}\n")
-
-            # TODO 模拟用户思考间隔（1-3秒）
-            await asyncio.sleep(random.random() * 2 + 1)
-    except Exception as e:
-        logger.error(f"【会话 {session_id}】处理异常：{str(e)}")
 
 
 async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, question: str):
@@ -510,6 +604,7 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
 
         # 4. 智能体协作处理
         retriever_reply = await retriever.reply()
+        logger.info(f"【会话 {session_id}】的检索助手返回数据：{retriever_reply.content}")
         await expert.memory.add(retriever_reply)
         expert_reply = await expert.reply()
 
@@ -534,10 +629,10 @@ class QueryResponse(BaseModel):
 
 
 # 全局实例池（启动时初始化）
-agent_pool = AgentPool(min_size=5, max_size=20)
+agent_pool = AgentPool(min_size=2, max_size=4)
 
 
-# @app.on_event("startup")
+# @app.on_event("startup")  # 该方式已过期，采用lifespan代替
 # async def startup_event():
 #     """服务启动时初始化实例池和后台任务"""
 #     await agent_pool.init_pool()
@@ -612,4 +707,5 @@ if __name__ == "__main__":
     # asyncio.run(main())
     import uvicorn
 
-    uvicorn.run(app='api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:app', port=8090, reload=True)
+    uvicorn.run(app='api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:app', port=8090, reload=True,
+                workers=1)
