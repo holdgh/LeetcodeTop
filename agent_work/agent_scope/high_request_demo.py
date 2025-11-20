@@ -8,9 +8,6 @@
 """
 import random
 from locust import FastHttpUser, task, between, tag
-from locust.contrib.fasthttp import FastHttpSession
-from locust.env import Environment
-from locust.log import setup_logging
 
 # 测试用问题池（覆盖运维场景，可按需扩展）
 FIRST_QUESTIONS = [
@@ -31,6 +28,7 @@ FOLLOW_UP_QUESTIONS = [
     "检查需要断电吗？",
     "还是报错怎么办？"
 ]
+
 
 class MaintenanceAPITester(FastHttpUser):
     """模拟运维用户并发请求"""
@@ -102,12 +100,16 @@ class MaintenanceAPITester(FastHttpUser):
             else:
                 print(f"会话{self.session_id}首轮失败，状态码={response.status_code}")
 
+            # 模拟用户思考
+            # self.wait_time = between(1, 3)  # 用户思考1-3秒
+
     @tag("多轮对话")
     @task(2)  # 权重2（出现概率较低，模拟部分用户继续咨询）
     def follow_up_query(self):
         """模拟多轮对话（携带已获取的session_id）"""
         if self.session_id:  # 仅首轮成功后执行
             question = random.choice(FOLLOW_UP_QUESTIONS)
+            # 发送POST请求
             response = self.client.post(
                 "/query",
                 json={"session_id": self.session_id, "question": question},
@@ -115,6 +117,9 @@ class MaintenanceAPITester(FastHttpUser):
             )
             if response.status_code != 200:
                 print(f"会话{self.session_id}多轮失败，状态码={response.status_code}")
+
+            # 模拟用户思考
+            # self.wait_time = between(1, 3)  # 用户思考1-3秒
 
     @tag("混合场景")
     @task(3)  # 权重3（混合首轮/多轮，更贴近真实流量）

@@ -1,0 +1,431 @@
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_1 绑定会话 session_9b8dd608
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：冷却滤芯更换周期？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_5dc9d09b）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_bb72d5f366a847b28c2f40', 'name': 'query_maintenance_cycle', 'input': {'part_name': '冷却系统滤芯', 'original_query': '冷却滤芯更换周期？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：冷却系统滤芯的更换周期为每3个月或运行1500小时，请根据实际使用情况及时更换以确保设备正常运行。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：冷却系统滤芯的更换周期为每3个月或运行1500小时。请根据实际使用情况及时更换，以确保设备正常运行。
+
+INFO:     127.0.0.1:55621 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：冷却液正常，下一步查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_5e0d3b81）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_17e802ce3a7943ee9684e3', 'name': 'search', 'input': {'query': '设备冷却液正常后下一步检查项目', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  2.74it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：在确认冷却液正常的前提下，建议下一步检查以下项目：
+1. 检查冷却系统压力是否充足；
+2. 确认电源电压是否在380V±10%范围内；
+3. 检查润滑油液位是否正常；
+4. 确保安全防护门已完全闭合。
+若存在相关报警代码（如E101），还需重点排查水泵及管路工作状态。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：在确认冷却液正常的前提下，建议下一步检查：
+1. 冷却系统压力是否充足；
+2. 电源电压是否在380V±10%范围内；
+3. 润滑油液位是否正常；
+4. 安全防护门是否已完全闭合。
+
+如果存在报警代码（如E101），还需重点排查水泵及管路的工作状态。
+
+INFO:     127.0.0.1:55621 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：冷却液正常，下一步查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_07ccab5f）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_d217fee570b94e4a8a5981', 'name': 'search', 'input': {'query': '设备冷却液正常后下一步检查流程', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.38it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：在确认冷却液正常的前提下，建议按以下顺序进行下一步检查：
+1. 检查冷却系统压力是否正常，是否存在报警代码E101，如有则需排查水泵及管路；
+2. 测量电源电压，确保其处于380V±10%的标准范围；
+3. 查看润滑油液位是否达标；
+4. 确认安全防护门已可靠闭合。
+以上是M系列设备常规检查流程，请结合具体机型和报警信息进一步判断。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：在确认冷却液正常的前提下，建议按以下顺序进行下一步检查：
+1. 检查冷却系统压力是否正常，是否存在报警代码E101，如有则需排查水泵及管路；
+2. 测量电源电压，确保其处于380V±10%的标准范围；
+3. 查看润滑油液位是否达标；
+4. 确认安全防护门已可靠闭合。
+
+以上是M系列设备的常规检查流程，请结合具体机型和报警信息进一步判断。
+
+INFO:     127.0.0.1:55621 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：冷却液正常，下一步查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_54e44a97）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_80d3298ed1284ab1b7ca17', 'name': 'search', 'input': {'query': '工业设备冷却液正常后的标准排障流程', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.09it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：在确认冷却液正常的前提下，建议按照标准排障流程继续检查以下项目：
+1. 检查冷却系统压力是否正常——若出现E101报警，需重点排查水泵运行状态及管路是否有堵塞或泄漏；
+2. 核实电源供电情况——电压应稳定在380V±10%范围内；
+3. 检查润滑系统——确认润滑油液位充足且无变质；
+4. 验证安全联锁装置——确保安全防护门已关闭并触发限位开关。
+请结合设备具体型号和当前有无报警代码进行针对性排查。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：在确认冷却液正常的前提下，建议按照标准排障流程继续检查以下项目：
+1. 检查冷却系统压力是否正常——若出现E101报警，需重点排查水泵运行状态及管路是否有堵塞或泄漏；
+2. 核实电源供电情况——电压应稳定在380V±10%范围内；
+3. 检查润滑系统——确认润滑油液位充足且无变质；
+4. 验证安全联锁装置——确保安全防护门已关闭并触发限位开关。
+
+请结合设备具体型号和当前有无报警代码进行针对性排查。
+
+INFO:     127.0.0.1:55621 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：润滑脂用什么型号？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_b833fe17）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_932963825ab04812baac16', 'name': 'search', 'input': {'query': 'M系列设备润滑脂推荐型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  3.97it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_b833fe17）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_97bd67dcc6264185ac682d', 'name': 'search', 'input': {'query': '主轴轴承润滑脂规格型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.80it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_b833fe17）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_45cb5f2a56bb4b0b864262', 'name': 'search', 'input': {'query': '工业设备主轴轴承常用润滑脂型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  8.29it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：根据现有资料，M系列设备主轴轴承每运行2000小时需更换一次润滑脂，但具体推荐使用的润滑脂型号未明确列出。建议参考设备说明书或联系厂家获取针对您设备型号（如M-2000或M-3000）的专用润滑脂规格。通常情况下，高速主轴可选用耐高温锂基润滑脂（如ISO LG2级，NLGI No.2）。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：关于润滑脂型号，根据现有资料：
+
+**原因分析**：M系列设备主轴轴承需定期维护，每运行2000小时应更换一次润滑脂，但通用文档中未明确指定具体型号。
+
+**解决方案**：
+1. 推荐查阅设备说明书或铭牌信息，查找与您的设备型号（如M-2000、M-3000等）匹配的原厂指定润滑脂；
+2. 若无法获取原厂规格，可临时选用高性能耐高温锂基润滑脂，常见适用规格为：
+   - ISO等级：LG2
+   - NLGI级别：No.2
+   - 工作温度范围宜覆盖 -20°C 至 160°C。
+
+**注意事项**：不同品牌主轴对润滑脂成分要求较高，错误选型可能导致过热或磨损加剧，请优先咨询厂家技术支持后再行加注。
+
+INFO:     127.0.0.1:55621 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：润滑脂用什么型号？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_df04c30f）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_c3a828b98ab0419e8fe21a', 'name': 'search', 'input': {'query': 'M-2000设备主轴轴承指定润滑脂型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.67it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_df04c30f）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_47415ae469d742df8b92fa', 'name': 'search', 'input': {'query': 'M-3000设备润滑脂技术要求', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  7.70it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：目前知识库中尚未明确记录M-2000或M-3000设备主轴轴承指定的润滑脂具体型号。但根据维护规范，主轴轴承应每运行2000小时更换一次润滑脂。建议使用高性能耐高温锂基润滑脂（如NLGI No.2等级），适用于高转速和重载工况。为确保兼容性，请查阅设备随附的技术手册或联系原厂技术支持获取官方推荐牌号。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：目前知识库中尚未明确记录M-2000或M-3000设备主轴轴承指定的润滑脂具体型号，但维护规范要求每运行2000小时更换一次润滑脂。
+
+**解决方案**：
+1. 优先查阅设备技术手册或铭牌信息，获取原厂推荐的润滑脂牌号；
+2. 如暂无法取得官方资料，可选用符合以下规格的替代品：
+   - 类型：高性能耐高温锂基润滑脂
+   - 等级：NLGI No.2
+   - 特性：适用于高转速、重载工况，具备良好抗氧化和抗剪切性能。
+
+**注意事项**：不同主轴对基础油和稠化剂成分敏感，不兼容的润滑脂可能引起硬化、流失或加速磨损。因此，在正式加注前务必联系厂家确认兼容性，避免因误用导致主轴损坏。
+
+INFO:     127.0.0.1:49672 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：检查需要断电吗？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_9190bd14）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_9a0ad183edf04d9cb81f3c', 'name': 'search', 'input': {'query': '工业设备维护检查是否需要断电操作', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  8.57it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_9190bd14）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_2315e89eaa204da3ab3c60', 'name': 'search', 'input': {'query': '添加润滑脂或更换保养时是否需要断电', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  3.83it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_9190bd14）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_5a9a3ccf2baa401a821437', 'name': 'search', 'input': {'query': '设备维护安全规程 断电操作要求', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.95it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：是的，进行设备检查或维护（尤其是涉及机械部件如主轴轴承加注或更换润滑脂）时，必须执行断电操作。根据安全规程，应在切断主电源后挂上警示标识，并通过急停按钮锁定设备状态，防止意外启动。只有在确认所有人员撤离危险区域后方可重新送电。这是保障运维人员人身安全的基本要求。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：在进行设备检查或维护作业时，特别是涉及机械内部组件（如主轴轴承润滑脂更换）的操作，存在意外启动的风险，可能造成严重的人身伤害或设备损坏。
+
+**解决方案**：
+1. 必须先切断设备主电源；
+2. 按下急停按钮并将开关置于锁定状态；
+3. 在电源控制柜悬挂“正在检修，禁止合闸”警示标识；
+4. 确认储能部件（如液压系统、电容等）已完成泄放。
+
+**注意事项**：断电是进入设备危险区域的前提条件，任何维护操作均不得带电作业。恢复供电前需确认所有工具已取出、人员已撤离，并由同一操作人解除急停与警示措施。此流程遵循国家安全生产规范，不可省略。
+
+INFO:     127.0.0.1:51497 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：冷却液正常，下一步查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_3db29a8c）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_c773831335e442388e9808', 'name': 'search', 'input': {'query': '冷却液正常后设备排障下一步检查项', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.38it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：在确认冷却液正常的前提下，建议接下来依次检查以下项目：
+1. **冷却系统压力**——即使液位正常，仍可能存在水泵故障或管路堵塞导致压力不足（特别是出现E101报警时）；
+2. **电源电压**——测量输入电压是否稳定在380V±10%，避免因供电异常引发控制问题；
+3. **润滑系统状态**——检查润滑油/脂液位及质量，确保各运动部件润滑良好；
+4. **安全防护装置**——确认安全门已关闭且限位开关有效触发。
+建议结合设备具体型号和当前是否有报警代码进行精准排查。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：尽管冷却液正常，但系统仍可能出现其他关键故障点，如压力不足、供电异常或安全联锁未生效等问题，尤其当设备伴随报警（如E101）时更需全面排查。
+
+**解决方案**：
+1. **检查冷却系统压力**——确认水泵运行是否正常，管路有无堵塞或泄漏，特别注意出现E101报警时的重点诊断；
+2. **检测电源电压**——使用万用表测量输入电压，确保其稳定在380V±10%范围内；
+3. **核查润滑系统**——查看润滑油液位及品质，必要时补充或更换；对于主轴等部位，确认润滑脂加注到位；
+4. **验证安全防护装置**——确保所有安全门已关闭，并测试限位开关信号是否正常反馈至控制系统。
+
+**注意事项**：建议按照上述顺序逐项排查，避免遗漏。同时结合设备具体型号和当前报警信息进行针对性处理，提升诊断效率与安全性。
+
+INFO:     127.0.0.1:51497 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：润滑脂用什么型号？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_082e2b7e）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_83ab37a0f3e64d2eb1fb33', 'name': 'search', 'input': {'query': 'M系列设备主轴轴承指定润滑脂型号 技术规范', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00, 16.70it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：经多次检索，当前知识库中未明确记载M系列设备（包括M-2000/M-3000）主轴轴承所对应的专用润滑脂具体型号。但根据维护要求，主轴轴承应每运行2000小时更换一次润滑脂。建议选用高性能耐高温锂基润滑脂（如NLGI No.2等级），具备良好的抗氧化性和承载能力。为确保符合原厂技术标准，请查阅设备出厂说明书或联系制造商获取正式推荐油脂牌号。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：经多次检索确认，当前知识库中未明确记载M系列设备（如M-2000、M-3000）主轴轴承所使用的专用润滑脂具体型号。虽然维护规范要求每运行2000小时更换一次润滑脂，但原厂推荐的具体油脂牌号不在现有资料中。
+
+**解决方案**：
+1. 优先查阅设备随机附带的《操作与维护手册》，在润滑章节中查找‘主轴轴承’对应油脂的规格或品牌型号；
+2. 若手册缺失或信息不明，建议联系设备制造商技术支持，提供设备序列号以获取准确的润滑脂推荐清单；
+3. 在应急情况下，可暂时选用符合以下标准的通用替代品：
+   - 类型：高性能耐高温锂基润滑脂
+   - 等级：NLGI No.2
+   - 性能要求：具有优良的抗氧化性、抗剪切能力和高滴点（≥180°C）。
+
+**注意事项**：不同主轴设计对润滑脂的基础油类型（矿物/合成）、增稠剂种类及添加剂配方有严格匹配要求，错误选型可能导致润滑失效、温升过高甚至主轴抱死。因此，严禁长期使用非认证油脂，务必尽快完成官方确认。”
+
+INFO:     127.0.0.1:51497 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：冷却液正常，下一步查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_6055ff85）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_0dc4a10bfe4a42b6b32850', 'name': 'search', 'input': {'query': '冷却液正常后设备故障排查后续步骤', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00, 25.00it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：在确认冷却液正常的前提下，建议按以下顺序进行下一步排查：
+1. **检查冷却系统压力**——尽管液位正常，但仍可能因水泵失效或管道阻塞导致压力不足，尤其当出现E101报警时；
+2. **检测电源电压**——确保供电稳定在380V±10%，防止电气异常影响控制系统；
+3. **核查润滑状况**——查看润滑油/脂是否充足、清洁，避免机械磨损加剧；
+4. **验证安全回路状态**——确认安全防护门已关闭且急停回路未被触发。
+请结合设备实际运行状态和是否有报警代码综合判断。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：冷却液虽正常，但系统仍可能因其他关键环节异常而无法正常运行，例如冷却循环压力不足、电源波动、润滑不良或安全保护机制未复位等。特别是在出现E101类报警时，需排除水泵及管路故障。
+
+**解决方案**：
+1. **检查冷却系统压力**——使用压力表检测系统工作压力，确认水泵是否正常运转，排查是否存在堵塞、泄漏或阀门未开的情况；
+2. **测量电源电压**——在电控柜进线端用万用表测量三相电压，确保其稳定在380V±10%范围内；
+3. **核查润滑状况**——检查各传动部件（如导轨、丝杠、主轴）的润滑油/脂是否充足、洁净，必要时补油或清理旧脂；
+4. **验证安全回路状态**——确认所有安全门已关闭，限位开关动作可靠，急停按钮处于释放状态，且PLC输入信号正常。
+
+**注意事项**：建议按上述顺序逐一排查，避免交叉干扰。若有报警代码，请优先调阅对应故障说明进行定向诊断。同时，确保设备断电后才可接触机械与电气内部元件，保障操作安全。”
+
+INFO:     127.0.0.1:51497 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：还是报错怎么办？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_8408487e）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_a693e6a6ecdc486898b669', 'name': 'search', 'input': {'query': '设备持续报错 排除基本检查后 故障处理方法', 'original_query': '还是报错怎么办？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  3.57it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_8408487e）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_e387d77b3337447bb60d1a', 'name': 'parse_error_code', 'input': {'device_model': 'M-2000', 'error_code': 'E101', 'original_query': '还是报错怎么办？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：如果已完成基础检查（如冷却液、电源、润滑等）但设备仍然报错，建议采取以下措施：
+
+1. **确认具体报警代码**——例如E101表示‘冷却系统压力不足’，即便冷却液正常，也可能是水泵损坏或管路堵塞所致；
+2. **执行深度诊断**——根据故障码进入专项排查流程，比如对E101需检查水泵运行声音、进出水压差及过滤器是否脏堵；
+3. **复位并测试**——排除隐患后，按下急停复位键重启设备，观察是否恢复正常；
+4. **联系技术支持**——若问题依旧存在，可能存在传感器误报、PLC逻辑错误或内部模块故障，建议由专业工程师介入处理。
+
+请提供具体的报警代码以便更精准定位问题。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：在已完成冷却液、电源、润滑及安全回路等基础检查的前提下，设备仍报错，说明问题可能源于特定功能模块故障或控制信号异常。常见的如E101报警虽与冷却系统相关，但并非仅由液体本身引起，更多指向水泵性能下降、管路堵塞、压力传感器失准或控制器误判等情况。
+
+**解决方案**：
+1. **明确具体报警代码**——查看HMI界面显示的完整故障信息（如E101、E205等），不同代码对应不同的诊断路径；
+   - 示例：E101 → 冷却系统压力不足 → 聚焦水泵、过滤器、止回阀和压力开关。
+2. **执行专项深度排查**：
+   - 听诊水泵运行声音是否正常，有无异响或空转现象；
+   - 检测进出口水压差，判断泵体输出能力；
+   - 拆检过滤网是否积垢或堵塞；
+   - 使用万用表测试压力传感器反馈信号是否在合理区间。
+3. **尝试系统复位**：排除物理隐患后，将急停旋出并按下复位按钮，重新启动控制系统，观察故障是否消除。
+4. **申请技术支持介入**：若上述操作无效，则可能存在PLC程序异常、I/O模块损坏或隐性泄漏等问题，需由厂家技术人员通过专用软件进行诊断。
+
+**注意事项**：切勿频繁强制重启设备，以免扩大故障范围。保留最后一次报错画面截图或日志记录，便于远程支持时快速定位。”
+
+INFO:     127.0.0.1:63140 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：密封圈怎么检查？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_56fd37ec）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_19019c9bf2e74cdaa0e5e0', 'name': 'search', 'input': {'query': '工业设备密封圈检查方法 步骤', 'original_query': '密封圈怎么检查？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.33it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_56fd37ec）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_aa140072a23e4a9a90bf6e', 'name': 'search', 'input': {'query': '密封圈外观检查与老化判断标准', 'original_query': '密封圈怎么检查？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  8.01it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_56fd37ec）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_08706d06000d4059b188bd', 'name': 'search', 'input': {'query': '密封圈安装注意事项 及常见失效模式', 'original_query': '密封圈怎么检查？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.44it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：密封圈的检查应按照以下步骤进行：
+
+1. **目视检查**——拆卸相关部件后，观察密封圈表面是否有裂纹、变形、划伤或溶胀现象；
+2. **触感判断**——用手轻捏密封圈，若明显发硬、失去弹性或出现粘连，则表明已老化失效；
+3. **位置确认**——检查密封圈是否正确安装到位，是否存在偏移、扭曲或挤压不均的情况；
+4. **配合面检查**——查看与其接触的金属表面是否光滑无毛刺，避免因刮擦导致泄漏；
+5. **运行监测**——重新装配后试机，注意有无渗漏迹象。
+
+特别提醒：对于液压系统（如M-3000设备E056报警），密封圈是关键防漏元件，建议定期更换易损密封件，并使用原厂匹配规格的产品。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：密封圈作为防止流体泄漏的关键元件，长期运行后可能因材料老化、机械损伤或安装不当导致失效，进而引发漏油、漏水或气密性下降等问题，影响设备稳定性与安全性。
+
+**检查步骤**：
+1. **断电停机并泄压**——在开始检查前，必须切断设备电源，并释放系统内残余压力（如液压、气动或冷却系统），确保操作安全；
+2. **拆卸相关组件**——打开需检查的腔体盖板或连接法兰，小心取出密封圈，避免二次损伤；
+3. **外观目视检查**——观察密封圈表面是否存在裂纹、断裂、划痕、溶胀、鼓包或永久压缩变形等缺陷；
+4. **手感评估弹性**——轻轻弯折或按压密封圈，若材质变硬、脆化或失去回弹能力，说明已老化需更换；
+5. **核实安装状态**——确认密封圈是否正确嵌入沟槽，有无扭转、错位或预紧力不均现象；
+6. **检查配合面质量**——查看与其贴合的金属表面是否平整、光滑，清除毛刺、锈蚀或沉积物，防止割伤新密封件；
+7. **试机验证效果**——重新组装后缓慢加压运行，密切观察接口处是否有渗漏迹象。
+
+**注意事项**：
+- 建议每次大修或预防性维护时同步检查关键部位密封圈；
+- 更换时应选用原厂规定规格和材质的备件，禁用不兼容替代品；
+- 对于高压或动态密封场景（如主轴前端油封），推荐定期批量更换而非等到破损再处理。
+
+INFO:     127.0.0.1:63140 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：还是报错怎么办？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_7f634a56）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_04efa20a996d4408adef51', 'name': 'search', 'input': {'query': '设备更换密封圈后仍报错 故障无法清除 处理方法', 'original_query': '还是报错怎么办？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.00it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_7f634a56）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_d8850faa05da4258bfc53c', 'name': 'parse_error_code', 'input': {'device_model': 'M-3000', 'error_code': 'E056', 'original_query': '还是报错怎么办？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：如果已经检查或更换了密封圈，但设备仍然报错（如M-3000显示E056液压系统泄漏），请按以下步骤进一步处理：
+
+1. **确认其他泄漏点**——除了密封圈外，检查液压油管接口是否松动、焊缝是否有裂纹、阀门连接处是否渗漏；
+2. **核实安装质量**——确保新密封圈型号正确、安装到位，无扭曲或损伤；
+3. **测试系统压力**——使用压力表检测液压泵输出压力是否正常，偏低可能说明泵体故障或内泄；
+4. **排气与循环运行**——更换密封后需排出空气，让系统低压试运行一段时间观察稳定性；
+5. **复位报警信号**——在排除物理故障后，进入HMI界面手动清除报警代码，并重启设备。
+
+若上述操作完成后仍持续报错，可能存在传感器误报或PLC反馈延迟问题，建议联系原厂技术人员进行深入诊断。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：在已完成密封圈检查或更换后设备仍报错（如M-3000显示E056“液压系统泄漏”），说明故障可能不仅限于单一密封件损坏，还可能存在其他隐蔽泄漏点、安装失误、系统残留气体或传感器信号异常等问题。
+
+**解决方案**：
+1. **排查其余潜在泄漏源**——除已更换的密封圈外，仔细检查液压系统的管路接头、焊接部位、控制阀体连接处以及软管老化情况，使用吸油纸或紫外荧光法辅助发现微小渗漏；
+2. **复查密封件安装质量**——确认新装密封圈型号与原厂一致，安装过程中无扭转、划伤或偏移，沟槽尺寸符合公差要求；
+3. **检测系统工作压力**——接入压力表测量液压泵出口压力，对比额定值判断是否存在内泄或泵效下降；
+4. **执行排气与循环运行**——打开排气口，使系统在低压下连续运行数分钟，排出混入空气，避免气穴现象误导压力传感；
+5. **手动清除报警并复位**——进入HMI操作界面，选择“故障复位”功能清除历史报警代码，随后正常启机观察是否再次触发。
+
+**注意事项**：
+- 切勿跳过排气步骤直接满负荷运行，可能导致噪声增大或误报警；
+- 若故障反复出现且无可见泄漏，应怀疑压力开关、液位传感器或PLC输入模块存在硬件故障或参数漂移；
+- 此时建议保存报警时间、频率及工况信息，并联系原厂技术支持进行远程诊断或现场服务。”
+
+INFO:     127.0.0.1:63140 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：检查需要断电吗？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_8b9e2527）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_462e60d9491a43509b7a29', 'name': 'search', 'input': {'query': '更换密封圈或液压系统维护 是否需要断电', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.99it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_8b9e2527）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_ce0c3679699249829e6e89', 'name': 'search', 'input': {'query': '液压系统维护 安全操作规程 断电要求', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.08it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：是的，检查或更换密封圈以及进行液压系统维护时必须断电。具体安全操作要求如下：
+
+1. **切断主电源**——在开始任何作业前，务必关闭设备总电源，并悬挂“正在维修”警示牌；
+2. **释放系统压力**——液压系统需先通过泄压阀将残余压力完全释放，防止高压油喷出造成伤害；
+3. **激活急停装置**——按下急停按钮并锁定，确保不会意外启动；
+4. **验电与隔离**——必要时对控制电路进行验电，确认无残留电压。
+
+只有在完成上述安全措施后方可开展拆装作业，以保障人员安全和设备不受二次损害。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：在进行密封圈检查或液压系统维护时，设备若未彻底断电和泄压，存在高压油喷射、机械突然动作或电气短路等风险，极易造成人员伤亡或设备损坏。
+
+**解决方案**：
+1. **切断主电源**——将设备总开关置于“OFF”状态，并从配电柜断开上级供电，防止误送电；
+2. **释放系统压力**——打开液压系统的手动泄压阀，确认压力表归零，确保管路与执行元件内无残存能量；
+3. **激活并锁定急停装置**——按下急停按钮，并使用挂锁将其固定在触发位置，实现双重保护；
+4. **挂牌上锁（LOTO）**——在电源控制箱悬挂“正在维修，禁止合闸”警示标牌，实行专人负责制；
+5. **验电确认安全**——对相关控制线路使用验电器检测，确保无电压残留。
+
+**注意事项**：
+- 所有操作必须遵守企业安全管理制度和国家《机械设备安全技术规范》；
+- 只有执行维修的人员才有权拆除警示标志和解锁送电；
+- 即使只是简单检查，也不得省略断电泄压步骤，以防突发意外。
+
+INFO:     127.0.0.1:57161 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：冷却液正常，下一步查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_91ebe13e）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_6888edaffd5b49b4916b73', 'name': 'search', 'input': {'query': '冷却液正常但设备异常 下一步排查流程', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00, 22.88it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：在确认冷却液正常的前提下，若设备仍存在异常，建议按以下优先级进行下一步排查：
+
+1. **检查冷却系统压力与水泵**——虽然液位正常，但可能出现水泵故障、叶轮堵塞或管路不通畅，导致循环不良（特别是出现E101报警时）；
+2. **检测电源质量**——测量输入电压是否稳定在380V±10%，三相平衡性是否良好，避免因电力波动引发控制紊乱；
+3. **核查润滑状态**——检查各关键部位（如主轴、导轨、丝杠）的润滑油/脂是否充足、清洁；
+4. **排查液压系统泄漏**——关注是否有渗油现象，尤其是M-3000类设备常见的E056报警，需重点检查密封圈和油管接口；
+5. **验证安全回路与传感器信号**——确保急停回路通畅、防护门闭合到位，同时查看温度、压力传感器是否误报。
+
+请结合当前具体报警代码进一步定向诊断。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：尽管冷却液正常，但设备仍可能存在其他功能性障碍。典型问题包括冷却系统循环失效（如水泵故障或管路堵塞）、电源不稳定、润滑不足、液压泄漏或安全/传感器信号异常，这些都可能导致设备报警或运行中断，尤其是在出现E101、E056等特定故障代码时更为显著。
+
+**解决方案**：
+1. **检查冷却系统压力与水泵状态**——确认水泵能否正常启动并产生足够扬程；监听有无异响，检测进出水压差，清理过滤器及散热通道；
+2. **检测电源质量**——使用电能质量仪或万用表测量三相电压是否在380V±10%范围内，检查是否存在缺相、电压跌落或谐波干扰；
+3. **核查关键部位润滑情况**——查看主轴、导轨、丝杠等部件的润滑油/脂是否充足、清洁，必要时补油或更换；
+4. **排查液压系统泄漏点**——细致检查密封圈、接头、焊缝和软管是否有渗漏痕迹，特别是曾报E056“液压泄漏”的设备；
+5. **验证安全回路与传感器反馈**——确认急停按钮已复位、防护门关闭到位，并通过PLC输入监控界面查看限位开关、温度和压力传感器信号是否正常。
+
+**注意事项**：建议按照上述顺序逐步排查，避免遗漏关联因素。若存在具体报警代码，请优先参照对应故障处理流程进行专项诊断，提高修复效率。”
+
+INFO:     127.0.0.1:57161 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：检查需要断电吗？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_820a9224）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_3b4fda481c8f4d2bb67207', 'name': 'search', 'input': {'query': '设备日常检查 是否需要断电操作 安全规范', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.24it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：对于一般的非侵入式日常检查（如查看冷却液液位、润滑油位、安全门状态、仪表读数等），可在设备停机但不断电的情况下进行，前提是确保设备处于安全静止状态且无高压、高温风险。
+
+但如果检查涉及以下情况，则必须断电：
+1. 需要打开防护罩或接近运动部件；
+2. 涉及电气接线、传感器或控制器检查；
+3. 进行润滑加注、密封圈检查、管路维护等拆装作业；
+4. 存在液压或气动系统压力未释放的情况。
+
+为保障安全，建议遵循“先断电、后作业”原则，尤其是在不确定风险时，应严格执行上锁挂牌（LOTO）程序。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：是否需要断电取决于检查项目的性质和风险等级。对于仅观察液位、仪表或外部状态的非侵入式检查，通常无需断电；但一旦涉及开启防护、接触机械或电气部件，则存在意外启动、触电或高压释放等重大安全隐患，必须实施断电保护。
+
+**解决方案**：
+1. **无需断电的情形（需谨慎操作）**：
+   - 查看冷却液、润滑油液位计；
+   - 观察HMI报警信息或压力表读数；
+   - 检查安全门闭合状态等外部可视项目；
+   > 注意：设备必须处于完全停机状态，且确认无高温、高压残留。
+
+2. **必须断电的情形**：
+   - 打开电柜或接触接线端子；
+   - 拆卸护罩、接近旋转或移动部件；
+   - 加注润滑脂、更换密封圈、检查管路等拆装作业；
+   - 释放液压/气动系统压力或进行传感器调试。
+
+在此类操作中，应执行完整的安全流程：
+- 切断主电源并上锁；
+- 释放系统储能（液压、气压、电容）；
+- 激活急停并挂牌警示（LOTO程序）；
+- 验电确认无电压后方可作业。
+
+**注意事项**：当不确定某项检查是否存在风险时，应默认采用断电模式。始终坚持“安全第一”原则，杜绝侥幸心理，防止发生人身伤害或设备事故。”
+
+INFO:     127.0.0.1:63986 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9b8dd608】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】发送：润滑脂用什么型号？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_2ad95118）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_63bcbda4f1bf457f814fa3', 'name': 'search', 'input': {'query': 'M-2000 M-3000 设备主轴轴承 指定润滑脂型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.25it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（9WukNcBkLC5XSxrXSwHymN）（conversation_2ad95118）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_bbc2e44f66e2459eacf9f3', 'name': 'search', 'input': {'query': 'M系列主轴轴承润滑脂 规格书 推荐油脂类型', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.75it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】的检索助手返回数据：经过多次检索，当前知识库中仍未明确列出M-2000或M-3000设备主轴轴承指定的具体润滑脂品牌和型号。但根据维护规范，主轴轴承应每运行2000小时更换一次润滑脂。
+
+一般建议使用高性能合成锂基润滑脂，满足以下特性：
+- NLGI 等级：No.2
+- 工作温度范围：-20°C 至 +180°C
+- 具备抗高温氧化、抗磨和防水性能
+
+典型可用型号包括：Shell Gadus S2 V220 AC、Klüberplex BEM 41-132 或类似工业级高速主轴润滑脂。
+
+⚠️ 注意：最终选型应以设备出厂技术手册为准，建议联系原厂获取官方推荐油脂清单，避免因不兼容导致轴承损坏。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9b8dd608】收到回复：**原因分析**：经过多次检索确认，当前知识库中仍未明确列出M-2000或M-3000设备主轴轴承专用润滑脂的具体品牌和型号。尽管维护规范要求每运行2000小时更换一次润滑脂，但原厂推荐的油脂规格未在公开资料中体现。
+
+**解决方案**：
+1. **优先查阅官方文件**——查看设备随附的《操作与维护手册》中“润滑图表”或“保养计划”部分，寻找‘主轴轴承’对应的油脂技术参数或指定牌号；
+2. **联系厂家技术支持**——提供设备序列号和技术版本，获取原厂认证的润滑脂清单，确保化学兼容性和性能匹配；
+3. **应急替代方案**——若短期内无法获得原厂指导，可选用符合以下标准的高性能工业润滑脂：
+   - 类型：合成锂基或复合锂基润滑脂
+   - NLGI等级：No.2
+   - 工作温度范围：-20°C 至 +180°C
+   - 特性：优异的高温稳定性、抗磨损性、防水性和剪切安定性
+   - 推荐示例（仅供参考）：
+     • Shell Gadus S2 V220 AC
+     • Klüberplex BEM 41-132
+     • FAG LITAX EP2/A2
+
+**注意事项**：
+- 不同主轴制造商对基础油黏度、稠化剂类型及添加剂体系有特殊要求，错误选型可能导致润滑膜破裂、温升过高或早期疲劳剥落；
+- 长期使用非认证油脂将影响保修资格，并增加突发故障风险；
+- 更换新品前建议彻底清除旧脂，防止交叉污染。
+
+请务必尽快完成官方确认，避免因润滑不当造成昂贵的核心部件损坏。”
+
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:清理过期实例的后台任务已被取消（服务重载/关闭）
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:服务已关闭，资源已释放
+INFO:     Application shutdown complete.
+INFO:     Finished server process [560]
+INFO:     Stopping reloader process [12424]

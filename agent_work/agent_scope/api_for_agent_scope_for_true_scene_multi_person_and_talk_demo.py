@@ -96,7 +96,7 @@ import asyncio
 import os
 from typing import List, Dict, Optional
 from agentscope.agent import ReActAgent
-from agentscope.message import Msg, TextBlock
+from agentscope.message import Msg, TextBlock, ToolUseBlock, ToolResultBlock
 from agentscope.model import DashScopeChatModel
 from agentscope.formatter import DashScopeMultiAgentFormatter
 from sentence_transformers import SentenceTransformer
@@ -107,10 +107,62 @@ import logging
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from cachetools import TTLCache  # 带过期时间的缓存，避免内存泄漏
 
 # 日志配置
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+# 缓存配置：key=dialog_msg_id（对话消息ID），value=工具调用次数，过期时间=30分钟（覆盖单次对话最大耗时）
+TOOL_CALL_CACHE = TTLCache(maxsize=1000, ttl=1800)  # 最多缓存1000个对话，30分钟无操作自动过期
+MAX_TOOL_CALLS_PER_DIALOG = 3
+
+from functools import wraps
+from typing import Dict, Any, Callable, Optional
+import inspect
+
+
+def validate_params(validators: Dict[str, Callable[[Any], bool]]) -> Any:
+    """
+    一个通用的参数校验装饰器。
+
+    Args:
+        validators (Dict[str, Callable[[Any], bool]]): 一个字典，键是参数名，值是一个校验函数。
+            校验函数接收参数值，如果通过校验则返回True，否则返回False。
+    """
+
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            # 将位置参数和关键字参数转换为一个字典，便于统一处理
+            # 这部分代码稍微复杂，因为需要正确关联参数名和值
+            sig = inspect.signature(func)
+            bound_args = sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()  # 应用函数定义中的默认参数值
+            original_query = bound_args.arguments.get('original_query')  # 获取用户原始问题
+            cur_func_name = func.__name__
+            # 公共校验逻辑--工具调用次数限制
+            if bound_args.arguments.get('is_exceed'):
+                return ToolResponse(content=[TextBlock(type='text',
+                                                       text="工具调用次数已达上限，请基于已获取的信息总结工具调用结果后传递给运维专家Agent，不可继续调用工具。若信息不足，可告知用户当前能提供的相关内容。")], metadata={"mark": "invalid_msg"})
+
+            # 遍历所有校验规则
+            for param_name, validator in validators.items():
+                # 检查函数是否有这个参数
+                if param_name not in sig.parameters:
+                    raise ValueError(f"校验规则中包含了函数 '{func.__name__}' 没有的参数 '{param_name}'")
+                # 获取参数的值
+                param_value = bound_args.arguments.get(param_name)
+                # 执行个性化校验
+                if not validator(param_value):
+                    # 校验失败，返回默认回复
+                    print(f"方法{func.__name__}的参数校验失败: 参数 '{param_name}' 的值 '{param_value}' 未通过校验。")
+                    return ToolResponse(content=[TextBlock(type='text', text=f"工具调用异常：{cur_func_name}工具的{param_name}参数为空。请基于用户输入「{original_query}」和当前已经得到的工具调用结果，生成具体检索关键词")], metadata={"mark": "invalid_msg"})
+            # 所有参数都通过校验，执行原函数
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 # -------------------------- 1. 全局配置与无状态工具/知识库（共享） --------------------------
@@ -167,7 +219,13 @@ class MaintenanceDocRetriever:
         with open(path, "rb") as f:
             return pickle.load(f)
 
-    def search(self, query: str, top_k: int = 3) -> ToolResponse:
+    @validate_params(
+        validators={
+            # 校验 'query' 参数必须是字符串且非空
+            "query": lambda q: isinstance(q, str) and q.strip() != ""
+        }
+    )
+    def search(self, query: str = None, top_k: int = 3, is_exceed: bool = False, original_query: str = None) -> ToolResponse:
         """
         运维手册知识库检索工具，支持设备故障、操作规范查询
         Args:
@@ -176,11 +234,11 @@ class MaintenanceDocRetriever:
         Returns:
             与用户输入相关的分块内容列表
         """
-        # == start-在工具中添加参数校验机制，避免模型调用时因确实入参而报错，同时提醒模型需传入参数 ==
-        # 参数校验：拒绝空字符串、纯空格
-        if not query or query.strip() == "":
-            return ToolResponse(content=[TextBlock(type='text', text="Error: 检索关键词不能为空，请提供具体查询内容")])
-        # == end ==
+        # # == start-在工具中添加参数校验机制，避免模型调用时因确实入参而报错，同时提醒模型需传入参数 ==
+        # # 参数校验：拒绝空字符串、纯空格
+        # if not query or query.strip() == "":
+        #     return ToolResponse(content=[TextBlock(type='text', text="Error: 检索关键词不能为空，请提供具体查询内容")])
+        # # == end ==
         """检索相关知识库内容"""
         query_vec = self.embedder.encode([query], convert_to_numpy=True).astype('float32')
         distances, indices = self.index.search(query_vec, top_k)
@@ -196,14 +254,21 @@ class MaintenanceDocRetriever:
 doc_retriever = MaintenanceDocRetriever()
 
 
+@validate_params(
+        validators={
+            # 校验 'device_model' 参数必须是字符串且非空
+            "device_model": lambda q: isinstance(q, str) and q.strip() != "",
+            # 校验 'error_code' 参数必须是字符串且非空
+            "error_code": lambda q: isinstance(q, str) and q.strip() != ""
+        }
+    )
 # 工具2：故障代码解析工具（结构化输出）
-# @tool
-def parse_error_code(device_model: str, error_code: str) -> ToolResponse:
+def parse_error_code(device_model: str, error_code: str, is_exceed: bool = False, original_query: str = None) -> ToolResponse:
     """
     解析设备故障代码的详细信息
     Args:
         device_model: 设备型号（如M-2000、M-3000）
-        error_code: 报警代码（如E101、E203）
+        error_code: 故障代码（如E101、E203）
     Returns:
         故障解析结果（包含原因、排查步骤、解决方案）
     """
@@ -240,13 +305,18 @@ def parse_error_code(device_model: str, error_code: str) -> ToolResponse:
         # result = {"原因": "未知故障代码", "排查步骤": f"无该{device_model}型号的{error_code}代码记录",
         #         "解决方案": "联系技术支持"}
         result = TextBlock(type='text',
-                           text=f"未知故障代码，排查步骤：无该{device_model}型号的{error_code}代码记录，请联系技术支持")
+                           text=f"未知故障代码，排查步骤：无该{device_model}型号的{error_code}代码记录，请基于用户问题查询运维手册")
     return ToolResponse(content=[result])
 
 
+@validate_params(
+        validators={
+            # 校验 'part_name' 参数必须是字符串且非空
+            "part_name": lambda q: isinstance(q, str) and q.strip() != ""
+        }
+    )
 # 工具3：保养周期查询工具
-# @tool
-def query_maintenance_cycle(part_name: str) -> ToolResponse:
+def query_maintenance_cycle(part_name: str, is_exceed: bool = False, original_query: str = None) -> ToolResponse:
     """
     查询设备部件的保养周期
     Args:
@@ -274,51 +344,132 @@ class AgentInstanceState(Enum):
 
 # -------------------------- 3. 单个Agent实例封装（含检索+专家对） --------------------------
 # 定义全局的 pre_acting 钩子（用于所有检索助手实例）
-from typing import Dict, Any, Optional
-from agentscope.agent import ReActAgentBase
 
 
-def create_pre_acting_hook(max_tool_calls: int = 3):
+def create_pre_acting_hook(max_tool_calls: int = MAX_TOOL_CALLS_PER_DIALOG):
     """
     创建实例级 pre_acting 钩子（带独立计数器，避免多实例冲突）
     - max_tool_calls: 该 Agent 允许的最大工具调用次数
+
+    【除了预处理钩子外，还有后处理钩子，用于 “修改 / 拦截工具调用结果”】
+    TODO 注意由于ReActAgent实例的_acting方法仅当调用结束工具时才会返回非空工具结果【其他普通工具，该方法皆返回None】，因此后处理钩子不便用于处理普通工具的结果后处理
     """
-    tool_call_count = 0  # 每个钩子实例独立计数（闭包变量）
 
-    def pre_acting_hook(agent: ReActAgent, kwargs: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        nonlocal tool_call_count  # 引用外部变量
+    async def pre_acting_hook(agent: ReActAgent, kwargs: Dict[str, Any]) -> Optional[Dict[str, Any]]:  # 预处理钩子的设计目标是 “修改 / 拦截工具调用参数”。
+        cur_tool_name = kwargs.get("tool_call", {}).get("name")
+        if cur_tool_name == "generate_response":  # agentscope框架中的结束工具方法
+            # 清除检索助手中系统追加工具调用异常数据缓存，避免影响后续对话【一些模型可能会将历史对话中的工具调用异常提示作用在后续新会话上】
+            invalid_msg_list = [msg for msg in agent.memory.content if msg.metadata and msg.metadata.get("mark", "") == "invalid_msg"]
+            if invalid_msg_list:
+                await agent.memory.clear()
+                agent.memory.content = [msg for msg in agent.memory.content if msg.metadata is None or msg.metadata.get("mark", "") != "invalid_msg"]
+            # 从智能体实例缓存中获取当前正在处理的对话id【对应一次对话交互】
+            user_msg_list = [msg for msg in agent.memory.content if msg.role == "user" and msg.invocation_id]
+            cur_user_msg = user_msg_list[-1]  # 取最近的用户消息作为当前用户消息
+            input_param = kwargs.get("tool_call", {}).get("input", {})
+            if input_param == {} or input_param.get("response", "") == "":
+                kwargs.get("tool_call", {}).get("input", {}).setdefault("response", f"针对【{cur_user_msg.content}】无任何有效检索结果，请将该情况告知运维专家agent")
+        else:
+            # 从智能体实例缓存中获取当前正在处理的对话id【对应一次对话交互】
+            user_msg_list = [msg for msg in agent.memory.content if msg.role == "user" and msg.invocation_id]
+            cur_user_msg = user_msg_list[-1]  # 取最近的用户消息作为当前用户消息
+            cur_conversation_id = cur_user_msg.invocation_id
+            kwargs.get("tool_call", {}).get("input", {}).setdefault("original_query", cur_user_msg.content)  # 将用户原始问题传入工具，以备异常情况提示
+            # 1. 从缓存获取当前调用次数（不存在则视为0，避免初始化遗漏）
+            current_count = TOOL_CALL_CACHE.get(cur_conversation_id, 1)
+            if current_count > max_tool_calls:
+                # # 关键：向 Agent 内存添加系统提示，告知停止工具调用 TODO 看起来不起作用
+                # stop_msg = Msg(
+                #     name="system",
+                #     content="工具调用次数已达上限（最多3次），请基于已获取的信息直接生成最终回答，无需继续调用工具。若信息不足，可告知用户当前能提供的相关内容。",
+                #     role="system"
+                # )
+                # agent.memory.content.append(stop_msg)  # 将提示加入 Agent 记忆
+                logger.info(f"Agent {agent.id} 工具调用达上限，停止调用并提示模型总结回答")
+                # 关键：向工具调用参数中添加调用次数达到最大次数的标识，用以指示工具返回默认回复“工具调用次数已达上限（最多3次），请基于已获取的信息直接生成最终回答，无需继续调用工具。若信息不足，可告知用户当前能提供的相关内容。”
+                kwargs.get("tool_call", {}).get("input", {}).setdefault("is_exceed", True)  # 提示工具当前已超过调用次数限制
 
-        # 1. 检查工具调用次数
-        tool_call_count += 1
-        if tool_call_count > max_tool_calls:
-            # 关键：向 Agent 内存添加系统提示，告知停止工具调用
-            stop_msg = Msg(
-                name="system",
-                content="工具调用次数已达上限（最多3次），请基于已获取的信息直接生成最终回答，无需继续调用工具。若信息不足，可告知用户当前能提供的相关内容。",
-                role="system"
-            )
-            agent.memory.add(stop_msg)  # 将提示加入 Agent 记忆
-            logger.info(f"Agent {agent.id} 工具调用达上限，停止调用并提示模型总结回答")
-            return None  # 返回 None → AgentScope 会终止本次工具调用
-        logger.info(f"Agent {agent.name}（{agent.id}）第 {tool_call_count} 次调用工具：{kwargs}")
-        # 2. 校验 search 工具的 query 参数
-        tool_name = kwargs.get("tool_name")
-        input_args = kwargs.get("input_args", {})
-        if tool_name == "search":
-            query = input_args.get("query", "").strip()
-            if not query:
-                # 向内存添加参数错误提示，引导模型补充 query
-                error_msg = Msg(
-                    name="system",
-                    content="search 工具必须传入非空的查询关键词（如“冷却系统维护 断电”），请补充关键词后再尝试调用；若无法补充，可基于现有信息回答用户问题。",
-                    role="system"
-                )
-                agent.memory.add(error_msg)
-                return None  # 终止本次空参数调用
-
-        return kwargs  # 校验通过，继续执行工具调用
+            logger.info(f"Agent {agent.name}（{agent.id}）（{cur_conversation_id}）第 {current_count} 次调用工具：{kwargs}")
+            TOOL_CALL_CACHE[cur_conversation_id] = current_count + 1  # 为下一次工具调用追加1
+        return kwargs  # 返回 None → AgentScope 会终止本次工具调用
 
     return pre_acting_hook
+
+
+class ReActAgentSelf(ReActAgent):
+
+    async def _acting(self, tool_call: ToolUseBlock) -> Msg | None:
+        """Perform the acting process.
+
+        Args:
+            tool_call (`ToolUseBlock`):
+                The tool use block to be executed.
+
+        Returns:
+            `Union[Msg, None]`:
+                Return a message to the user if the `finish_function` is
+                called, otherwise return `None`.
+        """
+
+        tool_res_msg = Msg(
+            "system",
+            [
+                ToolResultBlock(
+                    type="tool_result",
+                    id=tool_call["id"],
+                    name=tool_call["name"],
+                    output=[],
+                ),
+            ],
+            "system",
+        )
+        try:
+            # Execute the tool call
+            tool_res = await self.toolkit.call_tool_function(tool_call)
+
+            response_msg = None
+            # Async generator handling
+            async for chunk in tool_res:
+                # Turn into a tool result block
+                tool_res_msg.content[0][  # type: ignore[index]
+                    "output"
+                ] = chunk.content
+                # 定制化：向缓存消息中添加工具装饰器中的异常消息标识，用于在调用结束工具前将这些异常消息过滤剔除，避免影响模型对后续对话的正常处理
+                if chunk.metadata and chunk.metadata.get("mark"):
+                    tool_res_msg.metadata = chunk.metadata
+
+                # Skip the printing of the finish function call
+                if (
+                    tool_call["name"] != self.finish_function_name
+                    or tool_call["name"] == self.finish_function_name
+                    and (
+                        chunk.metadata is None
+                        or not chunk.metadata.get("success")
+                    )
+                ):
+                    await self.print(tool_res_msg, chunk.is_last)
+
+                # Raise the CancelledError to handle the interruption in the
+                # handle_interrupt function
+                if chunk.is_interrupted:
+                    raise asyncio.CancelledError()
+
+                # Return message if generate_response is called successfully
+                if (
+                    tool_call["name"] == self.finish_function_name
+                    and chunk.metadata
+                    and chunk.metadata.get(
+                        "success",
+                        True,
+                    )
+                ):
+                    response_msg = chunk.metadata.get("response_msg")
+
+            return response_msg
+
+        finally:
+            # Record the tool result message in the memory
+            await self.memory.add(tool_res_msg)
 
 
 class AgentPair:
@@ -327,10 +478,11 @@ class AgentPair:
     def __init__(self, pair_id: str):
         self.pair_id = pair_id  # 实例对ID
         self.session_id: Optional[str] = None  # 绑定的会话ID（空闲时为None）
+        self.message_id: Optional[str] = None  # 绑定的对话消息ID（空闲时为None）
         self.bind_time: Optional[datetime] = None  # 绑定会话的时间
         self.idle_timeout = timedelta(minutes=10)  # 空闲超时时间（10分钟无操作则释放）
         self.model = DashScopeChatModel(
-            model_name="deepseek-v3.2-exp",
+            model_name="qwen-plus",
             api_key="sk-f61034a0afd64ffdab4be83a063b20e3",
             # api_key=os.getenv("DASHSCOPE_API_KEY"),
             # temperature=0.1  # 降低随机性，保证运维回答准确性
@@ -346,7 +498,7 @@ class AgentPair:
         self.retriever = self._create_retriever_agent()
         self.expert = self._create_expert_agent()
 
-    def _create_retriever_agent(self) -> ReActAgent:
+    def _create_retriever_agent(self) -> ReActAgentSelf:
         # == start-添加工具调用次数限制 ==
         # == end ==
         # 初始化工具箱实例
@@ -356,23 +508,24 @@ class AgentPair:
         toolkit.register_tool_function(parse_error_code)
         toolkit.register_tool_function(query_maintenance_cycle)
 
-        retriever = ReActAgent(
+        retriever = ReActAgentSelf(
             name="检索助手",
             sys_prompt="""仅处理当前绑定会话的用户问题：
-1. 基于专属内存中的对话历史调用工具，结果整理后传递给专家Agent；
+1. 基于专属内存中的对话历史调用工具，结果整理后传递给运维专家Agent；
 2. 不直接回复用户，仅输出工具调用结果；
-3. 会话切换时内存会清空，无需考虑历史会话信息。""",
+3. 会话切换时内存会清空，无需考虑历史会话信息。
+4. 若收到“工具调用异常+强制终止”的系统提示，立即停止所有工具调用，基于现有信息总结工具调用结果后传递给运维专家Agent；""",
             model=self.model,
             # memory=self.retriever_memory,
             formatter=DashScopeMultiAgentFormatter(),
             toolkit=toolkit
         )
         retriever.set_console_output_enabled(False)  # 禁用控制台输出智能体内容，由业务代码控制输出内容
-        # 3. 关键：为当前 Agent 实例注册 pre_acting 钩子（仅当前实例生效）
+        # 为当前 Agent 实例注册 预处理钩子
         retriever.register_instance_hook(
             hook_type="pre_acting",  # 钩子类型：工具调用前
-            hook_name="search_param_check",  # 钩子名称（唯一标识）
-            hook=create_pre_acting_hook(max_tool_calls=3)  # 传入带计数器的钩子
+            hook_name="tool_use_check",  # 钩子名称（唯一标识）
+            hook=create_pre_acting_hook(max_tool_calls=3)  # 传入带工具调用最大次数的钩子
         )
         return retriever
 
@@ -585,7 +738,7 @@ class SessionManager:
         return f"session_{uuid.uuid4().hex[:8]}"
 
 
-async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, question: str):
+async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, question: str, conversation_id: str):
     """单个用户多轮对话（复用Agent实例）"""
     logger.info(f"\n【会话 {session_id}】用户开始咨询")
     try:
@@ -595,7 +748,8 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
         expert = agent_pair.expert
 
         # 2. 构造用户消息
-        user_msg = Msg(name="user", content=question, role="user")
+        # user_msg = Msg(name="user", content=question, role="user")
+        user_msg = Msg(name="user", content=question, role="user", invocation_id=conversation_id)
 
         # 3. 存入实例专属内存
         await retriever.memory.add(user_msg)
@@ -684,11 +838,13 @@ app.add_middleware(
 @app.post("/query", response_model=QueryResponse)
 async def handle_query(request: QueryRequest):
     """处理用户查询：获取Agent实例→生成回复→返回结果"""
+    # 生成会话ID（首次请求）
+    session_id = request.session_id or SessionManager.create_session()
+    # 每次对话生成对话id
+    conversation_id = f"conversation_{uuid.uuid4().hex[:8]}"
     try:
-        # 生成会话ID（首次请求）
-        session_id = request.session_id or SessionManager.create_session()
         # 获取对话结果
-        result = await user_dialog_for_one_question(session_id, agent_pool, request.question)
+        result = await user_dialog_for_one_question(session_id, agent_pool, request.question, conversation_id)
         # 返回结果
         return QueryResponse(
             session_id=session_id,
@@ -701,6 +857,10 @@ async def handle_query(request: QueryRequest):
     except Exception as e:
         logger.error(f"处理请求异常：{str(e)}")
         raise HTTPException(status_code=500, detail="服务器内部错误")
+    finally:
+        # 对话结束，清理缓存（无论成功/失败都执行）
+        if conversation_id in TOOL_CALL_CACHE:
+            del TOOL_CALL_CACHE[conversation_id]
 
 
 if __name__ == "__main__":
