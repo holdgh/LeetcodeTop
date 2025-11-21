@@ -1,0 +1,592 @@
+【会话 session_ffc7bdcd】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_1 绑定会话 session_ffc7bdcd
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_ffc7bdcd】发送：变频器怎么校准？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_75697392】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_2 绑定会话 session_75697392
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_75697392】发送：M-2000最大加工转速是多少？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_238d654c】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_3 绑定会话 session_238d654c
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_238d654c】发送：M-2000最大加工转速是多少？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_a4e4cc1b】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_4 绑定会话 session_a4e4cc1b
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_a4e4cc1b】发送：设备开机前要检查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9c4501be】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_5 绑定会话 session_9c4501be
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9c4501be】发送：冷却滤芯更换周期？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_15ef6122】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_6 绑定会话 session_15ef6122
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_15ef6122】发送：主轴轴承多久保养一次？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_d49f48bc】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_7 绑定会话 session_d49f48bc
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_d49f48bc】发送：变频器怎么校准？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_233974e9】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_8 绑定会话 session_233974e9
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_233974e9】发送：M-2000最大加工转速是多少？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_11464d9d】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_9 绑定会话 session_11464d9d
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_11464d9d】发送：液压油多久换一次？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_02ee9b97】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_10 绑定会话 session_02ee9b97
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_02ee9b97】发送：冷却滤芯更换周期？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6fe87503】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_11 绑定会话 session_6fe87503
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6fe87503】发送：冷却滤芯更换周期？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_d5d843b3】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_12 绑定会话 session_d5d843b3
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_d5d843b3】发送：设备开机前要检查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_adcceb07】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_13 绑定会话 session_adcceb07
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_adcceb07】发送：M-3000报警E056是什么问题？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_4cce8712】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_14 绑定会话 session_4cce8712
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_4cce8712】发送：M-2000最大加工转速是多少？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_c73e43dd】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_15 绑定会话 session_c73e43dd
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_c73e43dd】发送：变频器怎么校准？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_7636dc51】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_16 绑定会话 session_7636dc51
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_7636dc51】发送：M-3000报警E056是什么问题？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_b887c096】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_17 绑定会话 session_b887c096
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_b887c096】发送：冷却滤芯更换周期？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6d071e30】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_18 绑定会话 session_6d071e30
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6d071e30】发送：M-2000最大加工转速是多少？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_c8c11982】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_19 绑定会话 session_c8c11982
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_c8c11982】发送：M-2000报警E101怎么办？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6be7e226】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent实例对 agent_pair_20 绑定会话 session_6be7e226
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6be7e226】发送：冷却滤芯更换周期？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（X2YPJisLCBQeDSfnMLUG9X）（conversation_e60ee5c5）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_07a2f8cd2f164d66a36363', 'name': 'query_maintenance_cycle', 'input': {'part_name': '主轴轴承', 'original_query': '主轴轴承多久保养一次？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（JC5WauKWyuNxKXUMNp8sjU）（conversation_2df9f154）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_576f8f8378124adeb5f584', 'name': 'search', 'input': {'query': '变频器校准方法', 'original_query': '变频器怎么校准？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00, 13.75it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（Xsfi3gt98fZ78BheRMkfro）（conversation_8ca3bdb5）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_a6e6ed06c4ec4a9ca9eef8', 'name': 'search', 'input': {'query': 'M-2000 最大加工转速', 'original_query': 'M-2000最大加工转速是多少？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00, 32.12it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（dncPFDTNUpZ4fR2LC2KUTS）（conversation_be9ad237）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_0777035511ee44ee8bae40', 'name': 'query_maintenance_cycle', 'input': {'part_name': '液压油', 'original_query': '液压油多久换一次？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（hazAPDRpZUKiATh35ewWK9）（conversation_29f81104）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_3afa2c382136404f97ee4b', 'name': 'search', 'input': {'query': '变频器 校准 步骤 方法', 'original_query': '变频器怎么校准？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00, 38.12it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（fEPerxzrBaMw3KkEJgMY9G）（conversation_918c7b82）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_7605e1e758e9431ea69db2', 'name': 'query_maintenance_cycle', 'input': {'part_name': '冷却系统滤芯', 'original_query': '冷却滤芯更换周期？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（MAVKC8t3CKe5Ee2JKZ2kz4）（conversation_d6e55625）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_aaf57cea56d14e34b2520d', 'name': 'search', 'input': {'query': 'M-2000最大加工转速', 'original_query': 'M-2000最大加工转速是多少？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00, 38.24it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（73VFGWk9WAVYyRBgaj57qr）（conversation_8f624e1f）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_d90b63d76cb9435591a3f2', 'name': 'query_maintenance_cycle', 'input': {'part_name': '冷却系统滤芯', 'original_query': '冷却滤芯更换周期？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（jPpH2TBXDcwNWr5XWpmSLu）（conversation_f58cf631）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_64b529b0dd064cd1a25616', 'name': 'search', 'input': {'query': 'M-2000 最大加工转速', 'original_query': 'M-2000最大加工转速是多少？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00, 12.26it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（gmmutvN8LJLCyfUVKCWpbt）（conversation_fceaa0d9）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_ed966b687c7f438ab6a98d', 'name': 'search', 'input': {'query': '设备开机前要检查什么', 'original_query': '设备开机前要检查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  7.02it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（Xw82WcSyoXvA8dbc9ZBKK7）（conversation_2ed75760）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_6cef912cb7f84a33962205', 'name': 'search', 'input': {'query': 'M-2000最大加工转速', 'original_query': 'M-2000最大加工转速是多少？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.95it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（DSBEududHb9vJ3W5oABBKS）（conversation_13dbed34）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_f593dffb65dc4c8dad5748', 'name': 'search', 'input': {'query': 'M-2000 最大加工转速', 'original_query': 'M-2000最大加工转速是多少？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  7.75it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（X7QpU5Mg2vGSPo54QWMn6K）（conversation_2e438308）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_b43e5eb8a2c94040a9347d', 'name': 'search', 'input': {'query': '变频器校准步骤', 'original_query': '变频器怎么校准？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  7.18it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（mjnT3mwjAxsPa6cCjJW74s）（conversation_8273ca58）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_6274c85da0844ab2ab7a65', 'name': 'parse_error_code', 'input': {'device_model': 'M-2000', 'error_code': 'E101', 'original_query': 'M-2000报警E101怎么办？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（KXewi79yA8FhvEpeHteZKK）（conversation_d8f97d70）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_280359d911594ae3946515', 'name': 'parse_error_code', 'input': {'device_model': 'M-3000', 'error_code': 'E056', 'original_query': 'M-3000报警E056是什么问题？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（R8pKRWbP37TVJgQNjPPhHx）（conversation_2e720dbd）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_86340e426de042dab51d26', 'name': 'query_maintenance_cycle', 'input': {'part_name': '冷却系统滤芯', 'original_query': '冷却滤芯更换周期？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（cYn5ygjc3fCHNMgSaeiBxg）（conversation_5ab8566e）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_8abb970b795d4850b7a489', 'name': 'parse_error_code', 'input': {'device_model': 'M-3000', 'error_code': 'E056', 'original_query': 'M-3000报警E056是什么问题？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（3fnRAdKaYPjvbq5974rXay）（conversation_04c18d6a）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_2302881077294473bbe680', 'name': 'search', 'input': {'query': '设备开机前要检查什么', 'original_query': '设备开机前要检查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.64it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（kkxcWtU76ahgP3wgUYohua）（conversation_9a8d942d）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_b26dc794f0af448590f7a8', 'name': 'query_maintenance_cycle', 'input': {'part_name': '冷却系统滤芯', 'original_query': '冷却滤芯更换周期？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（HeXfRoE7rY7sa4NEyY4wBq）（conversation_10eb497c）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_6844cf0ad3e34d40874095', 'name': 'query_maintenance_cycle', 'input': {'part_name': '冷却系统滤芯', 'original_query': '冷却滤芯更换周期？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_15ef6122】的检索助手返回数据：主轴轴承的保养周期为每运行2000小时更换润滑脂。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（JC5WauKWyuNxKXUMNp8sjU）（conversation_2df9f154）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_946fd88271c24dd1bb7d55', 'name': 'search', 'input': {'query': '变频器校准步骤', 'original_query': '变频器怎么校准？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  9.26it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（hazAPDRpZUKiATh35ewWK9）（conversation_29f81104）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_bbf4e8f4ac9646f7842aed', 'name': 'parse_error_code', 'input': {'device_model': 'M-9000', 'error_code': 'E203', 'original_query': '变频器怎么校准？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_4cce8712】的检索助手返回数据：M-2000的最大加工转速是8000rpm。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_11464d9d】的检索助手返回数据：液压油应每运行一年或5000小时进行更换。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_238d654c】的检索助手返回数据：M-2000的最大加工转速是8000rpm。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（mjnT3mwjAxsPa6cCjJW74s）（conversation_8273ca58）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_3975d3178d214e0d81e32a', 'name': 'search', 'input': {'query': 'M-2000冷却系统压力不足如何检查', 'original_query': 'M-2000报警E101怎么办？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  7.47it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_02ee9b97】的检索助手返回数据：冷却系统滤芯的更换周期为每3个月或运行1500小时。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（cYn5ygjc3fCHNMgSaeiBxg）（conversation_5ab8566e）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_5120bd8c31434d01b9379d', 'name': 'query_maintenance_cycle', 'input': {'part_name': '液压油', 'original_query': 'M-3000报警E056是什么问题？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6be7e226】的检索助手返回数据：冷却系统滤芯的更换周期为每3个月或运行1500小时。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_75697392】的检索助手返回数据：M-2000的最大加工转速是8000rpm。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（KXewi79yA8FhvEpeHteZKK）（conversation_d8f97d70）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_660c2983a1aa49c28c8bf7', 'name': 'query_maintenance_cycle', 'input': {'part_name': '液压油', 'original_query': 'M-3000报警E056是什么问题？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6fe87503】的检索助手返回数据：冷却系统滤芯的更换周期为每3个月或运行1500小时。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（JC5WauKWyuNxKXUMNp8sjU）（conversation_2df9f154）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_e3248639a3dc47f9bd8efc', 'name': 'parse_error_code', 'input': {'device_model': 'M-2000', 'error_code': 'E203', 'original_query': '变频器怎么校准？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（X7QpU5Mg2vGSPo54QWMn6K）（conversation_2e438308）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_6e165c8fefe24a84afb2c6', 'name': 'parse_error_code', 'input': {'device_model': 'M-9000', 'error_code': 'E203', 'original_query': '变频器怎么校准？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_233974e9】的检索助手返回数据：M-2000的最大加工转速是8000rpm。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6d071e30】的检索助手返回数据：M-2000的最大加工转速是8000rpm。
+INFO:     127.0.0.1:60834 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_15ef6122】收到回复：主轴轴承的保养周期通常为每运行2000小时进行一次润滑脂更换。
+**原因**：长期运转会导致润滑脂老化、污染或流失，影响轴承性能和寿命。
+**步骤**：
+1. 确认设备停机并断电；
+2. 拆卸相关防护部件以暴露轴承润滑点；
+3. 清除旧润滑脂残留物；
+4. 加注符合规格的新润滑脂
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_d5d843b3】的检索助手返回数据：设备开机前需要进行以下检查：
+1. 检查电源电压是否在380V±10%范围内。
+2. 确认润滑油液位正常。
+3. 确保安全防护门已完全闭合。
+此外，请注意如果设备急停按钮被触发，应先排查故障原因并按下复位键后再重新启动，切
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9c4501be】的检索助手返回数据：冷却系统滤芯的更换周期为每3个月或运行1500小时，请根据实际使用情况及时更换以确保设备正常运行。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（3fnRAdKaYPjvbq5974rXay）（conversation_04c18d6a）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_689909b6e25745aa8266c8', 'name': 'parse_error_code', 'input': {'device_model': 'M-2000', 'error_code': 'E203', 'original_query': '设备开机前要检查什么？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_b887c096】的检索助手返回数据：冷却系统滤芯的更换周期为每3个月或运行1500小时。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（hazAPDRpZUKiATh35ewWK9）（conversation_29f81104）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_55bf4d9ab41e4582ac58d7', 'name': 'search', 'input': {'query': '变频器校准方法 步骤 参数设置', 'original_query': '变频器怎么校准？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.20it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（X7QpU5Mg2vGSPo54QWMn6K）（conversation_2e438308）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_77c21b3df6274c6385b7a7', 'name': 'search', 'input': {'query': '变频器校准方法', 'original_query': '变频器怎么校准？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.27it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（3fnRAdKaYPjvbq5974rXay）（conversation_04c18d6a）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_68e1cc9ccef744b99c76e8', 'name': 'query_maintenance_cycle', 'input': {'part_name': '主轴轴承', 'original_query': '设备开机前要检查什么？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_75697392】收到回复：M-2000的最大加工转速为8000rpm。这是设备在正常工作条件下能够达到的最高主轴旋转速度，适用于高效切削加工场景。使用时需确保刀具、工件装夹及冷却系统匹配该转速要求，以保障加工安全与精度。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_b887c096】收到回复：冷却滤芯的更换周期为每3个月或运行1500小时，以先到者为准。建议定期检查滤芯状态，若发现污染严重可提前更换，确保冷却系统高效运行。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_4cce8712】收到回复：M-2000的最大加工转速为8000rpm。该参数表示设备在正常工作条件下可达到的最高旋转速度，适用于高效切削加工场景。使用时需确保工件夹持牢固，并遵循操作规范以保障安全与精度。
+
+INFO:     127.0.0.1:60830 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62057 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62054 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent hazAPDRpZUKiATh35ewWK9 工具调用达上限，停止调用并提示模型总结回答
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（hazAPDRpZUKiATh35ewWK9）（conversation_29f81104）第 4 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_86258c4399744db2816ad9', 'name': 'search', 'input': {'query': '变频器校准 正确步骤 参数配置', 'original_query': '变频器怎么校准？', 'is_exceed': True}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（cYn5ygjc3fCHNMgSaeiBxg）（conversation_5ab8566e）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_0d1c9ae73dff4435b5f5ef', 'name': 'search', 'input': {'query': 'M-3000液压系统泄漏排查方法', 'original_query': 'M-3000报警E056是什么问题？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.22it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_02ee9b97】收到回复：冷却滤芯的更换周期为每3个月或运行1500小时，以先到者为准。建议定期检查滤芯状态，若发现污染严重可提前更换，确保冷却系统高效运行。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（mjnT3mwjAxsPa6cCjJW74s）（conversation_8273ca58）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_e2505488032f4cc5b8218a', 'name': 'query_maintenance_cycle', 'input': {'part_name': '冷却系统滤芯', 'original_query': 'M-2000报警E101怎么办？'}}}
+INFO:     127.0.0.1:62050 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（KXewi79yA8FhvEpeHteZKK）（conversation_d8f97d70）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_b72b65908cdf4a5da581a3', 'name': 'search', 'input': {'query': 'M-3000液压系统泄漏处理方法', 'original_query': 'M-3000报警E056是什么问题？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.72it/s]
+INFO:     127.0.0.1:60833 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60831 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62060 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9c4501be】收到回复：冷却系统滤芯的更换周期为每3个月或运行1500小时。建议您根据设备的实际使用情况按时更换，以确保系统的高效运行和延长设备寿命。如使用频率较高或环境粉尘较多，可适当缩短更换周期。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_238d654c】收到回复：M-2000的最大加工转速为8000rpm。该参数表示设备在正常工作条件下可达到的最高旋转速度，适用于高效切削加工场景。使用时需确保工件夹持牢固，并遵循操作规范以保障安全性和加工精度。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6be7e226】收到回复：冷却滤芯的更换周期为每3个月或运行1500小时，以先到者为准。建议定期检查滤芯状态，若发现污染严重或堵塞，需提前更换，以确保冷却系统的正常运行。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6fe87503】收到回复：冷却滤芯的更换周期为每3个月或运行1500小时，以先到为准。建议定期检查滤芯状态，若发现污染严重可提前更换，确保冷却系统正常工作。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6d071e30】收到回复：M-2000的最大加工转速为8000rpm。该参数适用于标准配置下的主轴运行，具体使用中需确保冷却系统正常工作并定期维护以维持最佳性能。如有特殊工况或非标配置，请参考设备说明书或联系技术支持确认适配性。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_11464d9d】收到回复：液压油建议每运行一年或累计工作5000小时后更换一次。具体更换周期还应结合设备使用频率、工况环境以及油品检测结果综合判断。若长期在高温、高负荷或潮湿环境下运行，可适当缩短更换周期。更换时需彻底排净旧油，并清洗或更换滤芯，确保系统清洁。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_d5d843b3】收到回复：设备开机前需要进行以下检查：
+1. 检查电源电压是否在380V±10%范围内。
+2. 确认润滑油液位正常。
+3. 确保安全防护门已完全闭合。
+
+**原因**：这些检查项目是为了确保设备能够在安全、稳定的条件下启动运行，防止因电力不稳、润滑
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_ffc7bdcd】的检索助手返回数据：根据您咨询的变频器校准问题，结合相关故障代码E203的处理方案，建议按以下步骤操作：
+
+1. **断电检查**：关闭设备总电源，确认安全后进行后续操作。
+2. **物理连接核查**：打开控制柜，检查驱动主轴电机的电缆接头是否牢固，有无烧蚀或松动
+INFO:     127.0.0.1:62051 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62058 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62049 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62052 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_233974e9】收到回复：M-2000的最大加工转速为8000rpm。该参数适用于标准配置下的主轴运行，在实际使用中建议根据工件材料与刀具类型合理设定转速以确保加工精度和设备安全。如需更高性能，可咨询厂家是否支持特殊定制升级选项。
+
+INFO:     127.0.0.1:60836 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9c4501be】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9c4501be】发送：密封圈怎么检查？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_238d654c】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_238d654c】发送：冷却液正常，下一步查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6be7e226】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6be7e226】发送：密封圈怎么检查？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6d071e30】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6d071e30】发送：检查需要断电吗？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_02ee9b97】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_02ee9b97】发送：检查需要断电吗？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_15ef6122】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_15ef6122】发送：润滑脂用什么型号？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_d5d843b3】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_d5d843b3】发送：检查需要断电吗？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_11464d9d】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_11464d9d】发送：还是报错怎么办？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_233974e9】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_233974e9】发送：冷却液正常，下一步查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent X7QpU5Mg2vGSPo54QWMn6K 工具调用达上限，停止调用并提示模型总结回答
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（X7QpU5Mg2vGSPo54QWMn6K）（conversation_2e438308）第 4 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_69c737d226af4002b1a30c', 'name': 'search', 'input': {'query': 'M-2000 变频器参数设置', 'original_query': '变频器怎么校准？', 'is_exceed': True}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_c8c11982】的检索助手返回数据：针对M-2000设备报警E101（冷却系统压力不足），建议按以下步骤处理：
+
+1. **初步检查**：
+   - 确认冷却液液位是否低于警戒线，若偏低请补充至标准刻度。
+   - 启动水泵，监听是否存在异响，判断水泵工作状态。
+   -
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_7636dc51】的检索助手返回数据：M-3000报警E056表示液压系统泄漏。建议按以下步骤处理：
+1. 检查液压油管接口是否松动，并紧固螺栓；
+2. 查看密封圈是否老化，必要时进行更换；
+3. 检测液压泵压力，若压力不足需维修或更换。
+
+此外，液压
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_ffc7bdcd】收到回复：根据您咨询的变频器校准问题，结合相关故障代码E203的处理方案，建议按以下步骤操作：
+
+1. **断电检查**：关闭设备总电源，确认安全后进行后续操作。
+2. **物理连接核查**：打开控制柜，检查驱动主轴电机的电缆接头是否牢固，有无烧蚀或松动
+
+ERROR:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_d49f48bc】处理异常：list index out of range
+ERROR:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:处理请求异常：1 validation error for QueryResponse
+reply
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_4cce8712】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_4cce8712】发送：冷却液正常，下一步查什么？
+INFO:     127.0.0.1:60829 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60835 - "POST /query HTTP/1.1" 500 Internal Server Error
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_adcceb07】的检索助手返回数据：根据您提供的M-3000设备报警代码E056，该故障表示液压系统泄漏。建议按以下步骤进行排查：
+
+1. **检查液压油管接口**：确认是否存在松动现象，并紧固相关螺栓。
+2. **查看密封圈状态**：若发现密封圈有老化或破损，请及时更换。
+3. **检测液压
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_a4e4cc1b】的检索助手返回数据：根据您的提问，以下是关于设备开机前需要检查的内容以及相关补充信息：
+
+### 开机前必检项目（适用于M系列设备）：
+1. **电源电压**：确认为380V±10%，避免因电压不稳导致启动失败或损坏电路。
+2. **润滑油液位**：确保各运动部件润滑充足，防止干磨
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_b887c096】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_b887c096】发送：润滑脂用什么型号？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_ffc7bdcd】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_ffc7bdcd】发送：冷却液正常，下一步查什么？
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_06a784d0】用户开始咨询
+WARNING:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:实例池已达最大容量，用户会话排队中...
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（fEPerxzrBaMw3KkEJgMY9G）（conversation_2b5edf6a）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_5a86a0579c674a0cb6b5f2', 'name': 'search', 'input': {'query': '密封圈检查方法', 'original_query': '密封圈怎么检查？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.97it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（HeXfRoE7rY7sa4NEyY4wBq）（conversation_14990b87）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_c5100c793a7441cfbe153e', 'name': 'search', 'input': {'query': '密封圈检查方法', 'original_query': '密封圈怎么检查？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.25it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（gmmutvN8LJLCyfUVKCWpbt）（conversation_e4113afd）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_cd4e5f51c9a9407db3c57b', 'name': 'search', 'input': {'query': '设备开机前检查是否需要断电', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.28it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（73VFGWk9WAVYyRBgaj57qr）（conversation_9c624101）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_48f891e23da24785ba3174', 'name': 'search', 'input': {'query': '更换冷却系统滤芯是否需要断电', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.21it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（dncPFDTNUpZ4fR2LC2KUTS）（conversation_e07ed9e5）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_462bd70fc395402ab7b5b4', 'name': 'search', 'input': {'query': '液压油更换后仍然报错 故障排查', 'original_query': '还是报错怎么办？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.25it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（X2YPJisLCBQeDSfnMLUG9X）（conversation_b10ee1b8）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_29d04da61cb94105af93ae', 'name': 'search', 'input': {'query': '主轴轴承润滑脂型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.29it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（Xsfi3gt98fZ78BheRMkfro）（conversation_7211fec6）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_8964e8f19c79435990c97e', 'name': 'search', 'input': {'query': 'M-2000 报警代码E203 主轴转速异常 排查步骤', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  7.89it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（DSBEududHb9vJ3W5oABBKS）（conversation_921d209f）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_f8529f5948554643900d55', 'name': 'search', 'input': {'query': 'M-2000 主轴检查 是否需要断电', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.25it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6fe87503】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_75697392】用户开始咨询
+INFO:     127.0.0.1:62055 - "POST /query HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:62059 - "POST /query HTTP/1.1" 200 OK
+ERROR:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_c73e43dd】处理异常：list index out of range
+ERROR:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:处理请求异常：1 validation error for QueryResponse
+reply
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_c8c11982】收到回复：针对M-2000设备报警E101（冷却系统压力不足），建议按以下步骤处理：
+
+1. **初步检查**：
+   - 确认冷却液液位是否低于警戒线，若偏低请补充至标准刻度。
+   - 启动水泵，监听是否存在异响，判断水泵工作状态。
+
+2.
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（Xw82WcSyoXvA8dbc9ZBKK7）（conversation_9b366fe9）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_304e721b4a0b43b997bf85', 'name': 'search', 'input': {'query': 'M-2000 E203 主轴转速异常 排查步骤', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.70it/s]
+INFO:     127.0.0.1:60832 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_a4e4cc1b】收到回复：在设备开机前，您需要进行以下检查以确保安全和正常运行：
+
+**原因**：
+这些检查能够预防潜在的安全隐患、减少机械磨损，并保证设备稳定启动。
+
+**步骤与解决方案**：
+1. **检查电源电压**：使用万用表测量输入电压，确认其处于380V±10%范围内。若电压
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（MAVKC8t3CKe5Ee2JKZ2kz4）（conversation_c3d6783d）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_54a543f99d004030b82183', 'name': 'search', 'input': {'query': 'M-2000 E203 主轴转速异常 故障排查步骤', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.49it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_7636dc51】收到回复：M-3000报警E056表示液压系统泄漏。建议按以下步骤处理：
+1. 检查液压油管接口是否松动，并紧固螺栓；
+2. 查看密封圈是否老化，必要时进行更换；
+3. 检测液压泵压力，若压力不足需维修或更换。
+
+此外，液压
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_adcceb07】收到回复：根据您提供的M-3000设备报警代码E056，该故障表示液压系统泄漏。建议按以下步骤进行排查：
+
+1. **检查液压油管接口**：确认是否存在松动现象，并紧固相关螺栓。
+2. **查看密封圈状态**：若发现密封圈有老化或破损，请及时更换。
+3. **检测液压
+
+INFO:     127.0.0.1:62056 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62053 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（kkxcWtU76ahgP3wgUYohua）（conversation_85d15c07）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_9e86827c6cb64aa1a02f4f', 'name': 'search', 'input': {'query': '润滑脂使用型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.70it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（JC5WauKWyuNxKXUMNp8sjU）（conversation_c5f4c0eb）第 1 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_ab1e3a8d25154a83ba2562', 'name': 'search', 'input': {'query': '主轴转速异常 故障排查 步骤', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.25it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（fEPerxzrBaMw3KkEJgMY9G）（conversation_2b5edf6a）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_baac6a98eec04965ad2ac3', 'name': 'search', 'input': {'query': '设备密封圈检查步骤', 'original_query': '密封圈怎么检查？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.68it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（HeXfRoE7rY7sa4NEyY4wBq）（conversation_14990b87）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_a1d0b617aaef480ea4e3c2', 'name': 'search', 'input': {'query': '设备密封圈检查步骤', 'original_query': '密封圈怎么检查？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.97it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_f6454d28】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（73VFGWk9WAVYyRBgaj57qr）（conversation_9c624101）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_4c1f1c6403ea4509a01dc1', 'name': 'search', 'input': {'query': '冷却系统维护 安全操作规程 断电要求', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.22it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（DSBEududHb9vJ3W5oABBKS）（conversation_921d209f）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_d3e41f173d8a479b86eea4', 'name': 'search', 'input': {'query': '工业设备主轴检查 安全操作规程 是否需要断电', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.21it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（dncPFDTNUpZ4fR2LC2KUTS）（conversation_e07ed9e5）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_b1b60d6e440c49209448e6', 'name': 'parse_error_code', 'input': {'device_model': 'M-3000', 'error_code': 'E056', 'original_query': '还是报错怎么办？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_238d654c】的检索助手返回数据：针对M-2000报警代码E203（主轴转速异常），在确认冷却液正常后，建议下一步检查电机接线是否松动以及变频器参数设置是否正确。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（X2YPJisLCBQeDSfnMLUG9X）（conversation_b10ee1b8）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_cfbe772e6cdc4f7ca187b1', 'name': 'search', 'input': {'query': 'M系列设备 主轴轴承 润滑脂型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  5.70it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_7636dc51】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_fc497b2f】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_d5d843b3】的检索助手返回数据：设备开机前的常规检查项目（如电源电压、润滑油液位、安全防护门状态）通常是在断电状态下进行的。特别是当涉及机械或电气部分的检查时，为确保人员安全，必须先切断电源。只有在完成所有检查并确认无误后，方可通电启动设备。此外，若设备曾因急停按钮触发而停机，则更需在
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_233974e9】的检索助手返回数据：针对M-2000报警代码E203（主轴转速异常），在确认冷却液正常后，建议下一步检查电机接线是否松动以及变频器参数设置是否正确。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（MAVKC8t3CKe5Ee2JKZ2kz4）（conversation_c3d6783d）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_db51675bbc914f01857655', 'name': 'search', 'input': {'query': 'M-2000 主轴电机接线 变频器参数 设置方法', 'original_query': '冷却液正常，下一步查什么？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  3.92it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（JC5WauKWyuNxKXUMNp8sjU）（conversation_c5f4c0eb）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_b11a64f815104745a0c775', 'name': 'query_maintenance_cycle', 'input': {'part_name': '主轴轴承', 'original_query': '冷却液正常，下一步查什么？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（kkxcWtU76ahgP3wgUYohua）（conversation_85d15c07）第 2 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_f38cde4d0ffd44cf817fc5', 'name': 'search', 'input': {'query': '主轴轴承 润滑脂型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.28it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_89363e4f】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（fEPerxzrBaMw3KkEJgMY9G）（conversation_2b5edf6a）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_3fa8834e19d343489d71da', 'name': 'parse_error_code', 'input': {'device_model': 'M-3000', 'error_code': 'E056', 'original_query': '密封圈怎么检查？'}}}
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（HeXfRoE7rY7sa4NEyY4wBq）（conversation_14990b87）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_fd42ea1372164922930298', 'name': 'search', 'input': {'query': '工业设备橡胶密封圈维护检查标准流程', 'original_query': '密封圈怎么检查？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  7.91it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（X2YPJisLCBQeDSfnMLUG9X）（conversation_b10ee1b8）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_01b5d60888604632a5dc5c', 'name': 'search', 'input': {'query': 'M-3000 主轴轴承 润滑脂型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  7.85it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（73VFGWk9WAVYyRBgaj57qr）（conversation_9c624101）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_9c7d4d32cd0348d4ad6b8b', 'name': 'search', 'input': {'query': '工业设备冷却系统滤芯更换 是否需要断电 操作规范', 'original_query': '检查需要断电吗？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  4.82it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_c8c11982】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6d071e30】的检索助手返回数据：根据安全操作规程，进行主轴相关检查时存在触电风险，因此必须先切断设备总电源，并在控制面板处悬挂"正在检修"警示牌后再进行作业。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_11464d9d】的检索助手返回数据：您在更换液压油后仍出现报错，可能是由于液压系统存在其他问题。根据常见情况，若设备型号为M-3000并显示错误代码E056，则表示液压系统泄漏。
+
+建议按以下步骤排查：
+1. 检查液压油管接口是否松动，并紧固螺栓；
+2. 查看密封圈
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_238d654c】收到回复：在确认冷却液正常后，针对M-2000报警代码E203（主轴转速异常），下一步应重点检查以下两项：
+
+1. **电机接线状态**：查看主轴电机连接线路是否存在松动、接触不良或损坏情况，必要时重新紧固接头；
+2. **变频器参数设置**：核对
+
+INFO:     127.0.0.1:60831 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_233974e9】收到回复：在确认冷却液正常后，下一步应重点排查以下两个方面：
+
+1. **电机接线检查**：查看主轴电机连接线路是否存在松动、接触不良或烧蚀现象，特别是动力线和编码器信号线的端子部分；
+2. **变频器参数核对**：进入系统参数界面，核实变频器设定频率范围、加
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_4cce8712】的检索助手返回数据：针对M-2000报警代码E203（主轴转速异常），在确认冷却液正常后，建议下一步检查主轴电机接线是否松动或损坏，并核对变频器参数设置是否正确。
+INFO:     127.0.0.1:60836 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62052 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_d5d843b3】收到回复：**原因**：为了保障操作人员的安全，并避免在检查过程中发生意外触电或设备误启动，大多数检查工作应在断电状态下进行。
+
+**步骤**：
+1. 在开始任何检查之前，首先关闭设备总电源并挂上警示牌；
+2. 使用万用表等工具检测输入电源线路电压（可在配电柜端子处测量），确认符合
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:Agent 检索助手（kkxcWtU76ahgP3wgUYohua）（conversation_85d15c07）第 3 次调用工具：{'tool_call': {'type': 'tool_use', 'id': 'call_f881ee40cc87441f89060c', 'name': 'search', 'input': {'query': 'M-3000 主轴轴承 润滑脂型号', 'original_query': '润滑脂用什么型号？'}}}
+Batches: 100%|██████████| 1/1 [00:00<00:00,  6.30it/s]
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9c4501be】的检索助手返回数据：关于密封圈的检查，建议按照以下步骤进行：
+
+1. **目视检查**：查看密封圈是否有裂纹、变形、老化或磨损现象。
+2. **安装状态确认**：确保密封圈正确安装在槽内，无错位或挤压损伤。
+3. **接口泄漏检测**：对于液压系统等关键部位（如M-300
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_ffc7bdcd】的检索助手返回数据：根据当前排查进展，在确认冷却液正常后，请继续执行以下步骤：
+
+3. **变频器参数核对**：上电进入变频器调试界面，查看实际输出频率与设定值是否匹配，重点检查加速时间、最大输出频率等参数是否符合设备铭牌要求。
+4. **主轴轴承状态检测**：手动旋转主轴，感知是否存在
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_15ef6122】的检索助手返回数据：根据现有资料，无法确定主轴轴承所使用的具体润滑脂型号。建议查阅M-3000设备的技术手册或联系厂家获取准确信息。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6be7e226】的检索助手返回数据：检查密封圈的方法如下：
+1. 首先确认是否存在液压系统泄漏等异常情况。
+2. 检查液压油管接口是否松动，若松动需紧固螺栓。
+3. 观察密封圈是否有老化、变形或破损现象，如有应进行更换。
+4. 可结合设备报警代码（如M-300
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_233974e9】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6d071e30】收到回复：是的，检查前必须断电。根据安全操作规程，进行主轴相关检查时存在触电风险，因此需先切断设备总电源，并在控制面板处悬挂“正在检修”警示牌后方可作业，以确保人员安全。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_02ee9b97】的检索助手返回数据：根据现有资料，未明确说明更换冷却系统滤芯是否需要断电。但依据通用安全规范，建议在进行任何维护操作前切断电源，以确保操作人员的安全。同时，请确认设备已完全停机并释放系统压力后再进行更换作业。
+INFO:     127.0.0.1:62058 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50754 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_4cce8712】收到回复：在确认冷却液正常后，下一步应重点检查主轴电机的接线是否存在松动或损坏情况，并核实变频器的参数设置是否符合设备要求。这两项是导致E203报警（主轴转速异常）的常见原因。排查时请先断电操作，确保安全；重新启动前需确认所有连接可靠、参数无误，以防故障扩大或
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_b887c096】的检索助手返回数据：根据现有资料，主轴轴承需每运行2000小时更换润滑脂，但未明确说明具体润滑脂型号。建议进一步查阅M-3000设备的技术手册或联系厂家确认适用的润滑脂型号。
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_11464d9d】收到回复：如果更换液压油后仍然报错，可能并非单纯由油品引起，而是液压系统存在其他故障。以常见的M-3000设备为例，若显示错误代码E056，通常表示系统存在泄漏。
+
+【原因】
+- 液压油管接头松动或密封老化；
+- 密封圈破损或安装不当；
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_238d654c】用户开始咨询
+INFO:     127.0.0.1:62049 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_ffc7bdcd】收到回复：根据当前排查进展，在确认冷却液正常后，请继续执行以下步骤：
+
+3. **变频器参数核对**：上电进入变频器调试界面，查看实际输出频率与设定值是否匹配，重点检查加速时间、最大输出频率等参数是否符合设备铭牌要求。
+4. **主轴轴承状态检测**：手动旋转主轴，感知是否存在
+
+INFO:     127.0.0.1:60829 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_9c4501be】收到回复：关于密封圈的检查，建议按照以下步骤进行：
+
+1. **目视检查**：查看密封圈表面是否存在裂纹、变形、老化或明显磨损。
+2. **安装状态确认**：检查密封圈是否正确嵌入密封槽内，有无错位、扭曲或受压损伤。
+3. **泄漏检测**：对连接部位（如液压系统
+
+INFO:     127.0.0.1:60833 - "POST /query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62050 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_02ee9b97】收到回复：虽然资料中未明确说明，但出于安全考虑，建议在检查或更换冷却滤芯前进行断电操作。请确保设备已完全停机、系统压力已释放，并遵循相关安全规程，以防发生意外。
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_b887c096】收到回复：根据现有资料，主轴轴承需要每运行2000小时更换一次润滑脂，但具体使用的润滑脂型号未在文档中明确说明。建议查阅M-3000设备的技术手册或直接联系设备制造商，以获取推荐的润滑脂型号，确保选用符合要求的产品。
+
+INFO:     127.0.0.1:64963 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_4cce8712】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_11464d9d】用户开始咨询
+INFO:     127.0.0.1:62060 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_6be7e226】收到回复：检查密封圈的方法如下：
+
+**原因**：密封圈老化、变形或破损可能导致液压系统泄漏，影响设备正常运行。
+
+**检查步骤**：
+1. 观察是否存在液压系统泄漏等异常现象；
+2. 检查液压油管接口是否松动，必要时紧固连接螺栓；
+3. 目视检查
+
+INFO:     127.0.0.1:64965 - "POST /query HTTP/1.1" 200 OK
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:【会话 session_15ef6122】收到回复：关于主轴轴承润滑脂的具体型号，目前提供的资料中未明确说明。
+**原因**：不同设备制造商和工作环境对润滑脂性能要求不同，需使用指定型号以确保兼容性和使用寿命。
+**解决方案**：请查阅M-3000设备的技术手册或直接联系设备生产厂家，确认推荐使用的润滑脂型号（如ISO标准号或NL
+
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_ffc7bdcd】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_b887c096】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6be7e226】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_02ee9b97】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6d071e30】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9c4501be】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_d5d843b3】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_15ef6122】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_05d5c018】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_75697392】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_7ed03bcf】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_fc182475】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6fe87503】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_7636dc51】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_2250c379】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_238d654c】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_233974e9】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_c8c11982】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_11464d9d】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_4cce8712】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_b887c096】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_ffc7bdcd】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6be7e226】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9c4501be】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6d071e30】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_d5d843b3】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_02ee9b97】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_15ef6122】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_80e22c7b】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_75697392】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_c0335e01】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_68e6fc5d】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_7636dc51】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6fe87503】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_97afa123】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_233974e9】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_c8c11982】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_238d654c】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_11464d9d】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_4cce8712】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6be7e226】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_ffc7bdcd】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6d071e30】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_b887c096】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_9c4501be】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_d5d843b3】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_02ee9b97】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_15ef6122】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_3c9a2832】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_75697392】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_e9e70db1】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_b2564836】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_7636dc51】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_b7395d0f】用户开始咨询
+INFO:api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:
+【会话 session_6fe87503】用户开始咨询
+INFO:     Shutting down
+INFO:     Waiting for background tasks to complete. (CTRL+C to force quit)
