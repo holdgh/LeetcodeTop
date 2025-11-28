@@ -20,6 +20,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from cachetools import TTLCache  # 带过期时间的缓存，避免内存泄漏
 
+from agent_work.datatransfer.async_memory_writer import send_conversation_to_queue
+
 # 日志配置
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -522,7 +524,7 @@ class SessionManager:
         return f"session_{uuid.uuid4().hex[:8]}"
 
 
-async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, question: str, conversation_id: str):
+async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, question: str, conversation_id: str, user_id: str = "default_user"):
     """单个用户多轮对话（复用Agent实例）"""
     logger.info(f"\n【会话 {session_id}】用户开始咨询")
     try:
@@ -543,6 +545,32 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
         logger.info(f"【会话 {session_id}】的检索助手返回数据：{retriever_reply.content}")
         await expert.memory.add(retriever_reply)
         expert_reply = await expert.reply()
+        # -------------------------- 新增：发送对话数据到队列（异步写入） --------------------------
+        # 发送用户消息
+        send_conversation_to_queue(
+            user_id=user_id,
+            session_id=session_id,
+            conversation_id=conversation_id,
+            role="user",
+            content=question
+        )
+        # 发送检索助手消息
+        send_conversation_to_queue(
+            user_id=user_id,
+            session_id=session_id,
+            conversation_id=conversation_id,
+            role="retriever",
+            content=str(retriever_reply.content)  # 转换为字符串存储
+        )
+        # 发送运维专家消息
+        send_conversation_to_queue(
+            user_id=user_id,
+            session_id=session_id,
+            conversation_id=conversation_id,
+            role="expert",
+            content=expert_reply.content
+        )
+        # -------------------------------------------------------------------------------------
         # TODO 在得到运维专家回复后，清除智能体实例中的缓存数据【历史对话及工作调用数据】，并将当前会话与当前智能体实例接触绑定，后续新对话进来重新从资源池获取新的智能体实例
         await agent_pair.unbind_session()
         # 5. 输出结果
@@ -616,6 +644,8 @@ async def handle_query(request: QueryRequest):
     """处理用户查询：获取Agent实例→生成回复→返回结果"""
     # 生成会话ID（首次请求）
     session_id = request.session_id or SessionManager.create_session()
+    # 此处user_id为默认值，若有用户登录系统，可从Token中解析真实user_id
+    user_id = "default_user"  # 替换为实际用户ID（如从请求头Token提取
     # TODO 风险点2
     """
     SESSION_GOING_CACHE的操作非原子性，存在并发安全问题
@@ -649,7 +679,7 @@ async def handle_query(request: QueryRequest):
     conversation_id = f"conversation_{uuid.uuid4().hex[:8]}"
     try:
         # 获取对话结果
-        result = await user_dialog_for_one_question(session_id, agent_pool, request.question, conversation_id)
+        result = await user_dialog_for_one_question(session_id, agent_pool, request.question, conversation_id, user_id)
         # 返回结果
         return QueryResponse(
             session_id=session_id,
