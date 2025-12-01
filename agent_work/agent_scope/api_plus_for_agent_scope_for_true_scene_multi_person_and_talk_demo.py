@@ -20,7 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from cachetools import TTLCache  # 带过期时间的缓存，避免内存泄漏
 
-from agent_work.datatransfer.async_memory_writer import send_conversation_to_queue
+from agent_work.datatransfer.async_memory_writer import send_message_to_queue_by_async
 
 # 日志配置
 logging.basicConfig(level=logging.INFO)
@@ -532,6 +532,14 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
         agent_pair = await agent_pool.get_agent_pair(session_id)
         retriever = agent_pair.retriever
         expert = agent_pair.expert
+        # 发送用户消息
+        await send_message_to_queue_by_async(
+            user_id=user_id,
+            session_id=session_id,
+            conversation_id=conversation_id,
+            role="user",
+            content=question
+        )
         # 2. 构造用户消息
         user_msg = Msg(name="user", content=question, role="user", invocation_id=conversation_id)
 
@@ -542,28 +550,19 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
 
         # 4. 智能体协作处理
         retriever_reply = await retriever.reply()
-        logger.info(f"【会话 {session_id}】的检索助手返回数据：{retriever_reply.content}")
-        await expert.memory.add(retriever_reply)
-        expert_reply = await expert.reply()
-        # -------------------------- 新增：发送对话数据到队列（异步写入） --------------------------
-        # 发送用户消息
-        send_conversation_to_queue(
-            user_id=user_id,
-            session_id=session_id,
-            conversation_id=conversation_id,
-            role="user",
-            content=question
-        )
         # 发送检索助手消息
-        send_conversation_to_queue(
+        await send_message_to_queue_by_async(
             user_id=user_id,
             session_id=session_id,
             conversation_id=conversation_id,
             role="retriever",
             content=str(retriever_reply.content)  # 转换为字符串存储
         )
+        logger.info(f"【会话 {session_id}】的检索助手返回数据：{retriever_reply.content}")
+        await expert.memory.add(retriever_reply)
+        expert_reply = await expert.reply()
         # 发送运维专家消息
-        send_conversation_to_queue(
+        await send_message_to_queue_by_async(
             user_id=user_id,
             session_id=session_id,
             conversation_id=conversation_id,
@@ -595,7 +594,7 @@ class QueryResponse(BaseModel):
 
 
 # 全局实例池（启动时初始化）
-agent_pool = AgentPool(min_size=20, max_size=20)
+agent_pool = AgentPool(min_size=2, max_size=4)
 
 
 @asynccontextmanager

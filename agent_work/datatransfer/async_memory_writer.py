@@ -1,19 +1,196 @@
 import json
 import uuid
 
+import asyncio
+from collections import defaultdict
+from datetime import datetime, timezone, timedelta
+
 import aio_pika
 import pika
+from sqlalchemy import func
 
 from sqlalchemy.future import select
-from agent_work.database.database import get_db, User, Session, Message
-from typing import Dict, Optional
+from agent_work.database.database import get_db, User, Session, Message, MessageSummary
+from typing import Dict, Optional, Set
+
+from agent_work.datasummary.summary_service import SUMMARY_TRIGGER_THRESHOLD, update_or_create_summary, \
+    get_session_conversation_stats
+from agent_work.util.timer_wrapper_for_func import async_timer_with_mark
 
 # 消息队列配置（与之前记忆管理智能体共用一个队列）
 QUEUE_NAME = "conversation_history_queue"
 RABBITMQ_URL = "amqp://guest:guest@localhost:5672/"
+# 新增：对话级触发防抖缓存（key：session_id，value：最后一次触发校验的时间）
+# 作用：同一会话的多条消息，2秒内仅触发一次摘要校验
+trigger_debounce_cache = defaultdict(lambda: datetime.min)
+DEBOUNCE_INTERVAL = timedelta(seconds=2)  # 防抖间隔（可根据实际调整）
+
+
+# async_memory_writer.py 中维护事件队列和处理器
+summary_event_queue = asyncio.Queue()
+is_summary_processor_running = True
+processing_sessions: Set[str] = set()  # 移到全局，方便关闭时访问
+processed_sessions: Set[str] = set()  # 记录已处理的会话，避免重复处理
+# 新增：记录队列中待处理的session_id（用于去重）
+pending_summary_tasks: Set[str] = set()
+
+
+async def process_summary_events():
+    """
+    持续消费摘要事件队列，批量处理摘要生成（聚合1秒内的重复会话，避免重复处理）
+    """
+    global is_summary_processor_running
+
+    while is_summary_processor_running:
+        try:
+            # 1秒超时：避免队列空时无限阻塞
+            session_id = await asyncio.wait_for(summary_event_queue.get(), timeout=1.0)
+            # 步骤1：兜底去重（防抖+队列去重可能漏网的情况）
+            if session_id in processing_sessions or session_id in processed_sessions:
+                # 从待处理集合中移除（避免内存泄漏）
+                pending_summary_tasks.discard(session_id)
+                summary_event_queue.task_done()
+                continue
+
+            # 步骤2：标记为正在处理
+            processing_sessions.add(session_id)
+            print(f"【摘要处理器】开始处理会话 {session_id}")
+
+            try:
+                await asyncio.sleep(1.0)  # 聚合消息
+                await update_or_create_summary(session_id)  # 执行摘要生成
+                processed_sessions.add(session_id)  # 标记已处理
+                print(f"【摘要处理器】会话 {session_id} 处理完成")
+            except Exception as e:
+                print(f"【摘要处理器】会话 {session_id} 处理失败：{str(e)}")
+            finally:
+                # 步骤3：清理标记
+                processing_sessions.discard(session_id)  # 移除处理标记，标记任务完成
+                pending_summary_tasks.discard(session_id)  # 关键：从待处理集合移除，避免后续无法重新触发
+                summary_event_queue.task_done()
+
+        except asyncio.TimeoutError:
+            continue  # 队列空，继续循环
+        except Exception as e:
+            print(f"【摘要处理器】循环异常：{str(e)}")
+            continue
+
+
+# 应用关闭时的清理函数
+async def shutdown_summary_processor():
+    """
+    优雅关闭摘要服务：
+    1. 停止接收新任务；
+    2. 等待队列中所有任务处理完毕；
+    3. 等待正在处理的任务完成；
+    4. 清理资源
+    """
+    global is_summary_processor_running
+    print("【摘要服务】开始关闭，停止接收新任务...")
+
+    # 1. 停止运行标志，不再接收新任务
+    is_summary_processor_running = False
+    # 清理缓存（避免内存泄漏）
+    trigger_debounce_cache.clear()
+    pending_summary_tasks.clear()
+    # 2. 等待队列中所有任务处理完毕（最多等待30秒，避免无限阻塞）
+    max_wait_time = 30.0
+    start_time = asyncio.get_event_loop().time()
+    while not summary_event_queue.empty():
+        elapsed_time = asyncio.get_event_loop().time() - start_time
+        if elapsed_time > max_wait_time:
+            print(f"【摘要服务】警告：等待队列任务超时（{max_wait_time}秒），仍有 {summary_event_queue.qsize()} 个任务未处理")
+            break
+        await asyncio.sleep(0.5)  # 轮询检查队列状态
+
+    # 3. 等待正在处理的任务完成（最多等待10秒）
+    start_time = asyncio.get_event_loop().time()
+    while processing_sessions:
+        elapsed_time = asyncio.get_event_loop().time() - start_time
+        if elapsed_time > 10.0:
+            print(f"【摘要服务】警告：等待正在处理的任务超时（10秒），仍有 {len(processing_sessions)} 个任务在处理")
+            break
+        print(f"【摘要服务】等待 {len(processing_sessions)} 个正在处理的任务完成...")
+        await asyncio.sleep(0.5)
+
+    # 4. 清理资源
+    processed_sessions.clear()
+    print("【摘要服务】已完全关闭")
 
 
 # -------------------------- 生产者：发送对话数据到队列 --------------------------
+@async_timer_with_mark(mark_param_name="session_id")
+async def send_message_to_queue_by_async(
+        user_id: str,
+        session_id: str,
+        conversation_id: str,
+        role: str,
+        content: str):
+    connection = await aio_pika.connect_robust(RABBITMQ_URL)
+
+    async with connection:
+        channel = await connection.channel()
+        queue = await channel.declare_queue(QUEUE_NAME, durable=True)
+
+        # 为消息添加生产者生成的时间戳
+        enriched_message = {
+            "message_id": f"msg_{uuid.uuid4().hex[:8]}",  # 消息ID，也可由生产者生成
+            "user_id": user_id,
+            "session_id": session_id,
+            "conversation_id": conversation_id,
+            "role": role,
+            "content": content,
+            # 核心：生产者生成的带时区的时间戳
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+        await channel.default_exchange.publish(
+            aio_pika.Message(
+                body=json.dumps(enriched_message).encode(),
+                delivery_mode=aio_pika.DeliveryMode.PERSISTENT
+            ),
+            routing_key=queue.name
+        )
+        print(f"生产者发送消息: {enriched_message}")
+
+
+# async_memory_writer.py 中调用，与事件驱动模型结合
+async def trigger_summary_if_needed(session_id: str):
+    """
+    消息写入数据库后，检查是否需要触发摘要生成：
+    未处理对话数 ≥5 时，触发摘要（放入事件队列异步处理）
+    """
+    # 对话级防抖：同一会话2秒内仅触发一次校验
+    last_trigger_time = trigger_debounce_cache[session_id]
+    if datetime.now() - last_trigger_time < DEBOUNCE_INTERVAL:
+        # 2秒内已触发过，直接跳过
+        print(f"【摘要触发】会话 {session_id} 触发防抖，2秒内已校验过，跳过")
+        return
+    # 更新最后触发时间
+    trigger_debounce_cache[session_id] = datetime.now()
+    # 获取会话的对话统计
+    total_conv_count, _ = await get_session_conversation_stats(session_id)
+    last_processed_count = 0
+    async for db in get_db():
+        summary_record = await db.execute(select(MessageSummary).filter_by(session_id=session_id))
+        summary_record = summary_record.scalars().first()
+        last_processed_count = summary_record.last_processed_conversation_count if summary_record else 0
+
+    # 计算未处理对话数
+    unprocessed_conv_count = total_conv_count - last_processed_count
+    if unprocessed_conv_count >= SUMMARY_TRIGGER_THRESHOLD:
+        # 队列任务去重：检查队列中是否已有该session_id的未处理任务
+        # 注意：asyncio.Queue无公开的“查看队列内容”方法，通过临时集合记录待处理任务
+        if session_id in pending_summary_tasks:
+            print(f"【摘要触发】会话 {session_id} 已有任务在队列中，跳过重复入队")
+            return
+        print(f"【触发机制】会话 {session_id} 未处理对话数达到 {unprocessed_conv_count}，触发摘要生成...")
+        # 放入事件队列异步处理（沿用之前的事件驱动模型）
+        await summary_event_queue.put(session_id)
+    else:
+        print(f"【触发机制】会话 {session_id} 未处理对话数 {unprocessed_conv_count}，未达到触发阈值（{SUMMARY_TRIGGER_THRESHOLD}）")
+
+
 def send_conversation_to_queue(
         user_id: str,
         session_id: str,
@@ -36,7 +213,9 @@ def send_conversation_to_queue(
         "conversation_id": conversation_id,
         "role": role,
         "content": content,
-        "message_id": f"msg_{uuid.uuid4().hex[:8]}"  # 消息唯一ID
+        "message_id": f"msg_{uuid.uuid4().hex[:8]}",  # 消息唯一ID
+        # 核心：生产者生成的带时区的时间戳
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
     # 连接消息队列并发送
     connection = pika.BlockingConnection(pika.URLParameters(url=RABBITMQ_URL))
@@ -52,49 +231,6 @@ def send_conversation_to_queue(
     print(f"对话数据已发送到队列：{message_data}")
 
 
-# -------------------------- 消费者：异步写入数据库 --------------------------
-# async def consume_conversation_queue():
-#     """消费队列中的对话数据，异步写入数据库"""
-#     # 获取当前事件循环
-#     loop = asyncio.get_running_loop()
-#     # 连接消息队列
-#     connection = pika.BlockingConnection(pika.URLParameters(url=RABBITMQ_URL))
-#     channel = connection.channel()
-#     channel.queue_declare(queue=QUEUE_NAME, durable=True)
-#
-#     def callback(ch, method, properties, body):
-#         try:
-#             # 解析消息数据
-#             data = json.loads(body)
-#             # 使用 asyncio.run_coroutine_threadsafe 将异步任务提交到事件循环
-#             # 1. 提交异步写入任务，获取 Future 对象
-#             future = asyncio.run_coroutine_threadsafe(write_conversation_to_db(data), loop)
-#             # 2. 阻塞等待任务执行完成（设置超时，避免无限等待）
-#             # 超时时间根据数据库写入耗时调整（如5秒）
-#             future.result(timeout=5)
-#             """
-#             pika 库的回调函数是同步执行的，它运行在一个单独的线程中，而不是在 asyncio 的事件循环线程中。
-#             当你在这个同步回调中调用 asyncio.run() 时，它会尝试创建一个新的事件循环，这与你已经启动的事件循环冲突。
-#             """
-#             # asyncio.run(write_conversation_to_db(db, data))
-#             # 确认消息处理完成
-#             ch.basic_ack(delivery_tag=method.delivery_tag)
-#             print(f"对话数据写入成功：{data['message_id']}")
-#         except asyncio.TimeoutError:
-#             # 任务超时，拒绝消息并重新入队
-#             print(f"写入超时，消息重新入队：{body}")
-#             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
-#         except Exception as e:
-#             # 处理失败，重新入队（最多重试3次）
-#             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
-#             print(f"对话数据写入失败（重试）：{str(e)}")
-#
-#     # 开始消费队列（手动确认消息）
-#     channel.basic_qos(prefetch_count=1)  # 公平分发，避免单消费者过载
-#     channel.basic_consume(queue=QUEUE_NAME, on_message_callback=callback)
-#     print("对话历史消费服务已启动，等待数据...")
-#     channel.start_consuming()
-# -------------------------- 消费者：异步消费（核心改造，用 aio_pika） --------------------------
 async def consume_conversation_queue():
     # 1. 异步连接 RabbitMQ
     connection = await aio_pika.connect_robust(RABBITMQ_URL)
@@ -159,10 +295,58 @@ async def write_conversation_to_db(data: Dict):
                 session_id=data["session_id"],
                 conversation_id=data["conversation_id"],
                 role=data["role"],
-                content=data["content"]
+                content=data["content"],
+                timestamp= datetime.fromisoformat(data["timestamp"])
             )
             db.add(message)
+
+            # !!! 修正后的逻辑：在提交前，获取当前消息总数 !!!
+            # 注意：此时 message 还未被提交，所以 count 是当前总数（不包含新消息）
+            result = await db.execute(
+                select(func.count(Message.id)).filter_by(session_id=data["session_id"])
+            )
+            current_message_count = result.scalar_one()
+
+            # 3.1 提交事务，将新消息写入数据库
             await db.commit()
+            print(f"数据库写入成功：{data['message_id']}")
+
+            # # 3.2 计算提交后的消息总数
+            # new_message_count = current_message_count + 1
+            #
+            # # 3.3 修正：当消息总数是阈值的整数倍时，触发摘要更新
+            # if new_message_count % SUMMARY_TRIGGER_THRESHOLD == 0:
+            #     print(f"会话 {data['session_id']} 消息数达到 {new_message_count}，触发摘要更新...")
+            #     """
+            #     asyncio.create_task() 的作用是创建一个任务并将其加入事件循环，然后立即返回，不会等待该任务执行完成。
+            #
+            #     潜在问题：
+            #         如果这个后台任务在执行过程中抛出了异常，而没有任何代码去处理这个异常（即没有 await 这个 Task 对象），那么这个异常会被称为 “未被观察到的异常”（Unobserved Exception）
+            #
+            #     在 Python 中，未被观察到的异常会在事件循环的下一个周期被打印到控制台，但不会中断主程序。这可能导致：
+            #         - 问题被忽略：你可能不知道摘要生成失败了。
+            #         - 资源泄漏：如果任务持有某些资源（如数据库连接），在异常退出时可能无法被正确释放。
+            #
+            #     IDE（如 PyCharm、VS Code 配合 Pylance）能够识别这种模式，并提示开发者 “协程操作未被 await”，以提醒潜在的未处理异常风险。
+            #     """
+            #     # 使用 asyncio.create_task 使其异步执行，不阻塞当前流程。
+            #     task = asyncio.create_task(update_or_create_summary(data["session_id"]))
+            #     summary_tasks.add(task)
+            #
+            #     # 为了防止任务完成后内存泄漏，可以添加一个回调将其从集合中移除
+            #     def task_done_callback(t: asyncio.Task):
+            #         summary_tasks.discard(t)
+            #         # 在这里可以处理任务的结果或异常
+            #         try:
+            #             t.result()  # 如果任务抛出异常，这里会重新抛出
+            #         except Exception as summary_e:
+            #             print(f"后台摘要任务失败: {summary_e}")
+            #
+            #     task.add_done_callback(task_done_callback)
+
+            await db.commit()
+            # 检查是否需要触发摘要
+            await trigger_summary_if_needed(data["session_id"])
         except Exception as e:
             # 内部异常立即抛出，让外层 future.result() 捕获
             await db.rollback()  # 回滚事务
@@ -170,14 +354,33 @@ async def write_conversation_to_db(data: Dict):
             raise  # 重新抛出异常，触发回调的 basic_nack
 
 
+async def main():
+    """消费者服务启动入口：同时启动消息消费和摘要处理器"""
+    # 启动摘要处理器协程
+    summary_task = asyncio.create_task(process_summary_events())
+    print("【摘要服务】已启动")
+
+    # 启动消息消费协程
+    consume_task = asyncio.create_task(consume_conversation_queue())
+    print("【消费者服务】已启动，开始监听队列...")
+
+    # 等待两个协程完成（或被中断）
+    try:
+        await asyncio.gather(summary_task, consume_task)
+    except KeyboardInterrupt:
+        print("\n【消费者服务】收到关闭信号...")
+        await shutdown_summary_processor()
+        await asyncio.gather(summary_task, consume_task, return_exceptions=True)
+
+
 if __name__ == '__main__':
     # 单独运行，持续消费队列并写入数据库
-    import asyncio
+
     """
     asyncio.run() 打断点调试不生效，核心原因是 asyncio.run() 会启动独立事件循环并阻塞主线程，调试器无法 “穿透” 到异步任务内部—— 
     调试器默认跟踪主线程，但 consume_conversation_queue() 是在事件循环管理的异步任务中执行，而非主线程，导致断点 “看不到” 执行流程。
     """
-    asyncio.run(consume_conversation_queue())
+    asyncio.run(main())
     # 调试策略：采用显式创建事件循环，构造具体方法入参，执行异步协程方法
     # 显式创建事件循环
     # loop = asyncio.get_event_loop()

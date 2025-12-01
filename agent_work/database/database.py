@@ -1,5 +1,5 @@
 import pytz
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Enum, CheckConstraint, Integer
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, CheckConstraint, Integer
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -18,7 +18,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
     user_id = Column(String(64), primary_key=True, comment="用户唯一标识（如登录态ID）")
-    create_time = Column(DateTime, default=datetime.datetime.now(pytz.UTC), comment="创建时间")
+    create_time = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), comment="创建时间")
     # 关联会话
     sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
 
@@ -28,8 +28,8 @@ class Session(Base):
     __tablename__ = "sessions"
     session_id = Column(String(64), primary_key=True, comment="会话ID（与现有session_id一致）")
     user_id = Column(String(64), ForeignKey("users.user_id"), nullable=False, comment="关联用户ID（用户隔离核心）")
-    create_time = Column(DateTime, default=datetime.datetime.now(pytz.UTC), comment="会话创建时间")
-    update_time = Column(DateTime, default=datetime.datetime.now(pytz.UTC), onupdate=datetime.datetime.now(pytz.UTC),
+    create_time = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), comment="会话创建时间")
+    update_time = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), onupdate=datetime.datetime.now(datetime.timezone.utc),
                          comment="最后更新时间")
     # 关联对话
     messages = relationship("Message", back_populates="session", cascade="all, delete-orphan")
@@ -46,7 +46,7 @@ class Message(Base):
     role = Column(String(20), nullable=False,
                   comment="消息角色：user-用户，retriever-检索助手，expert-运维专家，system-系统")
     content = Column(Text, nullable=False, comment="消息内容（文本）")
-    timestamp = Column(DateTime, default=datetime.datetime.now(pytz.UTC), comment="消息时间戳")
+    timestamp = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), comment="消息时间戳")
     # 关联会话
     session = relationship("Session", back_populates="messages")
 
@@ -85,9 +85,9 @@ class MessageSummary(Base):
         comment="会话最新摘要（压缩长对话历史，减少加载耗时）"
     )
     summary_time = Column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=False,
-        default=datetime.datetime.now(pytz.UTC),
+        default=datetime.datetime.now(datetime.timezone.utc),
         comment="最后一次摘要生成时间"
     )
     total_messages = Column(
@@ -95,6 +95,13 @@ class MessageSummary(Base):
         nullable=False,
         default=0,
         comment="会话总消息数"
+    )
+    # 新增字段：上次摘要已处理的对话数（核心）
+    last_processed_conversation_count = Column(
+        Integer,
+        nullable=False,
+        default=0,
+        comment="上次摘要已处理的对话数"
     )
 
     def __repr__(self):
