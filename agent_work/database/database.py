@@ -44,7 +44,7 @@ class Message(Base):
     session_id = Column(String(64), ForeignKey("sessions.session_id"), nullable=False, comment="关联会话ID")
     conversation_id = Column(String(64), nullable=False, comment="对话ID（与现有conversation_id一致）")
     role = Column(String(20), nullable=False,
-                  comment="消息角色：user-用户，retriever-检索助手，expert-运维专家，system-系统")
+                  comment="消息角色：user-用户，retriever-检索助手，expert-运维专家，system-系统，rewriter-重写助手")
     content = Column(Text, nullable=False, comment="消息内容（文本）")
     timestamp = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), comment="消息时间戳")
     # 关联会话
@@ -61,7 +61,7 @@ class Message(Base):
     # 添加表级 CHECK 约束（如果在 SQL 中未手动添加）
     __table_args__ = (
         CheckConstraint(
-            role.in_(["user", "retriever", "expert", "system"]),
+            role.in_(["user", "retriever", "expert", "system", "rewriter"]),
             name="valid_role"
         ),
     )

@@ -154,7 +154,7 @@ class MaintenanceDocRetriever:
         self.index.add(vectors)
         # 保存索引和文本
         faiss.write_index(self.index, "maintenance_index.index")
-        with open("maintenance_texts.pkl", "wb") as f:
+        with open("../agent/maintenance_texts.pkl", "wb") as f:
             pickle.dump(knowledge, f)
         return knowledge
 

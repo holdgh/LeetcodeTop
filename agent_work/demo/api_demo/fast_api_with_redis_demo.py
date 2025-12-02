@@ -6,7 +6,7 @@ app = FastAPI()
 r = redis.Redis(host='localhost', port=6379, db=2)
 
 
-@app.get("/api/query")
+@app.get("/api_demo/query")
 def query_data(key: str):
     # 先查缓存
     cache_res = r.get(key)

@@ -1,9 +1,9 @@
 import asyncio
 from typing import List, Tuple, Optional
 
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlalchemy.future import select
-from database import get_db, Message, MessageSummary
+from agent_work.database.database import get_db, Message, MessageSummary
 
 # 配置参数（可根据大模型窗口调整）
 RECENT_CONVERSATIONS_COUNT = 3  # 取最近3次对话的完整消息
@@ -76,7 +76,7 @@ async def get_recent_conversation_messages(session_id: str, limit: int) -> List[
             )
             .filter_by(session_id=session_id)
             .group_by(Message.conversation_id)
-            .order_by("first_msg_time.desc()")  # 最近的对话在前
+            .order_by(text("first_msg_time DESC"))  # 最近的对话在前
             .limit(limit)
             .subquery()
         )
@@ -94,3 +94,8 @@ async def get_recent_conversation_messages(session_id: str, limit: int) -> List[
             .order_by(Message.timestamp.asc())
         )
         return recent_messages.scalars().all()
+
+
+if __name__ == '__main__':
+    result = asyncio.run(get_session_history_context('session_1dfc1ade'))
+    print(result)

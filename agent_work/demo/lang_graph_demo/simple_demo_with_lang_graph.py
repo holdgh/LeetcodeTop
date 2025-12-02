@@ -14,7 +14,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 
 # 设置OpenAI API密钥 (请替换为你的实际密钥)
-# os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
+# os.environ["OPENAI_API_KEY"] = "your-openai-api_demo-key"
 
 async def parse_model_response(response: Any) -> str:
     response_text = "抱歉，暂时无法生成结果"

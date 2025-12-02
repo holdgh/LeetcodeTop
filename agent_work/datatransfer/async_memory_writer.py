@@ -307,45 +307,10 @@ async def write_conversation_to_db(data: Dict):
             )
             current_message_count = result.scalar_one()
 
-            # 3.1 提交事务，将新消息写入数据库
+            # 提交事务，将新消息写入数据库
             await db.commit()
             print(f"数据库写入成功：{data['message_id']}")
-
-            # # 3.2 计算提交后的消息总数
-            # new_message_count = current_message_count + 1
-            #
-            # # 3.3 修正：当消息总数是阈值的整数倍时，触发摘要更新
-            # if new_message_count % SUMMARY_TRIGGER_THRESHOLD == 0:
-            #     print(f"会话 {data['session_id']} 消息数达到 {new_message_count}，触发摘要更新...")
-            #     """
-            #     asyncio.create_task() 的作用是创建一个任务并将其加入事件循环，然后立即返回，不会等待该任务执行完成。
-            #
-            #     潜在问题：
-            #         如果这个后台任务在执行过程中抛出了异常，而没有任何代码去处理这个异常（即没有 await 这个 Task 对象），那么这个异常会被称为 “未被观察到的异常”（Unobserved Exception）
-            #
-            #     在 Python 中，未被观察到的异常会在事件循环的下一个周期被打印到控制台，但不会中断主程序。这可能导致：
-            #         - 问题被忽略：你可能不知道摘要生成失败了。
-            #         - 资源泄漏：如果任务持有某些资源（如数据库连接），在异常退出时可能无法被正确释放。
-            #
-            #     IDE（如 PyCharm、VS Code 配合 Pylance）能够识别这种模式，并提示开发者 “协程操作未被 await”，以提醒潜在的未处理异常风险。
-            #     """
-            #     # 使用 asyncio.create_task 使其异步执行，不阻塞当前流程。
-            #     task = asyncio.create_task(update_or_create_summary(data["session_id"]))
-            #     summary_tasks.add(task)
-            #
-            #     # 为了防止任务完成后内存泄漏，可以添加一个回调将其从集合中移除
-            #     def task_done_callback(t: asyncio.Task):
-            #         summary_tasks.discard(t)
-            #         # 在这里可以处理任务的结果或异常
-            #         try:
-            #             t.result()  # 如果任务抛出异常，这里会重新抛出
-            #         except Exception as summary_e:
-            #             print(f"后台摘要任务失败: {summary_e}")
-            #
-            #     task.add_done_callback(task_done_callback)
-
-            await db.commit()
-            # 检查是否需要触发摘要
+            # 4. 检查是否需要触发摘要
             await trigger_summary_if_needed(data["session_id"])
         except Exception as e:
             # 内部异常立即抛出，让外层 future.result() 捕获
