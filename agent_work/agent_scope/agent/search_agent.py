@@ -242,7 +242,7 @@ def create_pre_acting_hook(max_tool_calls: int = MAX_TOOL_CALLS_PER_DIALOG):
         cur_tool_name = kwargs.get("tool_call", {}).get("name")
         if cur_tool_name == "generate_response":  # agentscope框架中的结束工具方法
             # 从智能体实例缓存中获取当前正在处理的对话id【对应一次对话交互】
-            user_msg_list = [msg for msg in agent.memory.content if msg.role == "user" and msg.invocation_id]  # TODO 在添加重写助手后，检索助手接收到的是重写后的问题，并非user信息。带改造，兼容重写助手
+            user_msg_list = [msg for msg in agent.memory.content if msg.role == "user" and msg.invocation_id]
             cur_user_msg = user_msg_list[-1]  # 取最近的用户消息作为当前用户消息
             input_param = kwargs.get("tool_call", {}).get("input", {})
             if not input_param or input_param.get("response") in (None, ""):

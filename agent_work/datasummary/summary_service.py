@@ -12,8 +12,6 @@ from agent_work.util.dashscope_response_parser import parse_model_response
 summary_model = DashScopeChatModel(
     model_name="deepseek-v3",
     api_key="sk-f61034a0afd64ffdab4be83a063b20e3",
-    # api_key=os.getenv("DASHSCOPE_API_KEY"),
-    # temperature=0.1  # 降低随机性，保证运维回答准确性
     generate_kwargs={
         "temperature": 0.1,
         "top_p": 0.8,
@@ -166,44 +164,6 @@ async def generate_incremental_summary(session_id: str) -> Tuple[str, int] or No
     except Exception as e:
         print(f"【摘要服务】生成摘要失败（会话 {session_id}）：{str(e)}")
         raise
-
-
-# async def update_or_create_summary(session_id: str):
-#     """更新或创建会话摘要（含增量逻辑）"""
-#     try:
-#         new_summary, latest_msg_timestamp = await generate_incremental_summary(session_id)
-#     except Exception as e:
-#         print(f"更新摘要失败：{str(e)}")
-#         return
-#
-#     async for db in get_db():
-#         # 1. 查询当前消息总数
-#         msg_count_result = await db.execute(
-#             select(func.count(Message.id)).filter_by(session_id=session_id)
-#         )
-#         total_messages = msg_count_result.scalar_one()
-#
-#         # 2. 更新或创建摘要记录
-#         summary_result = await db.execute(select(MessageSummary).filter_by(session_id=session_id))
-#         summary_record = summary_result.scalars().first()
-#
-#         if summary_record:
-#             summary_record.latest_summary = new_summary
-#             if latest_msg_timestamp:  # 当没有新消息时，此处为None
-#                 summary_record.summary_time = latest_msg_timestamp
-#             summary_record.total_messages = total_messages
-#         else:
-#             summary_record = MessageSummary(
-#                 session_id=session_id,
-#                 latest_summary=new_summary,
-#                 total_messages=total_messages,
-#                 # 如果是首次摘要，summary_time 设为最新消息的时间戳
-#                 summary_time=latest_msg_timestamp or datetime.datetime.now(datetime.timezone.utc)
-#             )
-#             db.add(summary_record)
-#
-#         await db.commit()
-#         print(f"会话 {session_id} 摘要更新成功（当前消息数：{total_messages}）")
 
 
 async def update_or_create_summary(session_id: str):

@@ -52,7 +52,7 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
         logger.info(f"【会话 {session_id}】发送：{question}")
         # 2. 获取会话历史上下文
         # 获取相应会话历史上下文
-        history_context = await get_session_history_context(session_id)
+        history_context, summary = await get_session_history_context(session_id)
         # 整合用户消息与历史上下文
         user_msg = Msg(name="user", content=create_input_text_for_rewrite(current_question=question, history_context=history_context), role="user", invocation_id=conversation_id)
         # 3. 重写问题
@@ -69,9 +69,14 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
             content=rewriter_reply.content
         )
         logger.info(f"【会话 {session_id}】的重写助手返回数据：{rewriter_reply.content}")
+        # 依据重写问题构造新的用户信息，用以给到检索助手智能体处理
+        user_rewrite_msg = Msg(name="user", content=rewriter_reply.content, role="user", invocation_id=conversation_id)
         # 4. 将重写后的问题存入实例专属内存
-        await retriever.memory.add(rewriter_reply)
+        await retriever.memory.add(user_rewrite_msg)
+        # 直接将重写助手回复给到运维专家，用以告知运维专家当前消息是重写后的问题
         await expert.memory.add(rewriter_reply)
+        # 构造历史对话摘要信息，帮助运维专家更好地回答问题
+        await expert.memory.add(Msg(name="历史对话摘要", content=summary, role="system", invocation_id=conversation_id))
         # 5. 智能体协作处理
         retriever_reply = await retriever.reply()
         # 发送检索助手消息
@@ -118,7 +123,7 @@ class QueryResponse(BaseModel):
 
 
 # 全局实例池（启动时初始化）
-agent_pool = AgentPool(min_size=2, max_size=4)
+agent_pool = AgentPool(min_size=20, max_size=25)
 
 
 @asynccontextmanager

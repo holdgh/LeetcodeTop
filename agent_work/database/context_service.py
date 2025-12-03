@@ -10,7 +10,7 @@ RECENT_CONVERSATIONS_COUNT = 3  # 取最近3次对话的完整消息
 CONTEXT_MAX_LENGTH = 2000  # 整合后的上下文最大长度（字符数）
 
 
-async def get_session_history_context(session_id: str) -> str:
+async def get_session_history_context(session_id: str) -> Tuple[str, str]:
     """
     获取会话的历史上下文：全局摘要 + 最近3次对话消息
     返回：标准化的上下文文本（长度可控）
@@ -47,7 +47,9 @@ async def get_session_history_context(session_id: str) -> str:
         else:
             full_context = recent_part[:CONTEXT_MAX_LENGTH - 20] + "..."
 
-    return full_context
+    if not summary:
+        summary = '当前暂无历史对话摘要。'
+    return full_context, summary
 
 
 async def get_session_summary(session_id: str) -> Optional[str]:
