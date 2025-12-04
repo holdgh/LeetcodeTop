@@ -197,7 +197,7 @@ def create_maintenance_agents() -> List[ReActAgent]:
     # 模型配置（使用通义千问，支持本地模型替换）
     model = DashScopeChatModel(
         model_name="qwen-max",
-        api_key="sk-f61034a0afd64ffdab4be83a063b20e3",
+        api_key="sk-6b8afa231399490bb7a56c025a3bc633",
         # api_key=os.getenv("DASHSCOPE_API_KEY"),
         # temperature=0.1  # 降低随机性，保证运维回答准确性
         generate_kwargs={

@@ -1,3 +1,4 @@
+import asyncio
 import os
 from typing import List
 from agentscope.agent import ReActAgent
@@ -269,7 +270,7 @@ def create_pre_acting_hook(max_tool_calls: int = MAX_TOOL_CALLS_PER_DIALOG):
     return pre_acting_hook
 
 
-def create_retriever_agent(chat_model: ChatModelBase) -> ReActAgent:
+def create_retriever_agent(chat_model: ChatModelBase, model_lock: asyncio.Lock) -> ReActAgent:
     # 初始化工具箱实例
     toolkit = Toolkit()
     # 使用 register_tool_function 方法注册工具

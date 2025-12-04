@@ -11,7 +11,7 @@ from agent_work.util.dashscope_response_parser import parse_model_response
 # 大模型实例
 summary_model = DashScopeChatModel(
     model_name="deepseek-v3",
-    api_key="sk-f61034a0afd64ffdab4be83a063b20e3",
+    api_key="sk-6b8afa231399490bb7a56c025a3bc633",
     generate_kwargs={
         "temperature": 0.1,
         "top_p": 0.8,

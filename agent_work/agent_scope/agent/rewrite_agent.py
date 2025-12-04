@@ -1,3 +1,5 @@
+import asyncio
+
 from agentscope.agent import ReActAgent
 from agentscope.formatter import DashScopeMultiAgentFormatter
 from agentscope.model import ChatModelBase
@@ -50,7 +52,7 @@ def create_input_text_for_rewrite(current_question: str, history_context: str):
 """
 
 
-def create_rewrite_agent(chat_model: ChatModelBase) -> ReActAgent:
+def create_rewrite_agent(chat_model: ChatModelBase, model_lock: asyncio.Lock) -> ReActAgent:
     rewrite = ReActAgent(
         name="重写助手",
         sys_prompt=REWRITE_SYS_PROMPT,

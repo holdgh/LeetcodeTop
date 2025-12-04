@@ -10,9 +10,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from agent_work.agent_scope.agent.rewrite_agent import create_input_text_for_rewrite
+from agent_work.agent_scope.agent.expert_agent import create_expert_agent
+from agent_work.agent_scope.agent.rewrite_agent import create_input_text_for_rewrite, create_rewrite_agent
 from agent_work.agent_scope.agent_pool.agent_pool import AgentPool, SESSION_GOING_CACHE
-from agent_work.agent_scope.agent.search_agent import TOOL_CALL_CACHE
+from agent_work.agent_scope.agent.search_agent import TOOL_CALL_CACHE, create_retriever_agent
+from agent_work.agent_scope.agent_pool.base_agent_pool import GenericAgentPool
 from agent_work.database.context_service import get_session_history_context
 from agent_work.datatransfer.async_memory_writer import send_message_to_queue_by_async
 
@@ -31,16 +33,96 @@ class SessionManager:
         return f"session_{uuid.uuid4().hex[:8]}"
 
 
-async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, question: str, conversation_id: str,
+# async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, question: str, conversation_id: str,
+#                                        user_id: str = "default_user"):
+#     """单个用户多轮对话（复用Agent实例）"""
+#     logger.info(f"\n【会话 {session_id}】用户开始咨询")
+#     try:
+#         # 1. 获取绑定该会话的Agent实例对
+#         agent_pair = await agent_pool.get_agent_pair(session_id)
+#         rewriter = agent_pair.rewriter
+#         retriever = agent_pair.retriever
+#         expert = agent_pair.expert
+#         # 发送用户消息
+#         await send_message_to_queue_by_async(
+#             user_id=user_id,
+#             session_id=session_id,
+#             conversation_id=conversation_id,
+#             role="user",
+#             content=question
+#         )
+#         logger.info(f"【会话 {session_id}】发送：{question}")
+#         # 2. 获取会话历史上下文
+#         # 获取相应会话历史上下文
+#         history_context, summary = await get_session_history_context(session_id)
+#         # 整合用户消息与历史上下文
+#         user_msg = Msg(name="user", content=create_input_text_for_rewrite(current_question=question,
+#                                                                           history_context=history_context), role="user",
+#                        invocation_id=conversation_id)
+#         # 3. 重写问题
+#         # 将重写信息给到重写助手
+#         await rewriter.memory.add(user_msg)
+#         # 获取重写助手结果
+#         rewriter_reply = await rewriter.reply()
+#         # 发送重写助手消息
+#         await send_message_to_queue_by_async(
+#             user_id=user_id,
+#             session_id=session_id,
+#             conversation_id=conversation_id,
+#             role="rewriter",
+#             content=rewriter_reply.content
+#         )
+#         logger.info(f"【会话 {session_id}】的重写助手返回数据：{rewriter_reply.content}")
+#         # 依据重写问题构造新的用户信息，用以给到检索助手智能体处理
+#         user_rewrite_msg = Msg(name="user", content=rewriter_reply.content, role="user", invocation_id=conversation_id)
+#         # 4. 将重写后的问题存入实例专属内存
+#         await retriever.memory.add(user_rewrite_msg)
+#         # 直接将重写助手回复给到运维专家，用以告知运维专家当前消息是重写后的问题
+#         await expert.memory.add(rewriter_reply)
+#         # 构造历史对话摘要信息，帮助运维专家更好地回答问题
+#         await expert.memory.add(Msg(name="历史对话摘要", content=summary, role="system", invocation_id=conversation_id))
+#         # 5. 智能体协作处理
+#         retriever_reply = await retriever.reply()
+#         # 发送检索助手消息
+#         await send_message_to_queue_by_async(
+#             user_id=user_id,
+#             session_id=session_id,
+#             conversation_id=conversation_id,
+#             role="retriever",
+#             content=str(retriever_reply.content)  # 转换为字符串存储
+#         )
+#         logger.info(f"【会话 {session_id}】的检索助手返回数据：{retriever_reply.content}")
+#         await expert.memory.add(retriever_reply)
+#         expert_reply = await expert.reply()
+#         # 发送运维专家消息
+#         await send_message_to_queue_by_async(
+#             user_id=user_id,
+#             session_id=session_id,
+#             conversation_id=conversation_id,
+#             role="expert",
+#             content=expert_reply.content
+#         )
+#         # -------------------------------------------------------------------------------------
+#         # TODO 在得到运维专家回复后，清除智能体实例中的缓存数据【历史对话及工作调用数据】，并将当前会话与当前智能体实例接触绑定，后续新对话进来重新从资源池获取新的智能体实例
+#         await agent_pair.unbind_session()
+#         # 6. 输出结果
+#         logger.info(f"【会话 {session_id}】收到回复：{expert_reply.content}\n")
+#         return expert_reply.content
+#     except Exception as e:
+#         traceback.print_exc()
+#         logger.error(f"【会话 {session_id}】处理异常：{str(e)}")
+
+
+async def user_dialog_for_one_question(session_id: str, question: str, conversation_id: str,
                                        user_id: str = "default_user"):
     """单个用户多轮对话（复用Agent实例）"""
     logger.info(f"\n【会话 {session_id}】用户开始咨询")
     try:
         # 1. 获取绑定该会话的Agent实例对
-        agent_pair = await agent_pool.get_agent_pair(session_id)
-        rewriter = agent_pair.rewriter
-        retriever = agent_pair.retriever
-        expert = agent_pair.expert
+        # agent_pair = await agent_pool.get_agent_pair(session_id)
+        # rewriter = agent_pair.rewriter
+        # retriever = agent_pair.retriever
+        # expert = agent_pair.expert
         # 发送用户消息
         await send_message_to_queue_by_async(
             user_id=user_id,
@@ -54,12 +136,16 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
         # 获取相应会话历史上下文
         history_context, summary = await get_session_history_context(session_id)
         # 整合用户消息与历史上下文
-        user_msg = Msg(name="user", content=create_input_text_for_rewrite(current_question=question, history_context=history_context), role="user", invocation_id=conversation_id)
+        user_msg = Msg(name="user", content=create_input_text_for_rewrite(current_question=question,
+                                                                          history_context=history_context), role="user",
+                       invocation_id=conversation_id)
+        rewriter, _ = await rewrite_pool.get_agent(session_id)
         # 3. 重写问题
         # 将重写信息给到重写助手
         await rewriter.memory.add(user_msg)
         # 获取重写助手结果
         rewriter_reply = await rewriter.reply()
+        await rewrite_pool.release_agent(rewriter, session_id)
         # 发送重写助手消息
         await send_message_to_queue_by_async(
             user_id=user_id,
@@ -72,13 +158,11 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
         # 依据重写问题构造新的用户信息，用以给到检索助手智能体处理
         user_rewrite_msg = Msg(name="user", content=rewriter_reply.content, role="user", invocation_id=conversation_id)
         # 4. 将重写后的问题存入实例专属内存
+        retriever, _ = await retriever_pool.get_agent(session_id)
         await retriever.memory.add(user_rewrite_msg)
-        # 直接将重写助手回复给到运维专家，用以告知运维专家当前消息是重写后的问题
-        await expert.memory.add(rewriter_reply)
-        # 构造历史对话摘要信息，帮助运维专家更好地回答问题
-        await expert.memory.add(Msg(name="历史对话摘要", content=summary, role="system", invocation_id=conversation_id))
         # 5. 智能体协作处理
         retriever_reply = await retriever.reply()
+        await retriever_pool.release_agent(retriever, session_id)
         # 发送检索助手消息
         await send_message_to_queue_by_async(
             user_id=user_id,
@@ -88,8 +172,14 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
             content=str(retriever_reply.content)  # 转换为字符串存储
         )
         logger.info(f"【会话 {session_id}】的检索助手返回数据：{retriever_reply.content}")
+        # 直接将重写助手回复给到运维专家，用以告知运维专家当前消息是重写后的问题
+        expert, _ = await expert_pool.get_agent(session_id)
+        await expert.memory.add(rewriter_reply)
+        # 构造历史对话摘要信息，帮助运维专家更好地回答问题
+        await expert.memory.add(Msg(name="历史对话摘要", content=summary, role="system", invocation_id=conversation_id))
         await expert.memory.add(retriever_reply)
         expert_reply = await expert.reply()
+        await expert_pool.release_agent(expert, session_id)
         # 发送运维专家消息
         await send_message_to_queue_by_async(
             user_id=user_id,
@@ -100,7 +190,7 @@ async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, q
         )
         # -------------------------------------------------------------------------------------
         # TODO 在得到运维专家回复后，清除智能体实例中的缓存数据【历史对话及工作调用数据】，并将当前会话与当前智能体实例接触绑定，后续新对话进来重新从资源池获取新的智能体实例
-        await agent_pair.unbind_session()
+        # await agent_pair.unbind_session()
         # 6. 输出结果
         logger.info(f"【会话 {session_id}】收到回复：{expert_reply.content}\n")
         return expert_reply.content
@@ -125,6 +215,48 @@ class QueryResponse(BaseModel):
 # 全局实例池（启动时初始化）
 agent_pool = AgentPool(min_size=20, max_size=25)
 
+"""
+    初始化所有智能体池，每个池绑定专属模型池：
+    1. 重写助手：deepseek-v3，3个模型实例
+    2. 检索助手：deepseek-v3，5个模型实例（检索耗时更长，需要更多并发）
+    3. 运维专家：gpt-4，2个模型实例（高端模型，控制并发）
+"""
+# 1. 重写助手池（绑定专属模型池）
+rewrite_pool = GenericAgentPool(
+    agent_creator=create_rewrite_agent,
+    agent_type_name="重写助手",
+    llm_model_name="deepseek-v3",
+    llm_api_key="sk-6b8afa231399490bb7a56c025a3bc633",
+    llm_model_count=3,
+    llm_generate_kwargs={"temperature": 0.1},
+    min_size=5,
+    max_size=30
+)
+
+# 2. 检索助手池（绑定专属模型池，更多模型实例）
+retriever_pool = GenericAgentPool(
+    agent_creator=create_retriever_agent,
+    agent_type_name="检索助手",
+    llm_model_name="deepseek-v3",
+    llm_api_key="sk-6b8afa231399490bb7a56c025a3bc633",
+    llm_model_count=5,  # 检索耗时更长，增加模型实例数
+    llm_generate_kwargs={"temperature": 0.0, "max_tokens": 500},
+    min_size=5,
+    max_size=30
+)
+
+# 3. 运维专家池（绑定专属高端模型池）
+expert_pool = GenericAgentPool(
+    agent_creator=create_expert_agent,
+    agent_type_name="运维专家",
+    llm_model_name="gpt-4",  # 不同模型
+    llm_api_key="sk-xxxxxxxxx",  # 不同API Key
+    llm_model_count=2,  # 控制高端模型并发数
+    llm_generate_kwargs={"temperature": 0.2, "max_tokens": 1000},
+    min_size=2,
+    max_size=15
+)
+
 
 @asynccontextmanager
 async def init_setting(app: FastAPI):
@@ -141,16 +273,30 @@ async def init_setting(app: FastAPI):
         - 后台任务的优雅关闭：保存 asyncio.create_task 返回的任务对象，在 yield 之后通过 cancel() 取消任务并等待结束，避免服务退出时残留未完成的任务。
     """
     """服务启动时初始化实例池和后台任务"""
-    await agent_pool.init_pool()
+    # await agent_pool.init_pool()
+    # 初始化所有池
+    await rewrite_pool.init_pool()
+    await retriever_pool.init_pool()
+    await expert_pool.init_pool()
     # 启动后台任务（用变量保存任务，方便后续关闭）
-    clean_task = asyncio.create_task(agent_pool.clean_expired_pairs())
+    # clean_task = asyncio.create_task(agent_pool.clean_expired_pairs())
+    # 启动后台清理任务
+    rewrite_pool_clean_task = asyncio.create_task(rewrite_pool.start_cleanup_task())
+    retriever_pool_clean_task = asyncio.create_task(retriever_pool.start_cleanup_task())
+    expert_pool_clean_task = asyncio.create_task(expert_pool.start_cleanup_task())
     logger.info("服务启动完成，等待请求...")
 
     yield  # 关键：分割启动和关闭逻辑，程序会在此时开始处理请求
 
     # 关闭逻辑（服务退出时执行，可选）
-    clean_task.cancel()  # 取消后台任务
-    await clean_task  # 等待任务结束
+    # clean_task.cancel()  # 取消后台任务
+    rewrite_pool_clean_task.cancel()
+    retriever_pool_clean_task.cancel()
+    expert_pool_clean_task.cancel()
+    # await clean_task  # 等待任务结束
+    await rewrite_pool_clean_task
+    await retriever_pool_clean_task
+    await expert_pool_clean_task
     logger.info("服务已关闭，资源已释放")
 
 

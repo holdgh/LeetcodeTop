@@ -18,7 +18,7 @@ def create_agent(name: str, background: str) -> ReActAgent:
         sys_prompt=f"你叫{name}。{background}在对话中请基于你的背景进行回复，每次发言尽量简洁。",
         model=DashScopeChatModel(
             model_name="qwen-max",  # 以通义千问模型为例，你可替换为其他支持的模型
-            api_key="sk-f61034a0afd64ffdab4be83a063b20e3"
+            api_key="sk-6b8afa231399490bb7a56c025a3bc633"
             # api_key=os.getenv("DASHSCOPE_API_KEY"),  # 请从环境变量读取你的API Key
         ),
         # 多智能体格式化器，用于处理多智能体对话的提示词构建
@@ -53,5 +53,5 @@ async def main():
 
 # 运行程序
 if __name__ == "__main__":
-    # os.environ.setdefault("DASHSCOPE_API_KEY", 'sk-f61034a0afd64ffdab4be83a063b20e3')
+    # os.environ.setdefault("DASHSCOPE_API_KEY", 'sk-6b8afa231399490bb7a56c025a3bc633')
     asyncio.run(main())
