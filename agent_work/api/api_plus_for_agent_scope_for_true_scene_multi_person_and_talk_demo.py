@@ -1,5 +1,4 @@
 import threading
-from typing import Dict
 import traceback
 import uuid
 from contextlib import asynccontextmanager
@@ -11,9 +10,10 @@ import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from cachetools import TTLCache
 
 from agent_work.agent_scope.agent.rewrite_agent import create_input_text_for_rewrite
-from agent_work.agent_scope.agent_pool.agent_pool_plus_plus import SESSION_GOING_CACHE, agent_pool
+from agent_work.agent_scope.agent_pool.agent_pool_plus import SESSION_GOING_CACHE, agent_pool
 from agent_work.agent_scope.agent.search_agent import TOOL_CALL_CACHE
 from agent_work.database.context_service import get_session_history_context
 from agent_work.datatransfer.async_memory_writer import send_message_to_queue_by_async
@@ -26,64 +26,69 @@ SESSION_CACHE_LOCK = asyncio.Lock()
 
 
 # ===================== 新增：全局会话控制器（单例） =====================
+
+
 class GlobalSessionController:
     """
-    全局会话控制器：统一管控所有会话的并发状态
-    特性：
-    1. 单例模式，所有智能体池共享同一状态
-    2. 原子化的锁定/解锁操作
-    3. 异常兜底，防止会话死锁
+    全局会话控制器：基于TTLCache实现（极简+稳定）
+    核心特性：
+    1. 单例模式
+    2. 原子化锁定/解锁（基于TTLCache的线程/协程安全操作）
+    3. 内置自动过期+最大容量，无需手动清理
+    4. 无异步任务/循环，彻底避免卡住问题
     """
-    _instance = None
-    # 同步锁：保护单例创建（__new__是同步方法，必须用threading.Lock）
-    _instance_lock = threading.Lock()
-    # 异步锁：保护会话状态修改（异步操作，用asyncio.Lock）
-    _session_lock = None
-    # 会话状态存储
-    _session_status = None
+    _instance: Optional["GlobalSessionController"] = None
+    _instance_lock = threading.Lock()  # 保护单例创建（线程安全）
+    # 核心：用TTLCache存储会话锁定状态
+    # key=session_id，value=True（仅标记“已锁定”，无需存储其他状态）
+    # maxsize：最大并发会话数；ttl：会话锁定自动过期时间（5分钟）
+    _session_cache: Optional[TTLCache] = None
 
     def __new__(cls):
         if cls._instance is None:
-            # 第二层检查：加锁，保证线程安全
             with cls._instance_lock:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
-                    # 初始化会话状态和异步锁（仅在第一次创建实例时执行）
-                    cls._instance._session_status: Dict[str, bool] = {}
-                    cls._instance._session_lock = asyncio.Lock()
+                    # 初始化TTLCache（核心配置）
+                    cls._instance._session_cache = TTLCache(
+                        maxsize=1000,  # 最大并发会话数限制
+                        ttl=300,  # 会话锁定5分钟自动过期（兜底）
+                    )
         return cls._instance
 
     async def lock_session(self, session_id: str) -> bool:
         """
-        锁定会话（全流程开始前调用）
-        :param session_id: 会话ID
-        :return: True=锁定成功，False=会话已被锁定
+        锁定会话（原子操作）
+        :return: True=锁定成功，False=会话已锁定/超过最大容量
         """
-        async with self._session_lock:
-            if self._session_status.get(session_id, False):
-                return False
-            self._session_status[session_id] = True
-            logger.info(f"【全局会话控制】会话[{session_id}]已锁定")
-            return True
+        # TTLCache的操作是线程/协程安全的，无需额外加锁
+        if session_id in self._session_cache:
+            logger.warning(f"【会话控制】会话[{session_id}]已锁定，锁定失败")
+            return False
+
+        # 检查是否超过最大容量（可选：TTLCache会自动淘汰，但提前判断更友好）
+        if len(self._session_cache) >= self._session_cache.maxsize:
+            logger.warning(f"【会话控制】会话[{session_id}]锁定失败：超过最大并发数{self._session_cache.maxsize}")
+            return False
+
+        # 锁定会话（存储True，标记已锁定）
+        self._session_cache[session_id] = True
+        logger.info(f"【会话控制】会话[{session_id}]锁定成功，当前会话数：{len(self._session_cache)}")
+        return True
 
     async def unlock_session(self, session_id: str) -> None:
-        """
-        解锁会话（全流程结束后调用）
-        :param session_id: 会话ID
-        """
-        async with self._session_lock:
-            self._session_status[session_id] = False
-            logger.info(f"【全局会话控制】会话[{session_id}]已解锁")
+        """解锁会话（原子操作）"""
+        if session_id in self._session_cache:
+            del self._session_cache[session_id]
+            logger.info(f"【会话控制】会话[{session_id}]解锁成功，当前会话数：{len(self._session_cache)}")
+        else:
+            logger.warning(f"【会话控制】会话[{session_id}]未锁定，无需解锁")
 
     async def force_unlock(self, session_id: str) -> None:
-        """
-        强制解锁会话（异常兜底用）
-        :param session_id: 会话ID
-        """
-        async with self._session_lock:
-            if self._session_status[session_id]:
-                self._session_status[session_id] = False
-                logger.warning(f"【全局会话控制】会话[{session_id}]已强制解锁")
+        """强制解锁（异常兜底）"""
+        if session_id in self._session_cache:
+            del self._session_cache[session_id]
+            logger.warning(f"【会话控制】会话[{session_id}]已强制解锁")
 
 
 # 会话管理--会话id生成
@@ -290,7 +295,7 @@ async def handle_query(request: QueryRequest):
     if not not_lock:  # 锁定失败，说明会话处于进行中状态
         return QueryResponse(
                         session_id=session_id,
-                        reply="当前对话尚未结束，请待当前对话完成后进行！",
+                        reply="当前对话尚未结束或系统会话容量已达上限，请稍后重试！",
                         timestamp=datetime.now()
         )
     # 每次对话生成对话id
