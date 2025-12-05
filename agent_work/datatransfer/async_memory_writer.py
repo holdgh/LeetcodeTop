@@ -141,7 +141,7 @@ async def send_message_to_queue_by_async(
             "role": role,
             "content": content,
             # 核心：生产者生成的带时区的时间戳
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()  # TODO 需要将该时间字段在真正的发送者侧设置【发送者可以先创建各种消息，待其业务逻辑完整结束后，发送消息即可。若发送者逻辑异常，可以丢弃因此产生的脏数据。如果业务上允许丢弃这种脏数据，或者将其存储到其他地方】，以使得消息的完整发送与存储
         }
 
         await channel.default_exchange.publish(
