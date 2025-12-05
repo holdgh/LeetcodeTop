@@ -1,5 +1,3 @@
-import threading
-from typing import Dict
 import traceback
 import uuid
 from contextlib import asynccontextmanager
@@ -13,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from agent_work.agent_scope.agent.rewrite_agent import create_input_text_for_rewrite
-from agent_work.agent_scope.agent_pool.agent_pool_plus_plus import SESSION_GOING_CACHE, agent_pool
+from agent_work.agent_scope.agent_pool.agent_pool import AgentPool, SESSION_GOING_CACHE
 from agent_work.agent_scope.agent.search_agent import TOOL_CALL_CACHE
 from agent_work.database.context_service import get_session_history_context
 from agent_work.datatransfer.async_memory_writer import send_message_to_queue_by_async
@@ -25,67 +23,6 @@ logger = logging.getLogger(__name__)
 SESSION_CACHE_LOCK = asyncio.Lock()
 
 
-# ===================== 新增：全局会话控制器（单例） =====================
-class GlobalSessionController:
-    """
-    全局会话控制器：统一管控所有会话的并发状态
-    特性：
-    1. 单例模式，所有智能体池共享同一状态
-    2. 原子化的锁定/解锁操作
-    3. 异常兜底，防止会话死锁
-    """
-    _instance = None
-    # 同步锁：保护单例创建（__new__是同步方法，必须用threading.Lock）
-    _instance_lock = threading.Lock()
-    # 异步锁：保护会话状态修改（异步操作，用asyncio.Lock）
-    _session_lock = None
-    # 会话状态存储
-    _session_status = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            # 第二层检查：加锁，保证线程安全
-            with cls._instance_lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-                    # 初始化会话状态和异步锁（仅在第一次创建实例时执行）
-                    cls._instance._session_status: Dict[str, bool] = {}
-                    cls._instance._session_lock = asyncio.Lock()
-        return cls._instance
-
-    async def lock_session(self, session_id: str) -> bool:
-        """
-        锁定会话（全流程开始前调用）
-        :param session_id: 会话ID
-        :return: True=锁定成功，False=会话已被锁定
-        """
-        async with self._session_lock:
-            if self._session_status.get(session_id, False):
-                return False
-            self._session_status[session_id] = True
-            logger.info(f"【全局会话控制】会话[{session_id}]已锁定")
-            return True
-
-    async def unlock_session(self, session_id: str) -> None:
-        """
-        解锁会话（全流程结束后调用）
-        :param session_id: 会话ID
-        """
-        async with self._session_lock:
-            self._session_status[session_id] = False
-            logger.info(f"【全局会话控制】会话[{session_id}]已解锁")
-
-    async def force_unlock(self, session_id: str) -> None:
-        """
-        强制解锁会话（异常兜底用）
-        :param session_id: 会话ID
-        """
-        async with self._session_lock:
-            if self._session_status[session_id]:
-                self._session_status[session_id] = False
-                logger.warning(f"【全局会话控制】会话[{session_id}]已强制解锁")
-
-
 # 会话管理--会话id生成
 class SessionManager:
     @staticmethod
@@ -94,11 +31,10 @@ class SessionManager:
         return f"session_{uuid.uuid4().hex[:8]}"
 
 
-async def user_dialog_for_one_question(session_id: str, question: str, conversation_id: str,
+async def user_dialog_for_one_question(session_id: str, agent_pool: AgentPool, question: str, conversation_id: str,
                                        user_id: str = "default_user"):
     """单个用户多轮对话（复用Agent实例）"""
     logger.info(f"\n【会话 {session_id}】用户开始咨询")
-    agent_pair = None
     try:
         # 1. 获取绑定该会话的Agent实例对
         agent_pair = await agent_pool.get_agent_pair(session_id)
@@ -164,33 +100,13 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         )
         # -------------------------------------------------------------------------------------
         # TODO 在得到运维专家回复后，清除智能体实例中的缓存数据【历史对话及工作调用数据】，并将当前会话与当前智能体实例接触绑定，后续新对话进来重新从资源池获取新的智能体实例
-        # await agent_pair.unbind_session()  # 将其放置在finally中，更稳定
+        await agent_pair.unbind_session()
         # 6. 输出结果
         logger.info(f"【会话 {session_id}】收到回复：{expert_reply.content}\n")
         return expert_reply.content
     except Exception as e:
         traceback.print_exc()
         logger.error(f"【会话 {session_id}】处理异常：{str(e)}")
-    finally:
-        # ========== 核心补偿机制：无论是否异常，都释放实例 ==========
-        if agent_pair:
-            try:
-                # 第一步：调用正常解绑逻辑
-                await agent_pair.unbind_session()
-                logger.info(f"会话 {session_id} 正常释放实例 {agent_pair.pair_id}")
-            except Exception as e:
-                # 第二步：解绑失败，强制兜底清空session_id（关键容错）
-                logger.warning(f"会话 {session_id} 正常解绑失败，执行强制释放：{str(e)}")
-                async with agent_pair.instance_lock:
-                    await agent_pair.retriever.memory.clear()
-                    await agent_pair.expert.memory.clear()
-                    await agent_pair.rewriter.memory.clear()
-                    agent_pair.session_id = None
-
-                await agent_pool.notify_idle()
-                logger.info(f"会话 {session_id} 强制释放实例 {agent_pair.pair_id} 成功")
-        # 解锁当前会话
-        await session_controller.unlock_session(session_id)
 
 
 # -------------------------- 5. 服务端 API 与业务逻辑 --------------------------
@@ -204,6 +120,10 @@ class QueryResponse(BaseModel):
     session_id: str  # 会话ID（用于多轮对话）
     reply: str  # 运维专家回复
     timestamp: datetime  # 响应时间
+
+
+# 全局实例池（启动时初始化）
+agent_pool = AgentPool(min_size=2, max_size=4)
 
 
 @asynccontextmanager
@@ -235,8 +155,6 @@ async def init_setting(app: FastAPI):
 
 
 # -------------------------- 全局配置 --------------------------
-# 初始化全局会话控制器
-session_controller = GlobalSessionController()
 app = FastAPI(title="工业设备运维Agent服务端", version="1.0", lifespan=init_setting)
 
 # CORS配置（允许前端跨域）
@@ -276,28 +194,20 @@ async def handle_query(request: QueryRequest):
     #     )
     # 新代码如下:
     # 原子性判断并标记会话状态
-    # async with SESSION_CACHE_LOCK:
-    #     is_going = SESSION_GOING_CACHE.get(session_id, 0)
-    #     if is_going == 1:
-    #         return QueryResponse(
-    #             session_id=session_id,
-    #             reply="当前对话尚未结束，请待当前对话完成后进行！",
-    #             timestamp=datetime.now()
-    #         )
-    #     SESSION_GOING_CACHE[session_id] = 1  # 标记为进行中
-    # 采用全局会话缓存控制，易维护
-    not_lock = await session_controller.lock_session(session_id)
-    if not not_lock:  # 锁定失败，说明会话处于进行中状态
-        return QueryResponse(
-                        session_id=session_id,
-                        reply="当前对话尚未结束，请待当前对话完成后进行！",
-                        timestamp=datetime.now()
-        )
+    async with SESSION_CACHE_LOCK:
+        is_going = SESSION_GOING_CACHE.get(session_id, 0)
+        if is_going == 1:
+            return QueryResponse(
+                session_id=session_id,
+                reply="当前对话尚未结束，请待当前对话完成后进行！",
+                timestamp=datetime.now()
+            )
+        SESSION_GOING_CACHE[session_id] = 1  # 标记为进行中
     # 每次对话生成对话id
     conversation_id = f"conversation_{uuid.uuid4().hex[:8]}"
     try:
         # 获取对话结果
-        result = await user_dialog_for_one_question(session_id, request.question, conversation_id, user_id)
+        result = await user_dialog_for_one_question(session_id, agent_pool, request.question, conversation_id, user_id)
         # 返回结果
         return QueryResponse(
             session_id=session_id,
@@ -315,14 +225,12 @@ async def handle_query(request: QueryRequest):
         if conversation_id in TOOL_CALL_CACHE:
             del TOOL_CALL_CACHE[conversation_id]
         # 对话结束，清理缓存，相当于将当前会话置为空闲状态
-        # if session_id in SESSION_GOING_CACHE:
-        #     del SESSION_GOING_CACHE[session_id]
-        # 采用全局会话缓存控制，易维护
-        await session_controller.force_unlock(session_id)
+        if session_id in SESSION_GOING_CACHE:
+            del SESSION_GOING_CACHE[session_id]
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app='api_plus_for_agent_scope_for_true_scene_multi_person_and_talk_demo:app', port=8090, reload=False,
+    uvicorn.run(app='api_plus_backup_for_agent_pair:app', port=8090, reload=False,
                 workers=1)

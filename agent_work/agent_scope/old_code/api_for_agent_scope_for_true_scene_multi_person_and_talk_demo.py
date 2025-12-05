@@ -494,7 +494,7 @@ class AgentPair:
         self.bind_time: Optional[datetime] = None  # 绑定会话的时间
         self.idle_timeout = timedelta(minutes=10)  # 空闲超时时间（10分钟无操作则释放）
         self.model = DashScopeChatModel(
-            model_name="deepseek-v3",
+            model_name="qwen3-max",
             api_key="sk-6b8afa231399490bb7a56c025a3bc633",
             # api_key=os.getenv("DASHSCOPE_API_KEY"),
             # temperature=0.1  # 降低随机性，保证运维回答准确性

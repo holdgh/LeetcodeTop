@@ -34,7 +34,7 @@ class AgentPair:
         self.session_id: Optional[str] = None  # 绑定的会话ID（空闲时为None）
         self.message_id: Optional[str] = None  # 绑定的对话消息ID（空闲时为None）
         self.model = DashScopeChatModel(
-            model_name="deepseek-v3",
+            model_name="qwen3-max",
             api_key="sk-6b8afa231399490bb7a56c025a3bc633",
             generate_kwargs={
                 "temperature": 0.1,

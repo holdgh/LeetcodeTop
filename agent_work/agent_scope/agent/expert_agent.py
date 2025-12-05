@@ -1,5 +1,3 @@
-import asyncio
-
 from agentscope.agent import ReActAgent
 from agentscope.model import ChatModelBase
 from agentscope.formatter import DashScopeMultiAgentFormatter
@@ -42,7 +40,7 @@ EXPERT_SYS_PROMPT = """
 """
 
 
-def create_expert_agent(chat_model: ChatModelBase, model_lock: asyncio.Lock) -> ReActAgent:
+def create_expert_agent(chat_model: ChatModelBase) -> ReActAgent:
     expert = ReActAgent(
         name="运维专家",
         sys_prompt=EXPERT_SYS_PROMPT,
