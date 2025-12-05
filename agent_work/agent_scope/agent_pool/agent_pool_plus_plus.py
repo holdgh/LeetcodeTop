@@ -40,7 +40,7 @@ class AgentPair:
                 "repetition_penalty": 1.1
             }
         )
-        self.instance_lock = asyncio.Lock()
+        self.instance_lock = asyncio.Lock()  # 仅在实例进行状态判断、会话绑定时持有该锁
         self.retriever = self._create_retriever_agent()
         self.expert = self._create_expert_agent()
         self.rewriter = self._create_rewrite_agent()
@@ -110,7 +110,7 @@ class AgentPool:
         self.min_size = min_size
         self.max_size = max_size
         self.pool: List[AgentPair] = []
-        self.lock = asyncio.Lock()
+        self.lock = asyncio.Lock()  # 仅在改变实例池时持有该锁
         self.idle_condition = asyncio.Condition(self.lock)  # 空闲通知条件变量
 
     async def init_pool(self):
