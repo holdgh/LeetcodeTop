@@ -2,7 +2,7 @@ import threading
 import traceback
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime
 import asyncio
 from typing import Optional
 from agentscope.message import Msg
@@ -17,7 +17,6 @@ from agent_work.agent_scope.agent_pool.agent_pool_plus import SESSION_GOING_CACH
 from agent_work.agent_scope.agent.search_agent import TOOL_CALL_CACHE
 from agent_work.database.context_service import get_session_history_context
 from agent_work.datatransfer.async_memory_writer import send_message_to_queue_by_async
-from agent_work.util.redis_util import redis_queue, AgentMessage
 
 # 日志配置
 logging.basicConfig(level=logging.INFO)
@@ -112,48 +111,34 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         retriever = agent_pair.retriever
         expert = agent_pair.expert
         # 发送用户消息
-        # await send_message_to_queue_by_async(
-        #     user_id=user_id,
-        #     session_id=session_id,
-        #     conversation_id=conversation_id,
-        #     role="user",
-        #     content=question
-        # )
-        # 生成用户消息并入Redis队列
-        user_msg = AgentMessage(
+        await send_message_to_queue_by_async(
+            user_id=user_id,
             session_id=session_id,
-            message_type="user",
-            content=question,
-            generate_time=datetime.now(timezone.utc).isoformat()
+            conversation_id=conversation_id,
+            role="user",
+            content=question
         )
-        await redis_queue.put_message(user_msg)
         logger.info(f"【会话 {session_id}】发送：{question}")
         # 2. 获取会话历史上下文
         # 获取相应会话历史上下文
         history_context, summary = await get_session_history_context(session_id)
         # 整合用户消息与历史上下文
-        user_msg = Msg(name="user", content=create_input_text_for_rewrite(current_question=question, history_context=history_context), role="user", invocation_id=conversation_id)
+        user_msg = Msg(name="user", content=create_input_text_for_rewrite(current_question=question,
+                                                                          history_context=history_context), role="user",
+                       invocation_id=conversation_id)
         # 3. 重写问题
         # 将重写信息给到重写助手
         await rewriter.memory.add(user_msg)
         # 获取重写助手结果
         rewriter_reply = await rewriter.reply()
         # 发送重写助手消息
-        # await send_message_to_queue_by_async(
-        #     user_id=user_id,
-        #     session_id=session_id,
-        #     conversation_id=conversation_id,
-        #     role="rewriter",
-        #     content=rewriter_reply.content
-        # )
-        # 生成重写助手消息并入Redis队列
-        rewriter_msg = AgentMessage(
+        await send_message_to_queue_by_async(
+            user_id=user_id,
             session_id=session_id,
-            message_type="rewriter",
-            content=rewriter_reply.content,
-            generate_time=datetime.now(timezone.utc).isoformat()
+            conversation_id=conversation_id,
+            role="rewriter",
+            content=rewriter_reply.content
         )
-        await redis_queue.put_message(rewriter_msg)
         logger.info(f"【会话 {session_id}】的重写助手返回数据：{rewriter_reply.content}")
         # 依据重写问题构造新的用户信息，用以给到检索助手智能体处理
         user_rewrite_msg = Msg(name="user", content=rewriter_reply.content, role="user", invocation_id=conversation_id)
@@ -166,40 +151,24 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         # 5. 智能体协作处理
         retriever_reply = await retriever.reply()
         # 发送检索助手消息
-        # await send_message_to_queue_by_async(
-        #     user_id=user_id,
-        #     session_id=session_id,
-        #     conversation_id=conversation_id,
-        #     role="retriever",
-        #     content=str(retriever_reply.content)  # 转换为字符串存储
-        # )
-        # 生成检索助手消息并入Redis队列
-        retriever_msg = AgentMessage(
+        await send_message_to_queue_by_async(
+            user_id=user_id,
             session_id=session_id,
-            message_type="retriever",
-            content=str(retriever_reply.content),
-            generate_time=datetime.now(timezone.utc).isoformat()
+            conversation_id=conversation_id,
+            role="retriever",
+            content=str(retriever_reply.content)  # 转换为字符串存储
         )
-        await redis_queue.put_message(retriever_msg)
         logger.info(f"【会话 {session_id}】的检索助手返回数据：{retriever_reply.content}")
         await expert.memory.add(retriever_reply)
         expert_reply = await expert.reply()
         # 发送运维专家消息
-        # await send_message_to_queue_by_async(
-        #     user_id=user_id,
-        #     session_id=session_id,
-        #     conversation_id=conversation_id,
-        #     role="expert",
-        #     content=expert_reply.content
-        # )
-        # 生成运维专家消息并入Redis队列
-        expert_msg = AgentMessage(
+        await send_message_to_queue_by_async(
+            user_id=user_id,
             session_id=session_id,
-            message_type="expert",
-            content=expert_reply.content,
-            generate_time=datetime.now(timezone.utc).isoformat()
+            conversation_id=conversation_id,
+            role="expert",
+            content=expert_reply.content
         )
-        await redis_queue.put_message(expert_msg)
         # -------------------------------------------------------------------------------------
         # TODO 在得到运维专家回复后，清除智能体实例中的缓存数据【历史对话及工作调用数据】，并将当前会话与当前智能体实例接触绑定，后续新对话进来重新从资源池获取新的智能体实例
         # await agent_pair.unbind_session()  # 将其放置在finally中，更稳定
@@ -290,13 +259,6 @@ app.add_middleware(
 @app.post("/query", response_model=QueryResponse)
 async def handle_query(request: QueryRequest):
     """处理用户查询：获取Agent实例→生成回复→返回结果"""
-    # 校验redis队列长度（核心限流逻辑）
-    if not await redis_queue.check_queue_threshold():
-        return QueryResponse(
-                        session_id=None,
-                        reply="当前请求过多，请稍后再试！",
-                        timestamp=datetime.now()
-        )
     # 生成会话ID（首次请求）
     session_id = request.session_id or SessionManager.create_session()
     # 此处user_id为默认值，若有用户登录系统，可从Token中解析真实user_id
@@ -334,9 +296,9 @@ async def handle_query(request: QueryRequest):
     not_lock = await session_controller.lock_session(session_id)
     if not not_lock:  # 锁定失败，说明会话处于进行中状态
         return QueryResponse(
-                        session_id=session_id,
-                        reply="当前对话尚未结束或系统会话容量已达上限，请稍后重试！",
-                        timestamp=datetime.now()
+            session_id=session_id,
+            reply="当前对话尚未结束或系统会话容量已达上限，请稍后重试！",
+            timestamp=datetime.now()
         )
     # 每次对话生成对话id
     conversation_id = f"conversation_{uuid.uuid4().hex[:8]}"
