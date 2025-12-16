@@ -125,7 +125,8 @@ async def send_message_to_queue_by_async(
         session_id: str,
         conversation_id: str,
         role: str,
-        content: str):
+        content: str,
+        generate_time: str):
     connection = await aio_pika.connect_robust(RABBITMQ_URL)
 
     async with connection:
@@ -141,7 +142,8 @@ async def send_message_to_queue_by_async(
             "role": role,
             "content": content,
             # 核心：生产者生成的带时区的时间戳
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            # "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": generate_time
             # TODO 需要将该时间字段在真正的发送者侧设置【发送者可以先创建各种消息，待其业务逻辑完整结束后，发送消息即可。若发送者逻辑异常，可以丢弃因此产生的脏数据。如果业务上允许丢弃这种脏数据，或者将其存储到其他地方】，以使得消息的完整发送与存储
         }
 
@@ -298,7 +300,7 @@ async def write_conversation_to_db(data: Dict):
                 conversation_id=data["conversation_id"],
                 role=data["role"],
                 content=data["content"],
-                timestamp=datetime.fromisoformat(data["timestamp"])
+                timestamp=datetime.fromisoformat(data["timestamp"])  # 将字符串日期转换为datetime实例
             )
             db.add(message)
 
@@ -344,6 +346,8 @@ async def main():
 # 日志配置
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
 class AsyncPersistenceService:
     """异步持久化服务：消费Redis队列，落库+发MQ"""
     from agent_work.util.redis_util import AgentMessage
@@ -352,7 +356,7 @@ class AsyncPersistenceService:
         self.mq_client = mq_client
         self.msg_db = msg_db
         self.conv_db = conv_db
-        from agent_work.util.redis_util import redis_queue
+        from agent_work.util.redis_util import redis_queue  # 全局redis消息队列实例
         self.redis_queue = redis_queue  # 注入Redis队列
         self.is_running = False
         self.MQ_MAX_RETRY = 3

@@ -16,8 +16,9 @@ from agent_work.agent_scope.agent.rewrite_agent import create_input_text_for_rew
 from agent_work.agent_scope.agent_pool.agent_pool_plus import SESSION_GOING_CACHE, agent_pool
 from agent_work.agent_scope.agent.search_agent import TOOL_CALL_CACHE
 from agent_work.database.context_service import get_session_history_context
+from agent_work.database.database import TempMessageStatus
 from agent_work.datatransfer.async_memory_writer import send_message_to_queue_by_async
-from agent_work.util.redis_util import redis_queue, AgentMessage
+from agent_work.util.redis_util import redis_queue, AgentMessage, create_msg_id, fallback_save
 
 # 日志配置
 logging.basicConfig(level=logging.INFO)
@@ -25,10 +26,55 @@ logger = logging.getLogger(__name__)
 # 新增缓存锁
 SESSION_CACHE_LOCK = asyncio.Lock()
 
+# 全局变量（协程锁实例）：仅用于Redis→MQ同步任务的关键操作锁定
+# 【注释修正】：锁粒度是“Redis→MQ同步操作”（而非全局所有操作），仅保护同步逻辑，不影响接口请求
+redis_mq_sync_lock = asyncio.Lock()
+
+
+async def sync_redis_to_mq(interval: int = 5):
+    """
+    Redis→MQ同步任务（协程版）
+    :param interval: 同步间隔（秒），避免无限循环霸占事件循环
+    """
+    while True:
+        try:
+            # 1. 细粒度锁：仅锁定“本次同步操作”，非全局
+            async with redis_mq_sync_lock:
+                # 从Redis读取待同步数据（异步操作，非阻塞）
+                pending_msgs = await redis_queue.batch_get_messages(batch_size=100, timeout=1)  # 每次同步100条，控制并发
+                if not pending_msgs:
+                    await asyncio.sleep(interval)
+                    continue
+
+                # 批量同步到MQ（异步操作）
+                for msg in pending_msgs:
+                    try:
+                        await send_message_to_queue_by_async(
+                            user_id=msg.user_id,
+                            session_id=msg.session_id,
+                            conversation_id=msg.message_id,
+                            role=msg.message_type,
+                            content=msg.content,
+                            generate_time=msg.generate_time
+                        )
+                    except Exception as e:
+                        await fallback_save(msg, TempMessageStatus.MQ_PENDING)
+                logger.info(f"同步{len(pending_msgs)}条数据从Redis到MQ完成")
+
+            # 2. 关键：同步完成后休眠，释放事件循环给接口请求
+            await asyncio.sleep(interval)
+
+        except asyncio.CancelledError:
+            # 任务被取消（服务退出），优雅退出循环
+            logger.info("Redis→MQ同步任务被取消，准备退出")
+            break
+        except Exception as e:
+            logger.error(f"Redis→MQ同步失败：{e}", exc_info=True)
+            # 失败后休眠，避免频繁报错霸占事件循环
+            await asyncio.sleep(interval)
+
 
 # ===================== 新增：全局会话控制器（单例） =====================
-
-
 class GlobalSessionController:
     """
     全局会话控制器：基于TTLCache实现（极简+稳定）
@@ -121,7 +167,9 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         # )
         # 生成用户消息并入Redis队列
         user_msg = AgentMessage(
+            message_id=create_msg_id(),
             session_id=session_id,
+            user_id=user_id,
             message_type="user",
             content=question,
             generate_time=datetime.now(timezone.utc).isoformat()
@@ -148,7 +196,9 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         # )
         # 生成重写助手消息并入Redis队列
         rewriter_msg = AgentMessage(
+            message_id=create_msg_id(),
             session_id=session_id,
+            user_id=user_id,
             message_type="rewriter",
             content=rewriter_reply.content,
             generate_time=datetime.now(timezone.utc).isoformat()
@@ -175,7 +225,9 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         # )
         # 生成检索助手消息并入Redis队列
         retriever_msg = AgentMessage(
+            message_id=create_msg_id(),
             session_id=session_id,
+            user_id=user_id,
             message_type="retriever",
             content=str(retriever_reply.content),
             generate_time=datetime.now(timezone.utc).isoformat()
@@ -194,7 +246,9 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         # )
         # 生成运维专家消息并入Redis队列
         expert_msg = AgentMessage(
+            message_id=create_msg_id(),
             session_id=session_id,
+            user_id=user_id,
             message_type="expert",
             content=expert_reply.content,
             generate_time=datetime.now(timezone.utc).isoformat()
@@ -243,6 +297,9 @@ class QueryResponse(BaseModel):
     reply: str  # 运维专家回复
     timestamp: datetime  # 响应时间
 
+# 保存所有后台任务句柄，方便退出时清理
+background_tasks = {}
+
 
 @asynccontextmanager
 async def init_setting(app: FastAPI):
@@ -261,14 +318,37 @@ async def init_setting(app: FastAPI):
     """服务启动时初始化实例池和后台任务"""
     await agent_pool.init_pool()
     # 启动后台任务（用变量保存任务，方便后续关闭）
-    clean_task = asyncio.create_task(agent_pool.clean_expired_pairs())
-    logger.info("服务启动完成，等待请求...")
-
+    # clean_task = asyncio.create_task(agent_pool.clean_expired_pairs())
+    # logger.info("服务启动完成，等待请求...")
+    # 2. 启动原有后台任务：清理过期Agent
+    clean_agent_task = asyncio.create_task(agent_pool.clean_expired_pairs())
+    background_tasks["clean_agent"] = clean_agent_task
+    # 3. 新增：启动Redis→MQ同步任务
+    redis_mq_sync_task = asyncio.create_task(sync_redis_to_mq(interval=5))  # 5秒同步一次
+    background_tasks["redis_mq_sync"] = redis_mq_sync_task
     yield  # 关键：分割启动和关闭逻辑，程序会在此时开始处理请求
 
     # 关闭逻辑（服务退出时执行，可选）
-    clean_task.cancel()  # 取消后台任务
-    await clean_task  # 等待任务结束
+    # clean_task.cancel()  # 取消后台任务
+    # await clean_task  # 等待任务结束
+    # 服务退出时：优雅关闭所有后台任务
+    logger.info("服务准备关闭，清理后台任务...")
+    for task_name, task in background_tasks.items():
+        if not task.done():
+            task.cancel()  # 取消任务
+            try:
+                await task  # 等待任务结束（捕获CancelledError）
+            except asyncio.CancelledError:
+                pass
+            logger.info(f"后台任务[{task_name}]已关闭")
+
+    # 额外：关闭Redis/MQ连接
+    # if redis_client:
+    #     await redis_client.close()
+    # if mq_connection:
+    #     await mq_connection.close()
+
+    logger.info("服务已关闭，所有资源已释放")
     logger.info("服务已关闭，资源已释放")
 
 
@@ -290,15 +370,15 @@ app.add_middleware(
 @app.post("/query", response_model=QueryResponse)
 async def handle_query(request: QueryRequest):
     """处理用户查询：获取Agent实例→生成回复→返回结果"""
-    # 校验redis队列长度（核心限流逻辑）
-    if not await redis_queue.check_queue_threshold():
-        return QueryResponse(
-                        session_id=None,
-                        reply="当前请求过多，请稍后再试！",
-                        timestamp=datetime.now()
-        )
     # 生成会话ID（首次请求）
     session_id = request.session_id or SessionManager.create_session()
+    # 校验redis队列长度（核心限流逻辑）
+    # if not await redis_queue.check_queue_threshold():
+    #     return QueryResponse(
+    #                     session_id=session_id,
+    #                     reply="当前请求过多，请稍后再试！",
+    #                     timestamp=datetime.now()
+    #     )
     # 此处user_id为默认值，若有用户登录系统，可从Token中解析真实user_id
     user_id = "default_user"  # 替换为实际用户ID（如从请求头Token提取
     # TODO 风险点2
@@ -368,6 +448,17 @@ async def handle_query(request: QueryRequest):
 
 if __name__ == "__main__":
     import uvicorn
-
+    # 豆包全链路补偿机制的查询关键词：请你整合全链路的兜底方案
+    """
+    豆包关于多个功能服务启动结构的查询关键词：
+        我有一个模块服务架构方面的疑问，上述运维问答场景涉及了以下功能服务：
+        问答服务
+        redis同步数据到rabbitmq的服务
+        rabbitmq消费数据【持久化到数据库、摘要生成与持久化】
+        rabbitmq消费数据的补偿服务
+        redis缓存失败时的临时数据定期清理服务
+        请问这些服务是否都可以单独启动，有没有更好地的服务启动方案
+    """
+    # redis同步数据到rabbitmq的服务 TODO 正常已跑通，异常情况待兜底【需要新增一个临时消息更新方法，或者在保存方法基础上改造】
     uvicorn.run(app='api_plus_for_agent_scope_for_true_scene_multi_person_and_talk_demo:app', port=8090, reload=False,
                 workers=1)
