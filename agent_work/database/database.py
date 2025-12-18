@@ -157,6 +157,7 @@ class TempMessage(Base):
     # 核心字段（和数据库表一一对应，注释清晰）
     id = Column(String(64), primary_key=True, comment="消息唯一标识，主键")
     session_id = Column(String(64), nullable=False, comment="会话ID（关联问答会话）")
+    conversation_id = Column(String(64), nullable=False, comment="对话ID（维持一次对话的多条消息记录）")
     user_id = Column(String(64), nullable=False, comment="用户ID（关联问答会话）")
     message_type = Column(String(32), nullable=False, comment="消息类型：user/rewrite/retrieve/expert")
     content = Column(Text, nullable=False, comment="消息内容（Redis兜底核心数据）")

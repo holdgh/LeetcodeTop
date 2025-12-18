@@ -24,13 +24,12 @@ RABBITMQ_URL = "amqp://guest:guest@localhost:5672/"
 # 新增：对话级触发防抖缓存（key：session_id，value：最后一次触发校验的时间）
 # 作用：同一会话的多条消息，2秒内仅触发一次摘要校验
 trigger_debounce_cache = defaultdict(lambda: datetime.min)
-DEBOUNCE_INTERVAL = timedelta(seconds=2)  # 防抖间隔（可根据实际调整）
+DEBOUNCE_INTERVAL = timedelta(seconds=5)  # 防抖间隔（可根据实际调整，也即一次对话的平均耗时）
 
 # async_memory_writer.py 中维护事件队列和处理器
 summary_event_queue = asyncio.Queue()
 is_summary_processor_running = True
 processing_sessions: Set[str] = set()  # 移到全局，方便关闭时访问
-processed_sessions: Set[str] = set()  # 记录已处理的会话，避免重复处理
 # 新增：记录队列中待处理的session_id（用于去重）
 pending_summary_tasks: Set[str] = set()
 
@@ -46,7 +45,7 @@ async def process_summary_events():
             # 1秒超时：避免队列空时无限阻塞
             session_id = await asyncio.wait_for(summary_event_queue.get(), timeout=1.0)
             # 步骤1：兜底去重（防抖+队列去重可能漏网的情况）
-            if session_id in processing_sessions or session_id in processed_sessions:
+            if session_id in processing_sessions:
                 # 从待处理集合中移除（避免内存泄漏）
                 pending_summary_tasks.discard(session_id)
                 summary_event_queue.task_done()
@@ -59,7 +58,6 @@ async def process_summary_events():
             try:
                 await asyncio.sleep(1.0)  # 聚合消息
                 await update_or_create_summary(session_id)  # 执行摘要生成
-                processed_sessions.add(session_id)  # 标记已处理
                 print(f"【摘要处理器】会话 {session_id} 处理完成")
             except Exception as e:
                 print(f"【摘要处理器】会话 {session_id} 处理失败：{str(e)}")
@@ -113,8 +111,6 @@ async def shutdown_summary_processor():
         print(f"【摘要服务】等待 {len(processing_sessions)} 个正在处理的任务完成...")
         await asyncio.sleep(0.5)
 
-    # 4. 清理资源
-    processed_sessions.clear()
     print("【摘要服务】已完全关闭")
 
 
@@ -142,7 +138,43 @@ async def send_message_to_queue_by_async(
             "role": role,
             "content": content,
             # 核心：生产者生成的带时区的时间戳
-            # "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
+            # TODO 需要将该时间字段在真正的发送者侧设置【发送者可以先创建各种消息，待其业务逻辑完整结束后，发送消息即可。若发送者逻辑异常，可以丢弃因此产生的脏数据。如果业务上允许丢弃这种脏数据，或者将其存储到其他地方】，以使得消息的完整发送与存储
+        }
+
+        await channel.default_exchange.publish(
+            aio_pika.Message(
+                body=json.dumps(enriched_message).encode(),
+                delivery_mode=aio_pika.DeliveryMode.PERSISTENT
+            ),
+            routing_key=queue.name
+        )
+        print(f"生产者发送消息: {enriched_message}")
+
+
+@async_timer_with_mark(mark_param_name="session_id")
+async def redis_to_queue_by_async(
+        message_id: str,
+        user_id: str,
+        session_id: str,
+        conversation_id: str,
+        role: str,
+        content: str,
+        generate_time: str):
+    connection = await aio_pika.connect_robust(RABBITMQ_URL)
+
+    async with connection:
+        channel = await connection.channel()
+        queue = await channel.declare_queue(QUEUE_NAME, durable=True)
+
+        # 为消息添加生产者生成的时间戳
+        enriched_message = {
+            "message_id": message_id,  # 消息ID，也可由生产者生成
+            "user_id": user_id,
+            "session_id": session_id,
+            "conversation_id": conversation_id,
+            "role": role,
+            "content": content,
             "timestamp": generate_time
             # TODO 需要将该时间字段在真正的发送者侧设置【发送者可以先创建各种消息，待其业务逻辑完整结束后，发送消息即可。若发送者逻辑异常，可以丢弃因此产生的脏数据。如果业务上允许丢弃这种脏数据，或者将其存储到其他地方】，以使得消息的完整发送与存储
         }
@@ -167,7 +199,7 @@ async def trigger_summary_if_needed(session_id: str):
     last_trigger_time = trigger_debounce_cache[session_id]
     if datetime.now() - last_trigger_time < DEBOUNCE_INTERVAL:
         # 2秒内已触发过，直接跳过
-        print(f"【摘要触发】会话 {session_id} 触发防抖，2秒内已校验过，跳过")
+        print(f"【摘要触发】会话 {session_id} 触发防抖，{DEBOUNCE_INTERVAL}秒内已校验过，跳过")
         return
     # 更新最后触发时间
     trigger_debounce_cache[session_id] = datetime.now()
@@ -248,6 +280,7 @@ async def consume_conversation_queue():
     # 4. 定义异步回调函数（关键：回调是异步的，不阻塞事件循环）
     async def callback(message: aio_pika.IncomingMessage):
         async with message.process():  # 自动确认消息（处理完成后 ack）
+            is_success = False
             try:
                 # 解析消息数据
                 data = json.loads(message.body)
@@ -257,12 +290,16 @@ async def consume_conversation_queue():
                 await write_conversation_to_db(data)
 
                 print(f"消息 {data['message_id']} 写入数据库成功！")
+                is_success = True
 
             except Exception as e:
                 # 处理失败，消息会重新入队（需配置 RabbitMQ 重试策略）
                 print(f"消息 {data.get('message_id')} 处理失败：{str(e)}")
                 # 手动拒绝消息，让其重新入队（durable=True 时消息不会丢失）
                 await message.reject(requeue=True)
+            if is_success:  # 消息成功后，触发摘要生成检查机制
+                # mq消息入库成功之后，检查是否需要触发摘要
+                await trigger_summary_if_needed(data["session_id"])
 
     # 6. 开始异步消费（不阻塞事件循环，事件循环可同时处理多个消息）
     await queue.consume(callback)
@@ -272,7 +309,7 @@ async def consume_conversation_queue():
     await asyncio.Future()  # 无限等待，直到程序被中断
 
 
-async def write_conversation_to_db(data: Dict):
+async def write_conversation_to_db(data: Dict):  # 仅处理mq消息入库，不涉及摘要生成校验【避免因校验逻辑异常，导致误认为mq消息入库失败，触发消息重新存入mq，导致后续重复消费】
     # 初始化数据库连接
     async for db in get_db():
         try:
@@ -304,18 +341,9 @@ async def write_conversation_to_db(data: Dict):
             )
             db.add(message)
 
-            # !!! 修正后的逻辑：在提交前，获取当前消息总数 !!!
-            # 注意：此时 message 还未被提交，所以 count 是当前总数（不包含新消息）
-            result = await db.execute(
-                select(func.count(Message.id)).filter_by(session_id=data["session_id"])
-            )
-            current_message_count = result.scalar_one()
-
             # 提交事务，将新消息写入数据库
             await db.commit()
             print(f"数据库写入成功：{data['message_id']}")
-            # 4. 检查是否需要触发摘要
-            await trigger_summary_if_needed(data["session_id"])
         except Exception as e:
             # 内部异常立即抛出，让外层 future.result() 捕获
             await db.rollback()  # 回滚事务
@@ -340,65 +368,6 @@ async def main():
         print("\n【消费者服务】收到关闭信号...")
         await shutdown_summary_processor()
         await asyncio.gather(summary_task, consume_task, return_exceptions=True)
-
-
-# 新增
-# 日志配置
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-class AsyncPersistenceService:
-    """异步持久化服务：消费Redis队列，落库+发MQ"""
-    from agent_work.util.redis_util import AgentMessage
-
-    def __init__(self, mq_client, msg_db, conv_db):
-        self.mq_client = mq_client
-        self.msg_db = msg_db
-        self.conv_db = conv_db
-        from agent_work.util.redis_util import redis_queue  # 全局redis消息队列实例
-        self.redis_queue = redis_queue  # 注入Redis队列
-        self.is_running = False
-        self.MQ_MAX_RETRY = 3
-        self.BATCH_SIZE = 10  # 批量处理大小
-
-    async def start_persistence_task(self):
-        """启动异步持久化任务（消费Redis队列）"""
-        self.is_running = True
-        logger.info("异步持久化任务已启动（消费Redis队列）")
-        while self.is_running:
-            try:
-                # 批量消费Redis队列消息（阻塞式，避免空轮询）
-                batch_messages = await self.redis_queue.batch_get_messages(
-                    batch_size=self.BATCH_SIZE,
-                    timeout=1
-                )
-
-                if not batch_messages:
-                    await asyncio.sleep(0.1)
-                    continue
-
-                # 批量落库（复用原有逻辑）
-                await self._batch_save_to_db(batch_messages)
-                # 批量发MQ（复用原有逻辑）
-                await self._batch_send_to_mq(batch_messages)
-
-            except Exception as e:
-                logger.error(f"异步持久化任务异常：{e}", exc_info=True)
-                await asyncio.sleep(1)
-
-    # 以下_batch_save_to_db/_batch_send_to_mq/stop_persistence_task逻辑完全复用，无需修改
-    async def _batch_save_to_db(self, messages: List[AgentMessage]):
-        # 复用原有批量落库逻辑...
-        pass
-
-    async def _batch_send_to_mq(self, messages: List[AgentMessage]):
-        # 复用原有批量发MQ逻辑...
-        pass
-
-    async def stop_persistence_task(self):
-        self.is_running = False
-        logger.info("异步持久化任务已停止")
 
 
 if __name__ == '__main__':

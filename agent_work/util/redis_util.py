@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 
 import redis.asyncio as async_redis
 import logging
-import time
 from dataclasses import dataclass, asdict
 import json
 from typing import Optional, List
@@ -12,8 +11,6 @@ from typing import Optional, List
 from sqlalchemy import select
 
 from agent_work.database.database import TempMessage, TempMessageStatus, get_db
-from agent_work.datatransfer.async_memory_writer import process_summary_events, shutdown_summary_processor, \
-    consume_conversation_queue
 
 logger = logging.getLogger(__name__)
 
@@ -31,32 +28,40 @@ class AgentMessage:
     content: str
     generate_time: str  # 消息生成时间戳
     message_id: str
+    conversation_id: str
 
 
-async def fallback_save(msg: AgentMessage, status: str):
+async def fallback_save_or_update(msg: AgentMessage, status: str, remark: str):
     """兜底落库：写入新增的temp_message表"""
     async for db in get_db():
         try:
-            temp_msg = TempMessage(
-                id=msg.message_id,
-                session_id=msg.session_id,
-                user_id=msg.user_id,
-                message_type=msg.message_type,
-                content=msg.content,
-                generate_time=datetime.fromisoformat(msg.generate_time),
-                backup_time=datetime.now(timezone.utc),  # 兜底写入时间
-                status=status  # 临时消息数据状态 见枚举类TempMessageStatus定义
-            )
-            db.add(temp_msg)
+
+            temp_msg_record = await db.execute(select(TempMessage).filter_by(id=msg.message_id))
+            temp_msg_record = temp_msg_record.scalars().first()
+            if temp_msg_record:  # 更新
+                temp_msg_record.status = status  # 更新临时消息的处理状态
+            else:  # 新增
+                temp_msg = TempMessage(
+                    id=msg.message_id,
+                    session_id=msg.session_id,
+                    user_id=msg.user_id,
+                    message_type=msg.message_type,
+                    conversation_id=msg.conversation_id,
+                    content=msg.content,
+                    generate_time=datetime.fromisoformat(msg.generate_time),
+                    backup_time=datetime.now(timezone.utc),  # 兜底写入时间
+                    status=status  # 临时消息数据状态 见枚举类TempMessageStatus定义
+                )
+                db.add(temp_msg)
             # 提交事务，将新消息写入数据库
             await db.commit()
-            logger.warning(f"消息[{msg.session_id}]入队Redis失败，兜底写入temp_message表")
+            logger.warning(f"消息[{msg.session_id}]{remark}，兜底写入temp_message表")
         except Exception as e:
             # 内部异常立即抛出，让外层 future.result() 捕获
             await db.rollback()  # 回滚事务
             print(f"数据库写入内部失败：{str(e)}")
             # 数据库也失败的极端场景：记录日志+告警，不中断接口
-            logger.critical(f"兜底落库失败（数据库异常）：session_id={msg.session_id}, error={e}")
+            logger.critical(f"兜底落库失败（数据库异常）：session_id={msg.session_id}, msg={msg}, error={e}")
             # TODO 可选：触发告警（如钉钉/邮件）
             # await self.send_alert(f"兜底落库失败：{db_e}")
             raise  # 重新抛出异常，触发回调的 basic_nack
@@ -175,14 +180,14 @@ class RedisMessageQueue:
         if not await self.check_queue_threshold():
             logger.error("redis消息队列长度已达到最大值，无法向redis消息队列写入消息，启用补偿机制将数据存入临时表")
             # 入队失败兜底：直接落库（应急方案）
-            await fallback_save(msg, TempMessageStatus.REDIS_FAILED)
+            await fallback_save_or_update(msg, TempMessageStatus.REDIS_FAILED, remark="redis消息入队失败")
             return False
 
         client = await self.get_redis_client()
         if client is None:
             logger.error("异步Redis客户端未初始化，无法向redis消息队列写入消息，启用补偿机制将数据存入临时表")
             # 入队失败兜底：直接落库（应急方案）
-            await fallback_save(msg, TempMessageStatus.REDIS_FAILED)
+            await fallback_save_or_update(msg, TempMessageStatus.REDIS_FAILED, remark="redis消息入队失败")
             return False
         # 第二步：消息序列化（dataclass转JSON字符串）
         # 重试逻辑：仅针对客户端超时异常
@@ -215,7 +220,7 @@ class RedisMessageQueue:
                 break
 
         # 入队失败兜底：直接落库（应急方案）
-        await fallback_save(msg, TempMessageStatus.REDIS_FAILED)
+        await fallback_save_or_update(msg, TempMessageStatus.REDIS_FAILED, remark="redis消息入队失败")
         return False
 
     async def get_message(self, timeout: int = 1, retry_times: int = 2) -> Optional[AgentMessage]:
@@ -238,11 +243,15 @@ class RedisMessageQueue:
                     return None
                 # result格式：(队列key, 消息JSON字符串)
                 msg_json = result[1]
-                msg_dict = json.loads(msg_json)
-                # 反序列化为AgentMessage
-                msg = AgentMessage(**msg_dict)
+                msg = None
+                try:
+                    msg_dict = json.loads(msg_json)
+                    # 反序列化为AgentMessage
+                    msg = AgentMessage(**msg_dict)
+                except Exception as e:
+                    logger.error(f"消息出队Redis成功，但解析异常：{e}，消息数据为：{msg_json}。需人工处理！！！", exc_info=True)
                 # 因为 brpop 是 “取出即删”，Redis 中无法保留消息的 “兜底副本”——临时表的 MQ_PENDING 状态，本质是 brpop 取出消息后的 “唯一兜底副本”
-                await fallback_save(msg, TempMessageStatus.MQ_PENDING)  # 关键兜底 TODO 这里的兜底逻辑待优化，从redis取出后，到兜底存入数据库结束时，一旦出现异常情况，会存在数据丢失的风险
+                await fallback_save_or_update(msg, TempMessageStatus.MQ_PENDING, remark="redis消息出队备份")  # 关键兜底 TODO 这里的兜底逻辑待优化，从redis取出后，到兜底存入数据库结束时，一旦出现异常情况，会存在数据丢失的风险
                 return msg
                 # 区分异常类型：仅处理客户端超时/连接异常
             except async_redis.TimeoutError as e:
@@ -264,7 +273,7 @@ class RedisMessageQueue:
 
             # 其他异常（如JSON解析、参数错误）：不重试，直接返回
             except Exception as e:
-                logger.error(f"消息出队Redis失败（非超时/连接异常）：{e}", exc_info=True)
+                logger.error(f"消息出队Redis失败（非超时、非连接异常）：{e}", exc_info=True)
                 return None
 
     async def batch_get_messages(self, batch_size: int = 10, timeout: int = 1) -> List[AgentMessage]:
@@ -289,6 +298,7 @@ class RedisMessageQueue:
                 agent_msg = AgentMessage(
                     message_id=msg.message_id,
                     session_id=msg.session_id,
+                    conversation_id=msg.conversation_id,
                     message_type=msg.message_type,
                     content=msg.content,
                     generate_time=msg.generate_time
@@ -306,22 +316,3 @@ redis_queue = RedisMessageQueue(
     redis_db=0,
     queue_key="ops_qa_message_queue"
 )
-
-
-async def main():
-    """消费者服务启动入口：同时启动消息消费和摘要处理器"""
-    # 启动摘要处理器协程
-    summary_task = asyncio.create_task(process_summary_events())
-    print("【摘要服务】已启动")
-
-    # 启动消息消费协程
-    consume_task = asyncio.create_task(consume_conversation_queue())
-    print("【消费者服务】已启动，开始监听队列...")
-
-    # 等待两个协程完成（或被中断）
-    try:
-        await asyncio.gather(summary_task, consume_task)
-    except KeyboardInterrupt:
-        print("\n【消费者服务】收到关闭信号...")
-        await shutdown_summary_processor()
-        await asyncio.gather(summary_task, consume_task, return_exceptions=True)

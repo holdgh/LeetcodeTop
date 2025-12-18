@@ -17,8 +17,8 @@ from agent_work.agent_scope.agent_pool.agent_pool_plus import SESSION_GOING_CACH
 from agent_work.agent_scope.agent.search_agent import TOOL_CALL_CACHE
 from agent_work.database.context_service import get_session_history_context
 from agent_work.database.database import TempMessageStatus
-from agent_work.datatransfer.async_memory_writer import send_message_to_queue_by_async
-from agent_work.util.redis_util import redis_queue, AgentMessage, create_msg_id, fallback_save
+from agent_work.datatransfer.async_memory_writer import redis_to_queue_by_async
+from agent_work.util.redis_util import redis_queue, AgentMessage, create_msg_id, fallback_save_or_update
 
 # 日志配置
 logging.basicConfig(level=logging.INFO)
@@ -48,17 +48,22 @@ async def sync_redis_to_mq(interval: int = 5):
 
                 # 批量同步到MQ（异步操作）
                 for msg in pending_msgs:
+                    is_success = False
                     try:
-                        await send_message_to_queue_by_async(
+                        await redis_to_queue_by_async(
+                            message_id=msg.message_id,
                             user_id=msg.user_id,
                             session_id=msg.session_id,
-                            conversation_id=msg.message_id,
+                            conversation_id=msg.conversation_id,
                             role=msg.message_type,
                             content=msg.content,
                             generate_time=msg.generate_time
                         )
+                        is_success = True
                     except Exception as e:
-                        await fallback_save(msg, TempMessageStatus.MQ_PENDING)
+                        await fallback_save_or_update(msg, TempMessageStatus.MQ_FAILED, remark="redis消息出队后同步至mq失败")
+                    if is_success:
+                        await fallback_save_or_update(msg, TempMessageStatus.MQ_SENT, remark="redis消息出队后同步mq成功")
                 logger.info(f"同步{len(pending_msgs)}条数据从Redis到MQ完成")
 
             # 2. 关键：同步完成后休眠，释放事件循环给接口请求
@@ -169,6 +174,7 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         user_msg = AgentMessage(
             message_id=create_msg_id(),
             session_id=session_id,
+            conversation_id=conversation_id,
             user_id=user_id,
             message_type="user",
             content=question,
@@ -198,6 +204,7 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         rewriter_msg = AgentMessage(
             message_id=create_msg_id(),
             session_id=session_id,
+            conversation_id=conversation_id,
             user_id=user_id,
             message_type="rewriter",
             content=rewriter_reply.content,
@@ -227,6 +234,7 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         retriever_msg = AgentMessage(
             message_id=create_msg_id(),
             session_id=session_id,
+            conversation_id=conversation_id,
             user_id=user_id,
             message_type="retriever",
             content=str(retriever_reply.content),
@@ -248,6 +256,7 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
         expert_msg = AgentMessage(
             message_id=create_msg_id(),
             session_id=session_id,
+            conversation_id=conversation_id,
             user_id=user_id,
             message_type="expert",
             content=expert_reply.content,
