@@ -2,6 +2,7 @@ from agentscope.agent import ReActAgent
 from agentscope.formatter import DashScopeMultiAgentFormatter
 from agentscope.model import ChatModelBase
 
+from agent_work.agent_scope.agent.base_agent_for_mock import BaseAgentForMock
 
 REWRITE_SYS_PROMPT = """
 你是工业设备运维场景的问题重写助手，核心目标是结合「历史对话摘要 + 最近3条对话」，将用户当前问题重写为「独立可解答的完整问题」，严格遵循以下规则：
@@ -97,7 +98,15 @@ def create_input_text_for_rewrite(current_question: str, history_context: str):
 
 
 def create_rewrite_agent(chat_model: ChatModelBase) -> ReActAgent:
-    rewrite = ReActAgent(
+    # TODO 免费llm到期，采用mock数据
+    # rewrite = ReActAgent(
+    #     name="重写助手",
+    #     # sys_prompt=REWRITE_SYS_PROMPT,
+    #     sys_prompt=REWRITE_SYS_PROMPT_PRO,
+    #     model=chat_model,
+    #     formatter=DashScopeMultiAgentFormatter()
+    # )
+    rewrite = BaseAgentForMock(
         name="重写助手",
         # sys_prompt=REWRITE_SYS_PROMPT,
         sys_prompt=REWRITE_SYS_PROMPT_PRO,

@@ -14,6 +14,8 @@ from functools import wraps
 from typing import Dict, Any, Callable, Optional
 import inspect
 
+from agent_work.agent_scope.agent.base_agent_for_mock import BaseAgentForMock
+
 # 日志配置
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -277,14 +279,27 @@ def create_retriever_agent(chat_model: ChatModelBase) -> ReActAgent:
     toolkit.register_tool_function(parse_error_code)
     toolkit.register_tool_function(query_maintenance_cycle)
 
-    retriever = ReActAgent(
+    # TODO 免费llm到期，采用mock数据
+#     retriever = ReActAgent(
+#         name="检索助手",
+#         sys_prompt="""仅处理当前绑定会话的用户问题：
+# 1. 基于专属内存中的对话历史调用工具，结果整理后传递给运维专家Agent；
+# 2. 不直接回复用户，仅输出工具调用结果；
+# 3. 会话切换时内存会清空，无需考虑历史会话信息。
+# 4. 若收到“工具调用异常+强制终止”的系统提示，立即停止所有工具调用，基于现有信息总结工具调用结果后传递给运维专家Agent；
+# 5. 必须将输出结果控制在100字以内。""",
+#         model=chat_model,
+#         formatter=DashScopeMultiAgentFormatter(),
+#         toolkit=toolkit
+#     )
+    retriever = BaseAgentForMock(
         name="检索助手",
         sys_prompt="""仅处理当前绑定会话的用户问题：
-1. 基于专属内存中的对话历史调用工具，结果整理后传递给运维专家Agent；
-2. 不直接回复用户，仅输出工具调用结果；
-3. 会话切换时内存会清空，无需考虑历史会话信息。
-4. 若收到“工具调用异常+强制终止”的系统提示，立即停止所有工具调用，基于现有信息总结工具调用结果后传递给运维专家Agent；
-5. 必须将输出结果控制在100字以内。""",
+    1. 基于专属内存中的对话历史调用工具，结果整理后传递给运维专家Agent；
+    2. 不直接回复用户，仅输出工具调用结果；
+    3. 会话切换时内存会清空，无需考虑历史会话信息。
+    4. 若收到“工具调用异常+强制终止”的系统提示，立即停止所有工具调用，基于现有信息总结工具调用结果后传递给运维专家Agent；
+    5. 必须将输出结果控制在100字以内。""",
         model=chat_model,
         formatter=DashScopeMultiAgentFormatter(),
         toolkit=toolkit

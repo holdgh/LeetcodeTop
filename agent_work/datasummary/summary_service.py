@@ -152,13 +152,15 @@ async def generate_incremental_summary(session_id: str) -> Tuple[str, int] or No
 
     # 步骤5：调用LLM生成摘要（异步调用，不阻塞事件循环）
     try:
-        response = await summary_model(
-            messages=[
-                {"role": "system", "content": "你是专业的会话摘要助手，严格遵循上述规则生成摘要"},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        new_summary = await parse_model_response(response)
+        # TODO 免费llm到期，采用mock数据
+        # response = await summary_model(
+        #     messages=[
+        #         {"role": "system", "content": "你是专业的会话摘要助手，严格遵循上述规则生成摘要"},
+        #         {"role": "user", "content": prompt}
+        #     ]
+        # )
+        # new_summary = await parse_model_response(response)
+        new_summary = f"已处理会话{session_id}的摘要"
         print(f"【摘要服务】会话 {session_id} 摘要生成成功，处理了 {unprocessed_conv_count} 次对话")
         return new_summary, unprocessed_conv_count  # 新摘要，当前处理的会话数量
     except Exception as e:
@@ -303,13 +305,15 @@ async def rebuild_full_summary(session_id: str):
         """
 
         # 步骤4：调用LLM生成全量摘要
-        response = await summary_model(
-            messages=[
-                {"role": "system", "content": "你是专业的会话摘要助手，严格遵循上述规则生成完整摘要"},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        full_summary = parse_model_response(response)
+        # TODO 免费llm到期，采用mock数据
+        # response = await summary_model(
+        #     messages=[
+        #         {"role": "system", "content": "你是专业的会话摘要助手，严格遵循上述规则生成完整摘要"},
+        #         {"role": "user", "content": prompt}
+        #     ]
+        # )
+        # full_summary = parse_model_response(response)
+        full_summary = f"已处理会话{session_id}摘要"
 
         # 步骤5：更新数据库摘要（重置已处理对话数）
         async for db in get_db():

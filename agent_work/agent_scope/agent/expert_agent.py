@@ -2,6 +2,7 @@ from agentscope.agent import ReActAgent
 from agentscope.model import ChatModelBase
 from agentscope.formatter import DashScopeMultiAgentFormatter
 
+from agent_work.agent_scope.agent.base_agent_for_mock import BaseAgentForMock
 
 # 定义运维专家的系统提示词（适配 Agentscope，引导读取内存数据）
 EXPERT_SYS_PROMPT = """
@@ -41,7 +42,14 @@ EXPERT_SYS_PROMPT = """
 
 
 def create_expert_agent(chat_model: ChatModelBase) -> ReActAgent:
-    expert = ReActAgent(
+    # TODO 免费llm到期，采用mock数据
+    # expert = ReActAgent(
+    #     name="运维专家",
+    #     sys_prompt=EXPERT_SYS_PROMPT,
+    #     model=chat_model,
+    #     formatter=DashScopeMultiAgentFormatter()
+    # )
+    expert = BaseAgentForMock(
         name="运维专家",
         sys_prompt=EXPERT_SYS_PROMPT,
         model=chat_model,
