@@ -7,7 +7,7 @@ app = FastAPI()
 
 
 # 关键点1：定义为异步函数（async def）
-@app.post("/api/work")
+@app.post("/api_demo/work")
 async def work():
     # 关键点2：用异步IO操作替换同步阻塞（asyncio.sleep替代time.sleep）
     await http_mock()  # 模拟异步IO操作（不会阻塞线程）

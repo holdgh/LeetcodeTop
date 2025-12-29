@@ -22,7 +22,7 @@ class MaintenanceAPITester(FastHttpUser):
         """模拟用户下单"""
         # 发送POST请求
         response = self.client.post(
-            "/api/work",
+            "/api_demo/work",
             headers={"Content-Type": "application/json"}
         )
         # 解析响应，获取session_id（用于后续多轮对话）

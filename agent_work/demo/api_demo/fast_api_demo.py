@@ -4,7 +4,7 @@ from fastapi import FastAPI
 app = FastAPI()
 
 
-@app.get("/api/query")
+@app.get("/api_demo/query")
 def query_data(key: str):
     return {"result": f"处理请求：{key}"}
 

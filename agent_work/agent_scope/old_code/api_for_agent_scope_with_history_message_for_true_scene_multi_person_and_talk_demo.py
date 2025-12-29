@@ -212,7 +212,7 @@ class MaintenanceDocRetriever:
         self.index.add(vectors)
         # 保存索引和文本
         faiss.write_index(self.index, "maintenance_index.index")
-        with open("maintenance_texts.pkl", "wb") as f:
+        with open("../agent/maintenance_texts.pkl", "wb") as f:
             pickle.dump(knowledge, f)
         return knowledge
 
@@ -494,8 +494,8 @@ class AgentPair:
         self.bind_time: Optional[datetime] = None  # 绑定会话的时间
         self.idle_timeout = timedelta(minutes=10)  # 空闲超时时间（10分钟无操作则释放）
         self.model = DashScopeChatModel(
-            model_name="deepseek-v3",
-            api_key="sk-f61034a0afd64ffdab4be83a063b20e3",
+            model_name="qwen3-max",
+            api_key="sk-6b8afa231399490bb7a56c025a3bc633",
             # api_key=os.getenv("DASHSCOPE_API_KEY"),
             # temperature=0.1  # 降低随机性，保证运维回答准确性
             generate_kwargs={
@@ -625,7 +625,7 @@ class AgentPool:
 
             # 3. 无空闲实例，且未达最大容量→扩容
             if len(self.pool) < self.max_size:
-                new_pair = AgentPair(pair_id=f"agent_pair_{len(self.pool) + 1}")
+                new_pair = AgentPair(pair_id=f"agent_pair_{len(self.pool) + 1}")  # 扩容时，因创建智能体实例较慢，导致中断请求连接
                 await new_pair.bind_session(session_id)
                 self.pool.append(new_pair)
                 self.session_map[session_id] = new_pair
@@ -896,5 +896,5 @@ if __name__ == "__main__":
     # asyncio.run(main())
     import uvicorn
 
-    uvicorn.run(app='api_for_agent_scope_for_true_scene_multi_person_and_talk_demo:app', port=8090, reload=False,
+    uvicorn.run(app='api_for_agent_scope_with_history_message_for_true_scene_multi_person_and_talk_demo:app', port=8090, reload=False,
                 workers=1)

@@ -91,7 +91,7 @@ class MaintenanceDocRetriever:
         self.index.add(vectors)
         # 保存索引和文本
         faiss.write_index(self.index, "maintenance_index.index")
-        with open("maintenance_texts.pkl", "wb") as f:
+        with open("../agent/maintenance_texts.pkl", "wb") as f:
             pickle.dump(knowledge, f)
         return knowledge
 
@@ -197,7 +197,7 @@ def create_maintenance_agents() -> List[ReActAgent]:
     # 模型配置（使用通义千问，支持本地模型替换）
     model = DashScopeChatModel(
         model_name="qwen-max",
-        api_key="sk-f61034a0afd64ffdab4be83a063b20e3",
+        api_key="sk-6b8afa231399490bb7a56c025a3bc633",
         # api_key=os.getenv("DASHSCOPE_API_KEY"),
         # temperature=0.1  # 降低随机性，保证运维回答准确性
         generate_kwargs={
@@ -227,10 +227,8 @@ def create_maintenance_agents() -> List[ReActAgent]:
         #     Tool(func=query_maintenance_cycle, name="保养周期查询", description="查询设备部件的保养周期")
         # ]
         # 在 AgentScope 1.0.7 版本中，ReActAgent 使用的是 toolkit 实例【在初始化后，需要将工具手动注册到该实例中】
-        toolkit=toolkit,  # TODO 如何将工具说明放入工具箱中呢？
-        # print_hint_msg=True # 是否打印提示消息，包括推理提示来自计划笔记本，检索信息来自长期记忆和知识库。
+        toolkit=toolkit  # TODO 如何将工具说明放入工具箱中呢？
     )
-    retriever_agent.set_console_output_enabled(False)  # 禁用控制台输出智能体内容，由业务代码控制输出内容
 
     # 智能体2：专家Agent（负责逻辑推理、故障定位、解决方案生成）
     expert_agent = ReActAgent(
@@ -244,89 +242,45 @@ def create_maintenance_agents() -> List[ReActAgent]:
         model=model,
         formatter=DashScopeMultiAgentFormatter()
     )
-    expert_agent.set_console_output_enabled(False)  # 禁用控制台输出智能体内容，由业务代码控制输出内容
 
     return [retriever_agent, expert_agent]
 
 
 # -------------------------- 3. 多Agent协作流程（招聘要求：Workflow编排、上下文管理）--------------------------
-# async def main():
-#     """运维问答Agent主流程"""
-#     # 创建智能体
-#     retriever_agent, expert_agent = create_maintenance_agents()
-#
-#     # 初始化消息枢纽，设置对话主题
-#     async with MsgHub(
-#             participants=[retriever_agent, expert_agent],
-#             announcement=Msg(
-#                 name="user",
-#                 content="""你好！我是设备运维人员，现在遇到问题：我的设备开机后报警代码E101，设备型号是M-2000，已经运行了1800小时，
-# 之前没有出现过类似故障，请问该怎么处理？另外想了解一下主轴轴承的保养周期。""",
-#                 role="user",
-#             ),
-#     ) as hub:
-#         # 第一轮：检索Agent查询知识和工具
-#         print("=== 第一轮：检索助手工作 ===")
-#         await retriever_agent()
-#
-#         # 第二轮：专家Agent分析并给出解决方案
-#         print("\n=== 第二轮：运维专家解答 ===")
-#         await expert_agent()
-#
-#         # 多轮对话：用户追问后续问题
-#         print("\n=== 第三轮：用户追问 ===")
-#         user_follow_msg = Msg(
-#             name="user",
-#             content="按照你的方法排查后，冷却液液位是正常的，水泵也没有异响，接下来该怎么办？",
-#             role="user",
-#         )
-#         # 发送追问消息并驱动智能体响应 在 AgentScope 1.0.7 中，应该使用 hub.broadcast() 方法来发送消息
-#         await hub.broadcast(user_follow_msg)
-#         await retriever_agent()
-#         await expert_agent()
-
-
 async def main():
-    """支持用户多次对话的运维问答Agent主流程"""
-    # 创建智能体（全局唯一，持续监听）
+    """运维问答Agent主流程"""
+    # 创建智能体
     retriever_agent, expert_agent = create_maintenance_agents()
-    # 初始化消息枢纽，设置欢迎语
-    print("=== 工业设备运维问答Agent ===")
-    print("欢迎咨询设备故障排查、操作规范、保养周期等问题（输入'quit'退出）")
-    print("示例提问：我的M-2000设备报警E101，该怎么处理？\n")
-    # 启动MsgHub
-    async with MsgHub(participants=[retriever_agent, expert_agent]) as hub:
 
-        # 循环监听用户输入（无限次对话）
-        while True:
-            # 接收用户输入（支持多行文本，按Enter提交）
-            user_input = input("\n你：")
-            if user_input.strip().lower() == "quit":
-                print("运维专家：感谢咨询，祝你工作顺利！")
-                break
-            if not user_input.strip():
-                print("运维专家：请输入具体问题，我会为你解答~")
-                continue
-
-            # 1. 封装用户消息并发送到MsgHub
-            user_msg = Msg(
+    # 初始化消息枢纽，设置对话主题
+    async with MsgHub(
+            participants=[retriever_agent, expert_agent],
+            announcement=Msg(
                 name="user",
-                content=user_input.strip(),
+                content="""你好！我是设备运维人员，现在遇到问题：我的设备开机后报警代码E101，设备型号是M-2000，已经运行了1800小时，
+之前没有出现过类似故障，请问该怎么处理？另外想了解一下主轴轴承的保养周期。""",
                 role="user",
-            )
-            await hub.broadcast(user_msg)
-            print(f"\n=== 智能体处理中... ===")
+            ),
+    ) as hub:
+        # 第一轮：检索Agent查询知识和工具
+        print("=== 第一轮：检索助手工作 ===")
+        await retriever_agent()
 
-            # 2. 触发智能体协作（检索→专家解答）
-            await retriever_agent()  # 检索Agent工具调用+信息整理
-            await expert_agent()  # 专家Agent逻辑推理+生成回答
+        # 第二轮：专家Agent分析并给出解决方案
+        print("\n=== 第二轮：运维专家解答 ===")
+        await expert_agent()
 
-            # 3. 提取并打印专家最终回答（从MsgHub历史中获取最新响应）
-            # 筛选专家Agent发送给用户的最新消息
-            expert_responses = await expert_agent.memory.get_memory()
-            if expert_responses:
-                latest_response = expert_responses[-1]
-                print(f"\n运维专家：{latest_response.content}")
+        # 多轮对话：用户追问后续问题
+        print("\n=== 第三轮：用户追问 ===")
+        user_follow_msg = Msg(
+            name="user",
+            content="按照你的方法排查后，冷却液液位是正常的，水泵也没有异响，接下来该怎么办？",
+            role="user",
+        )
+        # 发送追问消息并驱动智能体响应 在 AgentScope 1.0.7 中，应该使用 hub.broadcast() 方法来发送消息
+        await hub.broadcast(user_follow_msg)
+        await retriever_agent()
+        await expert_agent()
 
 
 # -------------------------- 4. 运行程序 --------------------------
