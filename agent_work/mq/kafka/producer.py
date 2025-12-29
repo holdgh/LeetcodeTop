@@ -3,6 +3,7 @@ import json
 from config import KAFKA_CONFIG
 from kafka import KafkaProducer
 
+
 class KafkaOrderProducer:
     def __init__(self):
         self.producer = KafkaProducer(
@@ -30,6 +31,7 @@ class KafkaOrderProducer:
 
     def close(self):
         self.producer.close()
+
 
 # 测试生产者
 if __name__ == "__main__":
