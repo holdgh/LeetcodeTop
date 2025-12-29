@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunklingjingAI"]=self["webpackChunklingjingAI"]||[]).push([[6],{6:function(n,u,l){l.r(u),l.d(u,{default:function(){return c}});var e=function(){var n=this,u=n._self._c;return u("div",[n._v(" 404 ")])},i=[],t=l(1656),r={},s=(0,t.A)(r,e,i,!1,null,null,null),c=s.exports}}]);
+//# sourceMappingURL=6.161deaaf.js.map
