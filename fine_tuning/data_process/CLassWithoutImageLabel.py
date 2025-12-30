@@ -1,7 +1,5 @@
 import random
-import os
-import json
-from tools import Optimize_Q,yolo_to_abs,write_file
+from fine_tuning.data_process.tools import Optimize_Q, write_file
 from ClassifyTheProblem import classify_question_by_index_withoutimage
 from copy import deepcopy
 import re

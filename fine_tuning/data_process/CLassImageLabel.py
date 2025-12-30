@@ -3,7 +3,7 @@ import os
 import json
 from copy import deepcopy
 import re
-from tools import Optimize_Q,yolo_to_abs,write_file,HorizontalAndVerticalStripeJudgment
+from fine_tuning.data_process.tools import Optimize_Q,yolo_to_abs,write_file,HorizontalAndVerticalStripeJudgment
 from ClassifyTheProblem import classify_question_by_index
 label_info = {"0": "刮刀横/竖条纹", "1": "曲翘凸起", "2": "污染物", "3": "污染物", "4": "球化",
                       "5": "刮刀横/竖条纹", "6": "刮刀横/竖条纹","7": "曲翘凸起","8": "曲翘凸起", "9": "铺粉不完全"}

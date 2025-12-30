@@ -183,7 +183,7 @@ def get_latest_run(search_dir="."):
     return max(last_list, key=os.path.getctime) if last_list else ""
 
 
-def update_models(model_names=("yolo11n.pt",), source_dir=Path("."), update_names=False):
+def update_models(model_names=("yolo11n.pt",), source_dir=Path(""), update_names=False):
     """
     Updates and re-saves specified YOLO models in an 'updated_models' subdirectory.
 

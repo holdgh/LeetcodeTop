@@ -1,0 +1,36 @@
+问题：rocketmq-client-python包不支持Windows
+解决方案：采用pyrocketmq【pip install pyrocketmq】
+
+问题：pyrocketmq包如何使用
+解决方案：
+
+问题：pyrocketmq依赖jpype，提示jpype包不存在
+解决方案：pip install jpype1
+
+问题：提示找不到Java.lang包
+解决方案：采用以下代码加载Java环境及rocketmq的Java驱动包
+import os
+import glob
+import jpype.imports
+
+# 指定 JVM 路径
+JVM_PATH = r"C:\Program Files\Java\jdk-1.8\jre\bin\server\jvm.dll"  # 请替换为你的 jvm.dll 路径
+
+# 指定 RocketMQ JAR 包目录
+LIB_DIR = r"C:\englishprogram\rocketmq-all-5.3.3-bin-release\lib"
+
+# 获取所有 JAR 文件
+jar_files = glob.glob(os.path.join(LIB_DIR, "*.jar"))
+classpath_str = os.pathsep.join(jar_files)
+
+# 启动 JVM
+if not jpype.isJVMStarted():
+    jpype.startJVM(JVM_PATH, "-Djava.class.path=" + classpath_str)
+
+print("[成功] RocketMQ JAR 加载完成")
+
+问题：提示RuntimeError: Can't find org.jpype.jar support library
+解决方案：由于jpype1.6.0+版本要求Java版本为11+，而本地安装的是java8，且rocketmq依赖Java8。因此降低jpype版本为1.5.2【pip install jpype1==1.5.2】，以兼容旧的Java版本
+
+问题：ImportError: Failed to import 'org.apache.rocketmq.common.protocol'
+解决方案：由于rocketmq版本为5.3+，其内部的Java驱动包已不满足路径org.apache.rocketmq.common.protocol。因此，降低rocketmq版本，采用rocketmq 4.9+系列版本即可
