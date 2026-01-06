@@ -1,0 +1,1 @@
+{"default": {"features": {"output": {"_type": "Value"}, "input": {"_type": "Value"}, "instruction": {"_type": "Value"}}, "splits": {"train": {"name": "train", "dataset_name": "alpaca_zh"}}}}
