@@ -32,8 +32,9 @@ def predict(text, tokenizer, model):
 
 if __name__ == '__main__':
     # model_path = r"C:\Users\gaohu\aiModel\all-MiniLM-L6-v2"
-    # model_path = r"C:\Users\gaohu\aiPyProject\LeetcodeTop\fine_tuning\lora\miniLM\best-model-20260106163605"  # 微调版
-    model_path = r"C:\Users\gaohu\aiPyProject\LeetcodeTop\model_smaller\miniLM\minilm_pruned_quant"  # 剪枝/量化版
+    # model_path = r"C:\Users\gaohu\aiPyProject\LeetcodeTop\fine_tuning\lora\miniLM\best-model-20260106163605"  # 微调版【效果较好，但推理速度较慢】
+    # model_path = r"C:\Users\gaohu\aiPyProject\LeetcodeTop\model_smaller\miniLM\minilm_pruned_quant"  # 剪枝/量化版【效果一般】
+    model_path = r"C:\Users\gaohu\aiPyProject\LeetcodeTop\model_smaller\miniLM\minilm_pruned_quant_202601061956"  # 剪枝/蒸馏补偿/量化版【效果较好】
     # 1. 加载Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_path, trust_remote_code=True)
     print_info("加载分词器完毕")
@@ -58,6 +59,7 @@ if __name__ == '__main__':
         # hidden_dropout_prob=0.2,  # 隐藏层dropout
         # attention_probs_dropout_prob=0.2,  # 注意力层dropout
     )
+    model.eval()  # 推理模式
     # 测试推理
     test_text1 = "这家酒店环境太差了，卫生不干净，服务也很敷衍"
     test_text2 = "酒店位置很好，房间宽敞明亮，服务人员很热情"

@@ -1,3 +1,5 @@
+import datetime
+
 from peft import LoraConfig
 from datasets import load_dataset
 from transformers import AutoTokenizer
@@ -8,6 +10,8 @@ from peft import get_peft_model
 import swanlab  # 训练监控（可选，替代TensorBoard）
 
 from fine_tuning.data_engineer.alpaca_data_zh.data_format import format_function
+
+model_path_time_str = datetime.datetime.now().strftime(format="%Y%m%d%H%M%S")
 # 配置lora参数
 lora_config = LoraConfig(
     r=8,  # 低秩维度，适配小模型，避免过拟合
@@ -20,7 +24,7 @@ lora_config = LoraConfig(
 
 # 设置训练参数
 training_args = TrainingArguments(
-    output_dir="../output/miniLM-finetune-result",  # 训练结果保存路径
+    output_dir=f"../output/qwen25-finetune-result_{model_path_time_str}",  # 训练结果保存路径
     per_device_train_batch_size=1,  # Windows CPU/低配N卡设为1
     gradient_accumulation_steps=4,  # 等效batch_size=4，省显存/CPU资源
     learning_rate=2e-4,  # LoRA专用学习率（Phi-2适配）
@@ -46,7 +50,7 @@ swanlab watch
 若执行swanlab watch提示命令不存在，需将 Python 的 Scripts 目录加入 Windows 环境变量（或用python -m swanlab watch替代）。
 """
 # 第二步：初始化
-swanlab.init(project="miniLM-zh-finetune", experiment_name="windows-laptop-test", mode="local")
+swanlab.init(project="qwen25-zh-finetune", experiment_name="windows-laptop-test", mode="local")
 
 
 def print_info(msg: str):
@@ -54,7 +58,7 @@ def print_info(msg: str):
 
 
 if __name__ == '__main__':
-    model_path = r"C:\Users\gaohu\aiModel\all-MiniLM-L6-v2"  # 改为Qwen/Qwen2.5-0.5B-Instruct【回家下载】
+    model_path = r"C:\Users\gaohu\aiModel\Qwen2.5-0.5B-Instruct"
     # 1. 加载Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_path, trust_remote_code=True)
     print_info("加载分词器完毕")
@@ -99,8 +103,8 @@ if __name__ == '__main__':
 
     # ====================== 保存模型 ======================
     # 仅保存LoRA适配器（体积＜10MB，便于部署）
-    model.save_pretrained("./miniLM-lora-adapter")
-    tokenizer.save_pretrained("./miniLM-lora-adapter")
+    model.save_pretrained(f"./qwen25-lora-adapter_{model_path_time_str}")
+    tokenizer.save_pretrained(f"./qwen25-lora-adapter_{model_path_time_str}")
 
     # ====================== 代码核心要点解析 ======================
     # 1. device_map="auto"：Windows下自动识别CPU/GPU，无需手动指定；

@@ -15,6 +15,10 @@ from peft import LoraConfig, get_peft_model
 from sklearn.metrics import accuracy_score, f1_score
 import pandas as pd
 import os
+import datetime
+
+
+model_path_time_str = datetime.datetime.now().strftime(format="%Y%m%d%H%M")
 
 
 class Pruner:
@@ -61,7 +65,7 @@ def distill_pruned_model(pruned_model, teacher_model, val_dataset, tokenizer):
     """用原始模型（教师）蒸馏剪枝模型（学生），补偿精度损失"""
     # 蒸馏训练参数（轻量训练，仅1~2个epoch）
     training_args = TrainingArguments(
-        output_dir="./distill_temp",
+        output_dir=f"./distill_temp_{model_path_time_str}",
         per_device_train_batch_size=2,
         per_device_eval_batch_size=2,
         num_train_epochs=2,
@@ -195,6 +199,9 @@ def evaluate_model(model, tokenizer, data_path):
     """验证轻量化后模型的精度和推理速度"""
     # 加载测试数据
     df = pd.read_csv(data_path, encoding="utf-8")
+    df = df.drop(labels='dataset', axis=1)  # 仅保留文本及类别标签列
+    df = df.dropna()  # 删除缺省值的行
+    df = df[df["sentence"].str.len() > 5].reset_index(drop=True)
     texts = df["sentence"].tolist()[:100]  # 取100条样本测试
     labels = df["label"].tolist()[:100]
 
@@ -259,7 +266,7 @@ if __name__ == '__main__':
     # 训练好的MiniLM情感分类模型路径（替换为你的模型路径）
     BASE_MODEL_PATH = r"../../fine_tuning/lora/miniLM/best-model-20260106163605"
     # 轻量化后模型保存路径
-    PRUNED_QUANT_MODEL_PATH = "./minilm_pruned_quant"
+    PRUNED_QUANT_MODEL_PATH = f"./minilm_pruned_quant_{model_path_time_str}"
     # 数据集路径（验证用）
     VAL_DATA_PATH = "../../fine_tuning/jd_comment/cleaned_dataset.csv"
 
@@ -276,11 +283,11 @@ if __name__ == '__main__':
 
     # ====================== 3. 第一步：剪枝（重点剪全连接层） ======================
 
-    # 执行剪枝
-    pruner = Pruner(model, pruning_ratio=0.5)
-    pruned_model = pruner.prune_fc_layers()
-    # 应用剪枝掩码（确保推理时剪枝参数不参与计算）
-    pruner.apply_mask()
+    # # 执行剪枝
+    # pruner = Pruner(model, pruning_ratio=0.5)
+    # pruned_model = pruner.prune_fc_layers()
+    # # 应用剪枝掩码（确保推理时剪枝参数不参与计算）
+    # pruner.apply_mask()
 
     # ====================== 4. 第二步：蒸馏补偿（挽回剪枝精度损失） ======================
 
@@ -293,7 +300,8 @@ if __name__ == '__main__':
     # quant_type = "int8" if DEVICE.type == "cpu" else "fp16"
     quant_type = "fp16" if DEVICE.type == "cpu" else "int8"
     # final_model = quantize_model(distilled_pruned_model, quant_type=quant_type)
-    final_model = quantize_model(pruned_model, quant_type=quant_type)
+    final_model = quantize_model(model, quant_type=quant_type)
+    # final_model = quantize_model(pruned_model, quant_type=quant_type)
 
     # ====================== 6. 验证轻量化效果 ======================
 
