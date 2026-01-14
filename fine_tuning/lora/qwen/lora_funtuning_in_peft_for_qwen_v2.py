@@ -338,6 +338,52 @@ if __name__ == '__main__':
         label_smoothing_factor=0.0,
         max_grad_norm=1.0
     )
+    """
+    GPU环境下的训练配置参数：
+        training_args = TrainingArguments(
+            # 基础输出配置
+            output_dir=OUTPUT_DIR,
+            overwrite_output_dir=True,  # 覆盖已有输出目录，适合多次调试
+            
+            # ===================== 核心优化：利用GPU提升batch_size，降低Loss波动 =====================
+            per_device_train_batch_size=8,  # GPU可支撑更大batch（原CPU=1），大幅降低梯度噪声
+            per_device_eval_batch_size=4,   # 验证集batch同步提升，评估更稳定
+            gradient_accumulation_steps=2,  # 等效batch_size=8*2=16，进一步平滑梯度
+            max_grad_norm=1.0,              # 梯度裁剪，防止大batch下梯度爆炸
+            
+            # ===================== 学习率与预热优化：适配大batch，避免过拟合 =====================
+            learning_rate=1e-4,             # 原2e-4偏大，GPU大batch下调低至1e-4，提升收敛稳定性
+            warmup_steps=100,               # 延长预热步数（原10），适配大batch的梯度更新节奏
+            weight_decay=0.05,              # 提高权重衰减（原0.01），小数据集下增强正则化，避免过拟合
+            
+            # ===================== 训练周期与评估策略：平衡效率与效果 =====================
+            num_train_epochs=5,             # 适当增加epoch（原3），GPU训练更快，充分利用小数据集
+            eval_strategy="steps",          # 保留按步评估，更早发现过拟合
+            eval_steps=50,                  # 降低评估频率（原10），减少GPU算力浪费，提升训练效率
+            logging_steps=LOGGING_STEPS,    # 保持原日志步长，便于对比Loss变化
+            
+            # ===================== GPU专属优化：混合精度+梯度检查点 =====================
+            fp16=True,                      # 开启FP16混合精度训练，GPU提速30%-50%，降低显存占用
+            bf16=False,                     # 若使用A100等支持BF16的GPU可开启，否则保持False
+            gradient_checkpointing=True,    # 开启梯度检查点，显存占用降低30%+，支持更大batch/模型
+            
+            # ===================== 模型保存与早停：避免过拟合，留存最优模型 =====================
+            save_strategy="steps",          # 按步保存模型（原no），留存训练过程中的模型
+            save_total_limit=3,             # 仅保留最近3个模型，避免磁盘占满
+            load_best_model_at_end=True,    # 训练结束后加载验证Loss最低的模型，避免过拟合 【要求保存策略和验证策略保持一致，也即eval_strategy="steps"时，要求save_strategy="steps"】
+            metric_for_best_model="eval_loss",  # 以验证Loss为最优模型判定标准
+            greater_is_better=False,        # eval_loss越小越好
+            
+            # ===================== 其他关键配置：适配中文微调 =====================
+            logging_dir="./logs/gpu",       # 单独的GPU训练日志目录，便于区分
+            report_to="tensorboard",        # 改用tensorboard可视化（替代swanlab，更通用）
+            remove_unused_columns=False,    # 保留labels列，避免数据丢失
+            label_smoothing_factor=0.1,     # 轻微标签平滑（原0.0），提升模型泛化能力
+            seed=42,                        # 固定随机种子，保证实验可复现
+            dataloader_pin_memory=True,     # GPU下开启pin_memory，提升数据加载速度
+            dataloader_num_workers=4,       # 多线程加载数据（CPU建议0，GPU建议2-4）
+        )
+    """
     print_info("训练配置")
 
     swanlab.init(project="qwen25-zh-finetune", experiment_name="windows-laptop-test", mode="local")

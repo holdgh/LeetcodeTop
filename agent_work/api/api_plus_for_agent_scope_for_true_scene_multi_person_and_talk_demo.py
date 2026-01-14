@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from cachetools import TTLCache
 
 from agent_work.agent_scope.agent.rewrite_agent import create_input_text_for_rewrite
-from agent_work.agent_scope.agent_pool.agent_pool_plus import SESSION_GOING_CACHE, agent_pool
+from agent_work.agent_scope.agent_pool.agent_pool_plus_with_safe_lock import SESSION_GOING_CACHE, agent_pool
 from agent_work.agent_scope.agent.search_agent import TOOL_CALL_CACHE
 from agent_work.database.context_service import get_session_history_context
 from agent_work.database.database import TempMessageStatus
