@@ -246,6 +246,14 @@ class AgentPool:
             while True:
                 await asyncio.sleep(30)
                 logger.info(f"开始清理过期实例，当前池容量：{len(self.pool)}")
+                # 核心优化：用asyncio.wait_for确保sleep不被阻塞（超时时间略大于30秒）
+                # try:
+                #     await asyncio.wait_for(
+                #         asyncio.sleep(30),
+                #         timeout=35  # 30秒sleep最多等35秒，超时强制唤醒
+                #     )
+                # except asyncio.TimeoutError:
+                #     logger.warning("清理任务sleep超时，强制唤醒执行")
 
                 # ========== 步骤1：无锁快照筛选疑似空闲实例（无池级锁，不阻塞任何操作） ==========
                 idle_pairs = [p for p in self.pool if p.get_state() == AgentInstanceState.IDLE]
@@ -293,11 +301,18 @@ class AgentPool:
                     for p in reserve_pairs:
                         try:
                             async with p.instance_lock:
-                                p.to_be_deleted = False
+                                p.pending_delete = False
                         except Exception as e:
                             logger.warning(f"重置实例 {p.pair_id} 待清理标记失败：{str(e)}")
                 else:
                     logger.info(f"无需缩容，当前空闲实例数：{idle_count}，最小空闲数：{self.min_size}")
+                    # 当空闲实例不足以达到清理条件时，将当前所有待清理实例恢复可用状态
+                    for p in real_idle_pairs:
+                        try:
+                            async with p.instance_lock:
+                                p.pending_delete = False
+                        except Exception as e:
+                            logger.warning(f"重置实例 {p.pair_id} 待清理标记失败：{str(e)}")
 
         except asyncio.CancelledError:
             logger.info("清理过期实例的后台任务已被取消")

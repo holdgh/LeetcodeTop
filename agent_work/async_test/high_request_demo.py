@@ -2,6 +2,7 @@
     模拟多用户并发请求场景，启动方式：
     # Web UI 模式
     locust -f locustfile.py --web-port=8089
+    locust -f high_request_demo.py --web-port=8089
 
     # 命令行模式（50并发用户，持续5分钟）
     locust -f locustfile.py --headless -u 50 -r 5 -t 5m
