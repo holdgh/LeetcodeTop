@@ -1,0 +1,109 @@
+# 默认参数
+#默认为1，表示开启一个业务进程。根据服务器核数来配置，一般1个核对应1个进程
+worker_processes  1;
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+events {
+	#单个业务进程可接受连接数
+    worker_connections  1024;
+}
+
+
+http {
+	#引入http mime类型，引入在conf文件下的mime.types文件,让浏览器知道识别文件后缀名后该如何展示
+    include       mime.types;
+	#如果mime类型没匹配上，默认使用二进制流的方式传输。
+    default_type  application/octet-stream;
+
+	#使用高效网络传输，也就是数据0拷贝，直接传输数据。未开启sendfile
+    sendfile        on;
+    #保持链接时间
+    keepalive_timeout  65;
+    #vhost虚拟主机
+    server {
+        #监听端口号
+        listen       80;
+        #主机名\域名
+        server_name  localhost;
+        #匹配路径url,样例:http://nginx.org/en/download.html
+        location / {
+            #文件根目录，相对于nginx安装根目录路径
+            root   html;
+            #默认页名称，访问先到访页面
+            index  index.html index.htm;
+        }
+        #服务端报错后报错编码对应页面。样例:http://nginx.org/50x.html
+        error_page   500 502 503 504  /50x.html;
+        #报错后识别到域名后面跟了/50x.html，则匹配到根目录root下的html文件夹
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+# 搭建站点
+# 虚拟主机
+server {
+    	listen       80;			# 浏览器访问端口号
+        server_name  font_server; 	# 浏览器访问域名
+
+    charset utf-8;
+    access_log  logs/xx_domian.access.log  access;
+
+    # 路由
+    location / {
+        root   ./html; # 访问根目录
+        index  index.html index.htm; # 入口文件
+    }
+}
+# 根据文件类型设置过期时间
+location ~.*\.css$ {
+    expires 1d;
+    break;
+}
+
+location ~.*\.js$ {
+    expires 1d;
+    break;
+}
+
+location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
+    access_log off;
+    expires 15d;    #保存15天
+    break;
+}
+
+# curl -x127.0.0.1:80 http://www.test.com/static/image/common/logo.png -I #测试图片的max-age
+# 禁止文件缓存
+location ~* \.(js|css|png|jpg|gif)$ {
+    add_header Cache-Control no-store;
+}
+# 防盗链
+location ~* \.(gif|jpg|png)$ {
+    # 只允许 192.168.0.1 请求资源
+    valid_referers none blocked 192.168.0.1;
+    if ($invalid_referer) {
+       rewrite ^/ http://$host/logo.png;
+    }
+}
+# 静态文件压缩
+server {
+    # 开启gzip 压缩
+    gzip on;
+    # 设置gzip所需的http协议最低版本 （HTTP/1.1, HTTP/1.0）
+    gzip_http_version 1.1;
+    # 设置压缩级别，压缩级别越高压缩时间越长  （1-9）
+    gzip_comp_level 4;
+    # 设置压缩的最小字节数， 页面Content-Length获取
+    gzip_min_length 1000;
+    # 设置压缩文件的类型  （text/html)
+    gzip_types text/plain application/javascript text/css;
+}
+# 指定错误页面
+# 根据状态码，返回对于的错误页面
+error_page 500 502 503 504 /50x.html;
+location = /50x.html {
+    root /source/error_page;
+}

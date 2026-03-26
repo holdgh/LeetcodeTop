@@ -4,7 +4,7 @@ import asyncio
 from typing import List, Optional
 from agentscope.agent import ReActAgent
 from agentscope.model import DashScopeChatModel
-import logging
+# import logging
 from cachetools import TTLCache
 
 from agent_work.agent_scope.agent.expert_agent import create_expert_agent
@@ -12,8 +12,12 @@ from agent_work.agent_scope.agent.rewrite_agent import create_rewrite_agent
 from agent_work.agent_scope.agent.search_agent import create_retriever_agent
 
 # 日志配置
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+
+# 采用日志工具类--同时输出日志到控制台和文件
+from agent_work.util.logger import get_logger
+logger = get_logger("agent_work_agent_pool")
 # 缓存配置：key=会话id，value=当前会话是否进行中的标识
 SESSION_GOING_CACHE = TTLCache(maxsize=1000, ttl=1800)
 

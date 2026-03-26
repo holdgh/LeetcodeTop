@@ -2,7 +2,7 @@ import os
 from typing import List
 from agentscope.agent import ReActAgent
 from agentscope.message import TextBlock
-from agentscope.model import ChatModelBase
+from agentscope.model import ChatModelBase, DashScopeChatModel
 from agentscope.formatter import DashScopeMultiAgentFormatter
 from sentence_transformers import SentenceTransformer
 from agentscope.tool import Toolkit, ToolResponse
@@ -280,30 +280,30 @@ def create_retriever_agent(chat_model: ChatModelBase) -> ReActAgent:
     toolkit.register_tool_function(query_maintenance_cycle)
 
     # TODO 免费llm到期，采用mock数据
-#     retriever = ReActAgent(
-#         name="检索助手",
-#         sys_prompt="""仅处理当前绑定会话的用户问题：
-# 1. 基于专属内存中的对话历史调用工具，结果整理后传递给运维专家Agent；
-# 2. 不直接回复用户，仅输出工具调用结果；
-# 3. 会话切换时内存会清空，无需考虑历史会话信息。
-# 4. 若收到“工具调用异常+强制终止”的系统提示，立即停止所有工具调用，基于现有信息总结工具调用结果后传递给运维专家Agent；
-# 5. 必须将输出结果控制在100字以内。""",
-#         model=chat_model,
-#         formatter=DashScopeMultiAgentFormatter(),
-#         toolkit=toolkit
-#     )
-    retriever = BaseAgentForMock(
+    retriever = ReActAgent(
         name="检索助手",
         sys_prompt="""仅处理当前绑定会话的用户问题：
-    1. 基于专属内存中的对话历史调用工具，结果整理后传递给运维专家Agent；
-    2. 不直接回复用户，仅输出工具调用结果；
-    3. 会话切换时内存会清空，无需考虑历史会话信息。
-    4. 若收到“工具调用异常+强制终止”的系统提示，立即停止所有工具调用，基于现有信息总结工具调用结果后传递给运维专家Agent；
-    5. 必须将输出结果控制在100字以内。""",
+1. 基于专属内存中的对话历史调用工具，结果整理后传递给运维专家Agent；
+2. 不直接回复用户，仅输出工具调用结果；
+3. 会话切换时内存会清空，无需考虑历史会话信息。
+4. 若收到“工具调用异常+强制终止”的系统提示，立即停止所有工具调用，基于现有信息总结工具调用结果后传递给运维专家Agent；
+5. 必须将输出结果控制在100字以内。""",
         model=chat_model,
         formatter=DashScopeMultiAgentFormatter(),
         toolkit=toolkit
     )
+#     retriever = BaseAgentForMock(
+#         name="检索助手",
+#         sys_prompt="""仅处理当前绑定会话的用户问题：
+#     1. 基于专属内存中的对话历史调用工具，结果整理后传递给运维专家Agent；
+#     2. 不直接回复用户，仅输出工具调用结果；
+#     3. 会话切换时内存会清空，无需考虑历史会话信息。
+#     4. 若收到“工具调用异常+强制终止”的系统提示，立即停止所有工具调用，基于现有信息总结工具调用结果后传递给运维专家Agent；
+#     5. 必须将输出结果控制在100字以内。""",
+#         model=chat_model,
+#         formatter=DashScopeMultiAgentFormatter(),
+#         toolkit=toolkit
+#     )
     retriever.set_console_output_enabled(False)  # 禁用控制台输出智能体内容，由业务代码控制输出内容
     # 为当前 Agent 实例注册 预处理钩子
     retriever.register_instance_hook(
@@ -312,3 +312,16 @@ def create_retriever_agent(chat_model: ChatModelBase) -> ReActAgent:
         hook=create_pre_acting_hook(max_tool_calls=3)  # 传入带工具调用最大次数的钩子
     )
     return retriever
+
+
+# if __name__ == '__main__':
+#     model = DashScopeChatModel(
+#         model_name="qwen3-max",
+#         api_key="sk-6b8afa231399490bb7a56c025a3bc633",
+#         generate_kwargs={
+#             "temperature": 0.1,
+#             "top_p": 0.8,
+#             "max_tokens": 300,
+#             "repetition_penalty": 1.1
+#         }
+#     )

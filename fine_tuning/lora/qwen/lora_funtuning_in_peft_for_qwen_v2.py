@@ -294,10 +294,10 @@ if __name__ == '__main__':
         task_type="CAUSAL_LM",
         inference_mode=False
     )
-    # 应用LoRA
+    # 应用LoRA【基于Lora配置信息对原始模型网络结构进行lora改造，添加执行模块的lora网络层，这也是后续进行Lora微调的模型适配器参数】
     model = get_peft_model(model, lora_config)
     # 打印可训练参数（验证配置）
-    model.print_trainable_parameters()
+    model.print_trainable_parameters()  # 可以看到网络结构中的lora网络层
     print_info("配置LoRA")
 
     # ====================== 5. 数据整理器（核心修复维度对齐） ======================

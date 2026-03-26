@@ -1,0 +1,38 @@
+# 启动及验证
+1、切换到 Nginx 安装目录下，双击 Nginx.exe 启动 Nginx
+2、打开浏览器，输入 http://127.0.0.1/ （具体端口看个人配置，默认配置文件端口：80）出现以下界面【welcome to nginx!】说明配置成功
+3、如果需要修改配置文件，则需要重新启动 Nginx，首先 Ctrl + Shift + Esc，打开任务管理器，找个 Nginx 服务，结束任务，然后切换到 Nginx 安装目录下，双击 Nginx.exe 启动 Nginx
+# 常用命令
+nginx -s stop       # 快速关闭Nginx，可能不保存相关信息，并迅速终止Web服务。
+nginx -s quit       # 平稳关闭Nginx，保存相关信息，有安排的结束Web服务。
+nginx -s reload     # 因改变了Nginx相关配置，需要重新加载配置而重载。
+nginx -s reopen     # 重新打开日志文件。
+nginx -c filename   # 为 Nginx 指定一个配置文件，来代替缺省的。
+nginx -t            # 不运行，而仅仅测试配置文件。Nginx将检查配置文件的语法的正确性，并尝试打开配置文件中所引用到的文件。
+nginx -V            # 显示 nginx 的版本，编译器版本和配置参数。
+taskkill /f /t /im nginx.exe		# 彻底关闭nginx（关闭Nginx其他服务，这样才能彻底关闭）
+nginx -s reload		# 重新加载配置
+# 跨域问题
+跨域的定义：同源策略限制了从同一个源加载的文档或脚本如何与来自另一个源的资源进行交互。这是一个用于隔离潜在恶意文件的重要安全机制。通常不允许不同源间的读操作。
+同源的定义：如果两个页面的协议，端口（如果有指定）和域名都相同，则两个页面具有相同的源。
+nginx解决跨域的原理：
+例如：
+	前端 server 域名为：http://font_server
+	后端 server 域名为：https://github.com
+	现在 http://domain 对 http://font_server发起请求一定会出现跨域。
+	只需要启动一个 Nginx 服务器，将 server_name 设置为 font_server，然后设置相应的 location 以拦截前端需要跨域的请求，最后将请求代理回 github.com。配置如下：
+## 配置反向代理的参数
+server {
+    listen    8080;
+    server_name font_server
+
+    ## 1. 用户访问 http://font_server，则反向代理到 https://github.com
+    location / {
+        proxy_pass  https://github.com;
+        proxy_redirect     off;
+        proxy_set_header   Host             $host;        # 传递域名
+        proxy_set_header   X-Real-IP        $remote_addr; # 传递IP
+        proxy_set_header   X-Scheme         $scheme;      # 传递协议
+        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+    }
+}

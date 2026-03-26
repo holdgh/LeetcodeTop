@@ -99,19 +99,19 @@ def create_input_text_for_rewrite(current_question: str, history_context: str):
 
 def create_rewrite_agent(chat_model: ChatModelBase) -> ReActAgent:
     # TODO 免费llm到期，采用mock数据
-    # rewrite = ReActAgent(
-    #     name="重写助手",
-    #     # sys_prompt=REWRITE_SYS_PROMPT,
-    #     sys_prompt=REWRITE_SYS_PROMPT_PRO,
-    #     model=chat_model,
-    #     formatter=DashScopeMultiAgentFormatter()
-    # )
-    rewrite = BaseAgentForMock(
+    rewrite = ReActAgent(
         name="重写助手",
         # sys_prompt=REWRITE_SYS_PROMPT,
         sys_prompt=REWRITE_SYS_PROMPT_PRO,
         model=chat_model,
         formatter=DashScopeMultiAgentFormatter()
     )
+    # rewrite = BaseAgentForMock(
+    #     name="重写助手",
+    #     # sys_prompt=REWRITE_SYS_PROMPT,
+    #     sys_prompt=REWRITE_SYS_PROMPT_PRO,
+    #     model=chat_model,
+    #     formatter=DashScopeMultiAgentFormatter()
+    # )
     rewrite.set_console_output_enabled(False)  # 禁用控制台输出智能体内容，由业务代码控制输出内容
     return rewrite

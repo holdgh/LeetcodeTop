@@ -43,17 +43,17 @@ EXPERT_SYS_PROMPT = """
 
 def create_expert_agent(chat_model: ChatModelBase) -> ReActAgent:
     # TODO 免费llm到期，采用mock数据
-    # expert = ReActAgent(
-    #     name="运维专家",
-    #     sys_prompt=EXPERT_SYS_PROMPT,
-    #     model=chat_model,
-    #     formatter=DashScopeMultiAgentFormatter()
-    # )
-    expert = BaseAgentForMock(
+    expert = ReActAgent(
         name="运维专家",
         sys_prompt=EXPERT_SYS_PROMPT,
         model=chat_model,
         formatter=DashScopeMultiAgentFormatter()
     )
+    # expert = BaseAgentForMock(
+    #     name="运维专家",
+    #     sys_prompt=EXPERT_SYS_PROMPT,
+    #     model=chat_model,
+    #     formatter=DashScopeMultiAgentFormatter()
+    # )
     expert.set_console_output_enabled(False)  # 禁用控制台输出智能体内容，由业务代码控制输出内容
     return expert

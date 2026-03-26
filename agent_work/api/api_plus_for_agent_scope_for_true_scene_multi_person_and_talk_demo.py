@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import asyncio
 from typing import Optional
 from agentscope.message import Msg
-import logging
+# import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -21,8 +21,11 @@ from agent_work.datatransfer.async_memory_writer import redis_to_queue_by_async
 from agent_work.util.redis_util import redis_queue, AgentMessage, create_msg_id, fallback_save_or_update
 
 # 日志配置
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+# 采用日志工具类--同时输出日志到控制台和文件
+from agent_work.util.logger import get_logger
+logger = get_logger("agent_work_api")
 # 新增缓存锁
 SESSION_CACHE_LOCK = asyncio.Lock()
 
@@ -299,6 +302,10 @@ async def user_dialog_for_one_question(session_id: str, question: str, conversat
 class QueryRequest(BaseModel):
     session_id: Optional[str] = None  # 会话ID（首次请求可空，自动创建）
     question: str  # 用户问题
+
+
+class PoolData(BaseModel):
+    data: Optional[list] = None
 
 
 class QueryResponse(BaseModel):

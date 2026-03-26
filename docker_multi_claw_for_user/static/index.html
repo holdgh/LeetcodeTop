@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoPaw 多用户实例管理系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <!-- Vue 3 + Element Plus -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+    <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+</head>
+<body>
+    <div id="app">
+        <el-container style="height: 100vh;">
+            <el-header style="background:#1989fa;color:#fff;text-align:center;line-height:60px;">
+                <h1>CoPaw 多用户实例管理系统</h1>
+            </el-header>
+
+            <el-container>
+                <el-aside width="220px" style="background:#f5f7fa;">
+                    <el-menu default-active="1" @select="handleMenuSelect">
+                        <el-menu-item index="1">
+                            <el-icon><User /></el-icon>
+                            <span>用户管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="2">
+                            <el-icon><Server /></el-icon>
+                            <span>实例管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="3">
+                            <el-icon><FolderOpened /></el-icon>
+                            <span>备份管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="4">
+                            <el-icon><DataAnalysis /></el-icon>
+                            <span>资源监控</span>
+                        </el-menu-item>
+                    </el-menu>
+                </el-aside>
+
+                <el-main style="padding:20px;">
+                    <!-- 用户管理 -->
+                    <el-card v-if="activeTab === '1'" title="用户管理" style="margin-bottom:20px;">
+                        <el-form :inline="true" :model="userForm" style="margin-bottom:20px;">
+                            <el-form-item label="用户ID">
+                                <el-input v-model="userForm.userId" style="width:200px;"></el-input>
+                            </el-form-item>
+                            <el-form-item label="用户名">
+                                <el-input v-model="userForm.userName" style="width:200px;"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="registerUser">注册用户</el-button>
+                                <el-button type="success" @click="loginUser">用户登录</el-button>
+                                <el-button type="warning" @click="logoutUser">用户登出</el-button>
+                                <el-button type="danger" @click="deleteUser">删除用户</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <el-alert
+                            v-if="message"
+                            :title="message.title"
+                            :description="message.content"
+                            :type="message.type"
+                            closable
+                            @close="message = null"
+                        ></el-alert>
+                    </el-card>
+
+                    <!-- 实例管理 -->
+                    <el-card v-if="activeTab === '2'" title="实例管理" style="margin-bottom:20px;">
+                        <el-button type="primary" @click="listInstances">刷新实例列表</el-button>
+                        <el-table :data="instanceList" border style="width:100%;margin-top:10px;">
+                            <el-table-column prop="id" label="实例ID"></el-table-column>
+                            <el-table-column prop="user_id" label="所属用户"></el-table-column>
+                            <el-table-column prop="status" label="状态"></el-table-column>
+                            <el-table-column prop="url" label="访问地址"></el-table-column>
+                        </el-table>
+                    </el-card>
+
+                    <!-- 备份管理 -->
+                    <el-card v-if="activeTab === '3'" title="备份管理" style="margin-bottom:20px;">
+                        <el-form :inline="true" :model="backupForm">
+                            <el-form-item label="用户ID">
+                                <el-input v-model="backupForm.userId" style="width:200px;"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="listBackups">查看备份</el-button>
+                                <el-button type="success" @click="createBackup">创建备份</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <el-table :data="backupList" border style="width:100%;margin-top:10px;">
+                            <el-table-column prop="path" label="备份路径"></el-table-column>
+                            <el-table-column prop="create_time" label="创建时间"></el-table-column>
+                        </el-table>
+                    </el-card>
+
+                    <!-- 资源监控 -->
+                    <el-card v-if="activeTab === '4'" title="资源监控" style="margin-bottom:20px;">
+                        <el-form :inline="true" :model="metricsForm">
+                            <el-form-item label="用户ID">
+                                <el-input v-model="metricsForm.userId" style="width:200px;"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="getMetrics">获取监控数据</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <el-row v-if="metricsData" style="margin-top:15px;" gutter="20">
+                            <el-col :span="6"><div class="metrics-box">{{ metricsData.cpu_usage }}%</div><div class="metrics-label">CPU</div></el-col>
+                            <el-col :span="6"><div class="metrics-box">{{ metricsData.mem_usage }}%</div><div class="metrics-label">内存</div></el-col>
+                            <el-col :span="6"><div class="metrics-box">{{ metricsData.disk_usage }}%</div><div class="metrics-label">磁盘</div></el-col>
+                            <el-col :span="6"><div class="metrics-box">{{ metricsData.uptime }}</div><div class="metrics-label">运行时长(分)</div></el-col>
+                        </el-row>
+                    </el-card>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: '1',
+                    userForm: { userId: 'user001', userName: 'testuser' },
+                    backupForm: { userId: 'user001' },
+                    metricsForm: { userId: 'user001' },
+                    message: null,
+                    instanceList: [],
+                    backupList: [],
+                    metricsData: null
+                };
+            },
+            mounted() {
+                for (const [k, cmp] of Object.entries(ElementPlusIconsVue)) {
+                    this._instance.appContext.components[k] = cmp;
+                }
+            },
+            methods: {
+                handleMenuSelect(i) { this.activeTab = i; },
+                async registerUser() {
+                    const uid = this.userForm.userId;
+                    const name = this.userForm.userName;
+                    const res = await fetch(`/admin/users/${uid}/register?user_name=${name}`, { method: 'POST' });
+                    const d = await res.json();
+                    this.msg(d.success ? '成功' : '失败', d.success ? '注册成功' : d.detail, d.success ? 'success' : 'danger');
+                },
+                async loginUser() {
+                    const r = await fetch(`/admin/users/${this.userForm.userId}/login`, { method: 'POST' });
+                    const d = await r.json();
+                    this.msg('登录', d.success ? '成功：' + d.url : d.detail, d.success ? 'success' : 'danger');
+                },
+                async logoutUser() {
+                    const r = await fetch(`/admin/users/${this.userForm.userId}/logout`, { method: 'POST' });
+                    const d = await r.json();
+                    this.msg('登出', d.success ? '成功' : d.detail, d.success ? 'success' : 'danger');
+                },
+                async deleteUser() {
+                    const r = await fetch(`/admin/users/${this.userForm.userId}`, { method: 'DELETE' });
+                    const d = await r.json();
+                    this.msg('删除', d.success ? '成功' : d.detail, d.success ? 'success' : 'danger');
+                },
+                async listInstances() {
+                    const r = await fetch('/admin/instances');
+                    const d = await r.json();
+                    this.instanceList = d.success ? d.data : [];
+                    this.msg('实例', '刷新成功', 'success');
+                },
+                async listBackups() {
+                    const r = await fetch(`/admin/backups/${this.backupForm.userId}`);
+                    const d = await r.json();
+                    this.backupList = d.success ? d.data : [];
+                    this.msg('备份', '加载成功', 'success');
+                },
+                async createBackup() {
+                    const r = await fetch(`/admin/backups/${this.backupForm.userId}/create`, { method: 'POST' });
+                    const d = await r.json();
+                    this.msg('备份', d.success ? '创建成功' : d.detail, d.success ? 'success' : 'danger');
+                    this.listBackups();
+                },
+                async getMetrics() {
+                    const r = await fetch(`/admin/metrics/${this.metricsForm.userId}`);
+                    const d = await r.json();
+                    this.metricsData = d.success ? d.data : null;
+                    this.msg('监控', '获取成功', 'success');
+                },
+                msg(title, content, type) { this.message = { title, content, type }; }
+            }
+        }).use(ElementPlus).mount('#app');
+    </script>
+</body>
+</html>

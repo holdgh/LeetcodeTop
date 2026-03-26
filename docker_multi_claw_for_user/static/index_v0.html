@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoPaw 多用户实例管理系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- 引入Element Plus（可选，提升UI体验） -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/element-plus@2.4.3/dist/index.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.4.3/dist/index.min.css">
+</head>
+<body>
+    <div id="app">
+        <el-container style="height: 100vh;">
+            <el-header>
+                <h1>CoPaw 多用户实例管理系统</h1>
+            </el-header>
+            <el-container>
+                <el-aside width="200px">
+                    <el-menu default-active="1" class="el-menu-vertical-demo">
+                        <el-menu-item index="1">
+                            <el-icon><User /></el-icon>
+                            <span slot="title">用户管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="2">
+                            <el-icon><Server /></el-icon>
+                            <span slot="title">实例管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="3">
+                            <el-icon><FolderOpened /></el-icon>
+                            <span slot="title">备份管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="4">
+                            <el-icon><DataAnalysis /></el-icon>
+                            <span slot="title">资源监控</span>
+                        </el-menu-item>
+                    </el-menu>
+                </el-aside>
+                <el-main>
+                    <!-- 用户管理模块 -->
+                    <el-card v-if="activeTab === '1'" title="用户管理">
+                        <el-form :inline="true" :model="userForm" class="demo-form-inline">
+                            <el-form-item label="用户ID">
+                                <el-input v-model="userForm.userId" placeholder="输入用户ID"></el-input>
+                            </el-form-item>
+                            <el-form-item label="用户名">
+                                <el-input v-model="userForm.userName" placeholder="输入用户名"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="registerUser">注册用户</el-button>
+                                <el-button type="success" @click="loginUser">用户登录</el-button>
+                                <el-button type="warning" @click="logoutUser">用户登出</el-button>
+                                <el-button type="danger" @click="deleteUser">删除用户</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <el-divider></el-divider>
+                        <el-alert
+                            v-if="message"
+                            :title="message.title"
+                            :message="message.content"
+                            :type="message.type"
+                            closable
+                            @close="message = null"
+                        ></el-alert>
+                    </el-card>
+
+                    <!-- 实例管理模块 -->
+                    <el-card v-if="activeTab === '2'" title="实例管理">
+                        <el-button type="primary" @click="listInstances">刷新实例列表</el-button>
+                        <el-table :data="instanceList" border style="width: 100%;margin-top:10px;">
+                            <el-table-column prop="id" label="实例ID"></el-table-column>
+                            <el-table-column prop="user_id" label="所属用户"></el-table-column>
+                            <el-table-column prop="status" label="状态"></el-table-column>
+                            <el-table-column prop="url" label="访问地址"></el-table-column>
+                        </el-table>
+                    </el-card>
+
+                    <!-- 备份管理模块 -->
+                    <el-card v-if="activeTab === '3'" title="备份管理">
+                        <el-form :inline="true" :model="backupForm" class="demo-form-inline">
+                            <el-form-item label="用户ID">
+                                <el-input v-model="backupForm.userId" placeholder="输入用户ID"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="listBackups">列出备份</el-button>
+                                <el-button type="success" @click="createBackup">创建备份</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <el-table :data="backupList" border style="width: 100%;margin-top:10px;">
+                            <el-table-column prop="path" label="备份路径"></el-table-column>
+                            <el-table-column prop="create_time" label="创建时间"></el-table-column>
+                        </el-table>
+                    </el-card>
+
+                    <!-- 资源监控模块 -->
+                    <el-card v-if="activeTab === '4'" title="资源监控">
+                        <el-form :inline="true" :model="metricsForm" class="demo-form-inline">
+                            <el-form-item label="用户ID">
+                                <el-input v-model="metricsForm.userId" placeholder="输入用户ID"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="getMetrics">获取资源指标</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <el-card v-if="metricsData" style="margin-top:10px;">
+                            <el-row>
+                                <el-col :span="8">
+                                    <div class="metrics-item">CPU使用率: {{ metricsData.cpu_usage }}%</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="metrics-item">内存使用率: {{ metricsData.mem_usage }}%</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="metrics-item">磁盘使用率: {{ metricsData.disk_usage }}%</div>
+                                </el-col>
+                            </el-row>
+                            <el-row style="margin-top:10px;">
+                                <el-col :span="8">
+                                    <div class="metrics-item">网络入站: {{ metricsData.net_in }} MB</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="metrics-item">网络出站: {{ metricsData.net_out }} MB</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="metrics-item">实例运行时长: {{ metricsData.uptime }} 分钟</div>
+                                </el-col>
+                            </el-row>
+                        </el-card>
+                    </el-card>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

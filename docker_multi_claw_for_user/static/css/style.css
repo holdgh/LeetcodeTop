@@ -1,0 +1,4 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:Arial, "Microsoft YaHei"; }
+.metrics-box { padding:15px; background:#1989fa; color:#fff; border-radius:8px; text-align:center; font-size:18px; font-weight:bold; }
+.metrics-label { text-align:center; margin-top:5px; font-size:14px; color:#666; }
