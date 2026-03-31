@@ -12,6 +12,8 @@ import logging
 from typing import Dict, Optional, List
 from pathlib import Path
 
+from docker_multi_claw_for_user.postgres_client_pg8000 import PostgresClient
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,10 +23,9 @@ class CoPawInstanceManager:
     def __init__(self, docker_client: docker.DockerClient = None):
         self.client = docker_client or docker.from_env()
         self.port_range = (9001, 9999)
-        self.used_ports = set()
-        self.instances = {}  # user_id -> instance_info
+        self.postgres_client = PostgresClient()
 
-    def create_user_instance(self, user_id: str, user_name: str, config: Dict = None) -> Dict:
+    def create_user_instance(self, user_id: str, user_name: str) -> Dict:
         """为用户创建独立的CoPaw实例"""
         try:
             # 分配端口
@@ -37,7 +38,7 @@ class CoPawInstanceManager:
             self._create_volumes(data_volume, secrets_volume)
 
             # 准备环境变量
-            environment = self._prepare_environment(user_id, user_name, config)
+            environment = self._prepare_environment(user_id, user_name)
 
             # 启动容器
             container = self.client.containers.run(
@@ -58,8 +59,8 @@ class CoPawInstanceManager:
             # 等待容器启动并初始化
             instance_info = self._initialize_instance(container, user_id, user_name, port)
 
-            # 记录实例信息
-            self.instances[user_id] = instance_info
+            # 保存实例信息到数据库
+            self.postgres_client.save_instance(user_id, instance_info)
 
             logger.info(f"Created CoPaw instance for user {user_id} on port {port}")
             return instance_info
@@ -70,11 +71,11 @@ class CoPawInstanceManager:
 
     def _allocate_port(self) -> int:
         """动态分配可用端口"""
+        used_ports = self.postgres_client.get_instance_ports()
         for port in range(self.port_range[0], self.port_range[1]):
-            if port not in self.used_ports:
+            if port not in used_ports:
                 # 检查端口是否真的可用
                 if self._is_port_available(port):
-                    self.used_ports.add(port)
                     return port
         raise Exception("No available ports in range")
 
@@ -145,7 +146,7 @@ class CoPawInstanceManager:
             if "already exists" not in str(e):
                 raise
 
-    def _prepare_environment(self, user_id: str, user_name: str, config: Dict = None) -> Dict:
+    def _prepare_environment(self, user_id: str, user_name: str) -> Dict:
         """准备容器环境变量"""
         environment = {
             'COPAW_WORKING_DIR': '/app/working',
@@ -158,9 +159,9 @@ class CoPawInstanceManager:
             'COPAW_LOG_LEVEL': 'info'
         }
 
-        # 添加自定义配置
-        if config:
-            environment.update(config.get('environment', {}))
+        # # 添加自定义配置
+        # if config:
+        #     environment.update(config.get('environment', {}))
 
         return environment
 
@@ -224,13 +225,9 @@ class CoPawInstanceManager:
 
         logger.info(f"Configured CoPaw instance for user {user_id}")
 
-    def get_instance(self, user_id: str) -> Optional[Dict]:
-        """获取用户实例信息"""
-        return self.instances.get(user_id)
-
     def remove_instance(self, user_id: str) -> bool:
         """移除用户实例"""
-        instance = self.instances.get(user_id)
+        instance = self.postgres_client.get_instance(user_id)
         if not instance:
             return False
 
@@ -240,11 +237,8 @@ class CoPawInstanceManager:
             container.stop()
             container.remove()
 
-            # 释放端口
-            self.used_ports.discard(instance['port'])
-
-            # 从记录中移除
-            del self.instances[user_id]
+            # 从数据库中移除实例记录
+            self.postgres_client.delete_instance(user_id)
 
             logger.info(f"Removed CoPaw instance for user {user_id}")
             return True
@@ -255,4 +249,4 @@ class CoPawInstanceManager:
 
     def list_instances(self) -> List[Dict]:
         """列出所有实例"""
-        return list(self.instances.values())
+        return self.postgres_client.list_instance()

@@ -66,7 +66,7 @@ class PostgresClient:
                     container_name VARCHAR(255) NOT NULL,  
                     port INTEGER NOT NULL,  
                     status VARCHAR(50) DEFAULT 'stopped',  
-                    config JSONB,  
+                    url VARCHAR(255) NOT NULL,  
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
                     FOREIGN KEY (user_id) REFERENCES users(user_id)  
@@ -115,19 +115,48 @@ class PostgresClient:
             """, (user_id, user_name, email))
             conn.commit()
 
+    def delete_user(self, user_id: str):
+        """删除用户"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            # cursor.execute("""
+            #     DELETE FROM users WHERE user_id = %s
+            # """, (user_id,))
+            cursor.execute("""UPDATE users 
+SET is_deleted = TRUE, deleted_at = NOW() 
+WHERE user_id = %s""", (user_id,))
+            conn.commit()
+
+    def get_user(self, user_id: str):
+        """创建用户"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            # 注意：占位符后的所有字段值【即使是常量，也要同一采用占位符的形式】
+            # cursor.execute("""
+            #     SELECT user_id, user_name FROM users WHERE is_deleted = FALSE and user_id = %s
+            # """, user_id)
+            cursor.execute("""  
+                            SELECT user_id, user_name FROM users WHERE is_deleted = %s and user_id = %s
+                        """, ("FALSE", user_id))
+            result = cursor.fetchone()
+            if result:
+                columns = ['user_id', 'user_name']
+                return dict(zip(columns, result))
+            return None
+
     def save_instance(self, user_id: str, instance_info: Dict):
         """保存实例信息"""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""  
-                INSERT INTO instances (user_id, container_id, container_name, port, status, config)  
+                INSERT INTO instances (user_id, container_id, container_name, port, status, url)  
                 VALUES (%s, %s, %s, %s, %s, %s)  
                 ON CONFLICT (user_id) DO UPDATE SET  
                     container_id = EXCLUDED.container_id,  
                     container_name = EXCLUDED.container_name,  
                     port = EXCLUDED.port,  
                     status = EXCLUDED.status,  
-                    config = EXCLUDED.config,  
+                    url = EXCLUDED.url,  
                     updated_at = CURRENT_TIMESTAMP  
             """, (
                 user_id,
@@ -135,7 +164,19 @@ class PostgresClient:
                 instance_info['container_name'],
                 instance_info['port'],
                 instance_info['status'],
-                json.dumps(instance_info)
+                instance_info['url']
+            ))
+            conn.commit()
+
+    def update_instance_status(self, instance_info: Dict):
+        """更新实例状态"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""  
+                UPDATE instances SET status = %s where container_id = %s 
+            """, (
+                instance_info['status'],
+                instance_info['container_id']
             ))
             conn.commit()
 
@@ -148,7 +189,7 @@ class PostgresClient:
             """, (user_id,))
             result = cursor.fetchone()
             if result:
-                columns = ['user_id', 'container_id', 'container_name', 'port', 'status', 'config', 'created_at',
+                columns = ['user_id', 'container_id', 'container_name', 'port', 'status', 'url', 'created_at',
                            'updated_at']
                 return dict(zip(columns, result))
             return None
@@ -161,10 +202,18 @@ class PostgresClient:
             result = cursor.fetchall()
             res = []
             for item in result:
-                columns = ['user_id', 'container_id', 'container_name', 'port', 'status', 'config', 'created_at',
+                columns = ['user_id', 'container_id', 'container_name', 'port', 'status', 'url', 'created_at',
                            'updated_at']
                 res.append(dict(zip(columns, item)))
             return res
+
+    def get_instance_ports(self) -> set[int]:
+        """获取实例信息"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT port FROM instances")
+            result = cursor.fetchall()
+            return set(result)
 
     def delete_instance(self, user_id: str) -> Optional[Dict]:
         """删除指定用户的实例信息"""

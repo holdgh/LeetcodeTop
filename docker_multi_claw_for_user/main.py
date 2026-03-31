@@ -22,47 +22,48 @@ from docker_multi_claw_for_user.claw_instance_manager import CoPawInstanceManage
 from docker_multi_claw_for_user.claw_lifespan_manager import CoPawLifecycleManager
 from docker_multi_claw_for_user.data_backup_recover import CoPawBackupManager
 from docker_multi_claw_for_user.resource_monitor import CoPawResourceMonitor
-from load_balancer import LoadBalancer
+# from load_balancer import LoadBalancer
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 全局管理器实例 TODO 暂时采用全局初始化方式
-# instance_manager = None
-# lifecycle_manager = None
-# resource_monitor = None
-# backup_manager = None
+instance_manager = None
+lifecycle_manager = None
+resource_monitor = None
+backup_manager = None
 # load_balancer = None
 
 # 初始化管理器
-instance_manager = CoPawInstanceManager()
-load_balancer = LoadBalancer()
-lifecycle_manager = CoPawLifecycleManager(instance_manager)
-resource_monitor = CoPawResourceMonitor(instance_manager)
-backup_manager = CoPawBackupManager()
+# instance_manager = CoPawInstanceManager()
+# # load_balancer = LoadBalancer()
+# lifecycle_manager = CoPawLifecycleManager(instance_manager)
+# resource_monitor = CoPawResourceMonitor(instance_manager)
+# backup_manager = CoPawBackupManager()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
-    global instance_manager, lifecycle_manager, resource_monitor, backup_manager, load_balancer
+    # global instance_manager, lifecycle_manager, resource_monitor, backup_manager, load_balancer
+    global instance_manager, lifecycle_manager, resource_monitor, backup_manager
 
     # 启动时初始化
     logger.info("Starting CoPaw Multi-User Manager...")
     # TODO 暂时注释，放置全局，以便查看代码
-    # # 初始化管理器
-    # instance_manager = CoPawInstanceManager()
+    # 初始化管理器
+    instance_manager = CoPawInstanceManager()
     # load_balancer = LoadBalancer()
-    # lifecycle_manager = CoPawLifecycleManager(instance_manager)
-    # resource_monitor = CoPawResourceMonitor(instance_manager)
-    # backup_manager = CoPawBackupManager()
+    lifecycle_manager = CoPawLifecycleManager(instance_manager)
+    resource_monitor = CoPawResourceMonitor(instance_manager)
+    backup_manager = CoPawBackupManager()
 
     # 设置负载均衡器
-    lifecycle_manager.set_load_balancer(load_balancer)
+    # lifecycle_manager.set_load_balancer(load_balancer)
 
     # 启动监控
-    lifecycle_manager.start_health_monitoring()
+    # lifecycle_manager.start_health_monitoring()
     resource_monitor.start_monitoring()
 
     logger.info("CoPaw Multi-User Manager started successfully")
@@ -72,6 +73,7 @@ async def lifespan(app: FastAPI):
     # 关闭时清理
     logger.info("Shutting down CoPaw Multi-User Manager...")
     resource_monitor.stop_monitoring()
+    lifecycle_manager.stop_all_instance()
     logger.info("CoPaw Multi-User Manager stopped")
 
 
@@ -113,8 +115,8 @@ app.add_middleware(
 
 # API路由
 @app.post("/admin/users/{user_id}/register")
-async def register_user(user_id: str, user_name: str):
-    """用户注册"""
+async def register_user(user_id: str, user_name: str):  # 应用于用户首次使用系统
+    """用户注册-创建一个claw容器-持久化信息"""
     try:
         result = lifecycle_manager.on_user_register(user_id, user_name)
         return {"success": True, "data": result}
@@ -123,8 +125,8 @@ async def register_user(user_id: str, user_name: str):
 
 
 @app.post("/admin/users/{user_id}/login")
-async def login_user(user_id: str):
-    """用户登录"""
+async def login_user(user_id: str):  # 应用于用户非首次使用系统
+    """用户登录-启动该用户对应的claw容器-启动失败则删除重建"""
     try:
         url = lifecycle_manager.on_user_login(user_id)
         if url:
@@ -136,8 +138,8 @@ async def login_user(user_id: str):
 
 
 @app.post("/admin/users/{user_id}/logout")
-async def logout_user(user_id: str):
-    """用户登出"""
+async def logout_user(user_id: str):  # 应用于用户退出系统
+    """用户登出-关闭该用户对应的claw容器"""
     try:
         lifecycle_manager.on_user_logout(user_id)
         return {"success": True}
@@ -146,8 +148,8 @@ async def logout_user(user_id: str):
 
 
 @app.delete("/admin/users/{user_id}")
-async def delete_user(user_id: str):
-    """删除用户"""
+async def delete_user(user_id: str):  # 应用于用户从系统中注销
+    """删除用户-删除该用户对应容器"""
     try:
         lifecycle_manager.on_user_delete(user_id)
         return {"success": True}
@@ -186,8 +188,8 @@ async def create_backup(user_id: str):
 
 
 @app.get("/admin/metrics/{user_id}")
-async def get_user_metrics(user_id: str):
-    """获取用户资源指标"""
+async def get_user_metrics(user_id: str):  # 应用于获取指定用户的claw实例资源情况【偏向运维场景】
+    """获取用户对应claw容器的实时资源指标"""
     try:
         metrics = resource_monitor.get_metrics_summary(user_id)
         return {"success": True, "data": metrics}

@@ -93,39 +93,104 @@ class CoPawResourceMonitor:
             except Exception as e:
                 logger.error(f"Failed to collect metrics for {user_id}: {e}")
 
+    # def _collect_instance_metrics(self, instance: Dict) -> Dict:
+    #     """收集单个实例的指标"""
+    #     container_id = instance['container_id']
+    #     container = self.instance_manager.client.containers.get(container_id)
+    #
+    #     # 获取容器统计信息
+    #     stats = container.stats(stream=False)
+    #     print(f"容器统计信息：{stats}")
+    #     # 计算CPU使用率
+    #     cpu_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - stats['precpu_stats']['cpu_usage']['total_usage']
+    #     system_cpu_delta = stats['cpu_stats']['system_cpu_usage'] - stats['precpu_stats']['system_cpu_usage']
+    #     cpu_usage = (cpu_delta / system_cpu_delta) * len(
+    #         stats['cpu_stats']['cpu_usage']['percpu_usage']) * 100 if system_cpu_delta > 0 else 0
+    #
+    #     # 内存使用
+    #     memory_usage = stats['memory_stats']['usage']
+    #     memory_limit = stats['memory_stats']['limit']
+    #     memory_percent = (memory_usage / memory_limit) * 100
+    #
+    #     # 网络IO
+    #     network_io = {}
+    #     for interface, data in stats.get('networks', {}).items():
+    #         network_io[interface] = {
+    #             'rx_bytes': data['rx_bytes'],
+    #             'tx_bytes': data['tx_bytes']
+    #         }
+    #
+    #     return {
+    #         'cpu_usage': cpu_usage,
+    #         'memory_usage': memory_usage,
+    #         'memory_percent': memory_percent,
+    #         'network_io': network_io,
+    #         'container_status': container.status
+    #     }
+
     def _collect_instance_metrics(self, instance: Dict) -> Dict:
-        """收集单个实例的指标"""
+        """收集单个实例的指标（兼容空数据 + 完整Docker stats）"""
         container_id = instance['container_id']
         container = self.instance_manager.client.containers.get(container_id)
 
-        # 获取容器统计信息
         stats = container.stats(stream=False)
 
-        # 计算CPU使用率
-        cpu_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - stats['precpu_stats']['cpu_usage']['total_usage']
-        system_cpu_delta = stats['cpu_stats']['system_cpu_usage'] - stats['precpu_stats']['system_cpu_usage']
-        cpu_usage = (cpu_delta / system_cpu_delta) * len(
-            stats['cpu_stats']['cpu_usage']['percpu_usage']) * 100 if system_cpu_delta > 0 else 0
+        # ===================== CPU 使用率 =====================
+        cpu_usage = 0.0
+        try:
+            cpu_stats = stats.get("cpu_stats", {})
+            precpu_stats = stats.get("precpu_stats", {})
 
-        # 内存使用
-        memory_usage = stats['memory_stats']['usage']
-        memory_limit = stats['memory_stats']['limit']
-        memory_percent = (memory_usage / memory_limit) * 100
+            cpu_total = cpu_stats.get("cpu_usage", {}).get("total_usage", 0)
+            pre_cpu_total = precpu_stats.get("cpu_usage", {}).get("total_usage", 0)
+            cpu_delta = cpu_total - pre_cpu_total
 
-        # 网络IO
+            system_cpu = cpu_stats.get("system_cpu_usage", 0)
+            pre_system_cpu = precpu_stats.get("system_cpu_usage", 0)
+            system_delta = system_cpu - pre_system_cpu
+
+            online_cpus = cpu_stats.get("online_cpus", 1)
+
+            if system_delta > 0 and cpu_delta > 0:
+                cpu_usage = (cpu_delta / system_delta) * online_cpus * 100
+        except Exception:
+            cpu_usage = 0.0
+
+        # ===================== 内存 =====================
+        memory_usage = 0
+        memory_percent = 0.0
+        try:
+            mem = stats.get("memory_stats", {})
+            usage = mem.get("usage", 0)
+            limit = mem.get("limit", 1)
+            memory_usage = usage
+            if limit > 0:
+                memory_percent = (usage / limit) * 100
+        except Exception:
+            memory_usage = 0
+            memory_percent = 0.0
+
+        # ===================== 网络 =====================
         network_io = {}
-        for interface, data in stats.get('networks', {}).items():
-            network_io[interface] = {
-                'rx_bytes': data['rx_bytes'],
-                'tx_bytes': data['tx_bytes']
-            }
+        try:
+            networks = stats.get("networks", {})
+            for iface, data in networks.items():
+                network_io[iface] = {
+                    "rx_bytes": data.get("rx_bytes", 0),
+                    "tx_bytes": data.get("tx_bytes", 0)
+                }
+        except Exception:
+            network_io = {}
+
+        # ===================== 容器状态 =====================
+        container_status = container.status
 
         return {
-            'cpu_usage': cpu_usage,
-            'memory_usage': memory_usage,
-            'memory_percent': memory_percent,
-            'network_io': network_io,
-            'container_status': container.status
+            "cpu_usage": round(cpu_usage, 2),
+            "memory_usage": memory_usage,
+            "memory_percent": round(memory_percent, 2),
+            "network_io": network_io,
+            "container_status": container_status
         }
 
     def _check_thresholds(self):

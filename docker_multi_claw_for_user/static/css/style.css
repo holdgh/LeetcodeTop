@@ -1,4 +1,520 @@
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:Arial, "Microsoft YaHei"; }
-.metrics-box { padding:15px; background:#1989fa; color:#fff; border-radius:8px; text-align:center; font-size:18px; font-weight:bold; }
-.metrics-label { text-align:center; margin-top:5px; font-size:14px; color:#666; }
+/**
+ * CoPaw 多用户实例管理系统 - 样式文件
+ * 版本: 1.1.0
+ * 更新: 2026-03-30
+ */
+
+/* 全局样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Vue加载隐藏 */
+[v-cloak] {
+    display: none;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 应用容器 */
+.app-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 头部渐变 */
+.header-gradient {
+    background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    padding: 0 24px;
+}
+
+.header-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+}
+
+.header-subtitle {
+    font-size: 12px;
+    color: #a0aec0;
+    margin-top: 4px;
+    letter-spacing: 1px;
+}
+
+/* 健康状态 */
+.health-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.health-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #67c23a;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+}
+
+/* 侧边栏菜单 */
+.aside-menu {
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%) !important;
+    border-right: none !important;
+}
+
+.aside-menu .el-menu {
+    border-right: none !important;
+    background-color: transparent !important;
+}
+
+.aside-menu .el-menu-item {
+    color: #a0aec0 !important;
+    border-radius: 8px;
+    margin: 4px 8px;
+    transition: all 0.3s ease;
+    height: 48px;
+    line-height: 48px;
+}
+
+.aside-menu .el-menu-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
+.aside-menu .el-menu-item.is-active {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.aside-menu .el-menu-item .el-icon {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+/* 主内容区 */
+.main-content {
+    background: #f5f7fa;
+    padding: 20px;
+    min-height: calc(100vh - 80px);
+}
+
+/* 内容卡片 */
+.content-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.content-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.content-card .card-header {
+    background: #fafbfc;
+    padding: 16px 20px;
+    border-bottom: 1px solid #ebeef5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content-card .card-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #303133;
+    display: flex;
+    align-items: center;
+}
+
+.content-card .card-body {
+    padding: 20px;
+}
+
+/* 表单样式 */
+.form-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.form-inline .el-form-item {
+    margin-bottom: 0;
+}
+
+.form-inline .el-form-item__label {
+    font-weight: 500;
+}
+
+/* 状态标签 */
+.status-tag {
+    font-weight: 500;
+}
+
+.status-running {
+    background: #e8f5e9 !important;
+    color: #2e7d32 !important;
+    border-color: #a5d6a7 !important;
+}
+
+.status-stopped {
+    background: #ffebee !important;
+    color: #c62828 !important;
+    border-color: #ef9a9a !important;
+}
+
+.status-unknown {
+    background: #fff3e0 !important;
+    color: #ef6c00 !important;
+    border-color: #ffcc80 !important;
+}
+
+/* 指标网格 */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.metric-item {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e7ed 100%);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.metric-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #409eff;
+    margin-bottom: 8px;
+}
+
+.metric-label {
+    font-size: 14px;
+    color: #606266;
+}
+
+.metric-progress {
+    margin-top: 12px;
+}
+
+/* URL链接 */
+.url-link {
+    color: #409eff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.3s ease;
+}
+
+.url-link:hover {
+    color: #66b1ff;
+    text-decoration: underline;
+}
+
+/* 表格样式 */
+.el-table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.el-table th {
+    background: #fafbfc !important;
+    font-weight: 600;
+    color: #303133;
+}
+
+.el-table td {
+    padding: 12px 0;
+}
+
+.el-table .el-table__row:hover > td {
+    background: #f5f7fa !important;
+}
+
+/* 按钮组 */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-buttons .el-button {
+    transition: all 0.3s ease;
+}
+
+.action-buttons .el-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 空状态 */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #909399;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #c0c4cc;
+}
+
+/* Alert 样式 */
+.el-alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.el-alert__title {
+    font-weight: 600;
+}
+
+/* 输入框样式 */
+.el-input__wrapper {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.el-input__wrapper:hover {
+    box-shadow: 0 0 0 1px #c0c4cc inset;
+}
+
+.el-input__wrapper.is-focus {
+    box-shadow: 0 0 0 1px #409eff inset, 0 0 8px rgba(64, 158, 255, 0.2);
+}
+
+/* 按钮样式 */
+.el-button {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.el-button--primary {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.el-button--primary:hover {
+    background: linear-gradient(90deg, #7b8eef 0%, #8559b8 100%);
+}
+
+.el-button--success {
+    background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%);
+    border: none;
+}
+
+.el-button--warning {
+    background: linear-gradient(90deg, #f2994a 0%, #f2c94c 100%);
+    border: none;
+}
+
+.el-button--danger {
+    background: linear-gradient(90deg, #eb3349 0%, #f45c43 100%);
+    border: none;
+}
+
+/* Tag 样式 */
+.el-tag {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* Menu 样式 */
+.el-menu {
+    border-right: none;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 768px) {
+    .header-title {
+        font-size: 18px;
+    }
+    
+    .header-subtitle {
+        display: none;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-inline {
+        flex-direction: column;
+    }
+    
+    .form-inline .el-form-item {
+        width: 100%;
+    }
+    
+    .form-inline .el-input {
+        width: 100% !important;
+    }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .main-content {
+        background: #1a1a2e;
+    }
+    
+    .content-card {
+        background: #16213e;
+    }
+    
+    .content-card .card-header {
+        background: #1a1a2e;
+        border-bottom-color: #2d3748;
+    }
+    
+    .content-card .card-header h3 {
+        color: #e2e8f0;
+    }
+    
+    .el-table {
+        background: #16213e;
+        color: #e2e8f0;
+    }
+    
+    .el-table th {
+        background: #1a1a2e !important;
+        color: #a0aec0;
+    }
+    
+    .el-table td {
+        border-bottom-color: #2d3748;
+    }
+    
+    .el-table .el-table__row:hover > td {
+        background: #1e2a4a !important;
+    }
+    
+    .metric-item {
+        background: linear-gradient(135deg, #1e2a4a 0%, #16213e 100%);
+    }
+    
+    .metric-label {
+        color: #a0aec0;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.content-card {
+    animation: fadeIn 0.3s ease;
+}
+
+/* 加载动画 */
+.refresh-btn {
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 工具提示 */
+.el-tooltip__popper {
+    border-radius: 8px;
+}
+
+/* 对话框样式 */
+.el-dialog {
+    border-radius: 12px;
+}
+
+.el-dialog__header {
+    border-bottom: 1px solid #ebeef5;
+    padding: 16px 20px;
+}
+
+.el-dialog__body {
+    padding: 20px;
+}
+
+.el-dialog__footer {
+    border-top: 1px solid #ebeef5;
+    padding: 12px 20px;
+}
+
+/* MessageBox 样式 */
+.el-message-box {
+    border-radius: 12px;
+}
+
+/* 消息提示样式 */
+.el-message {
+    border-radius: 8px;
+}

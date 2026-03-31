@@ -4,114 +4,344 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CoPaw 多用户实例管理系统</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-
-    <!-- Vue 3 + Element Plus -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Vue 3 + Element Plus CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
-    <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
-    <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+    <script src="https://unpkg.com/element-plus/dist/index.full.min.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; }
+        [v-cloak] { display: none; }
+        
+        .app-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .header-gradient {
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+        }
+        
+        .aside-gradient {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .metrics-box {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .metrics-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .metrics-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #67c23a;
+            animation: pulse 2s infinite;
+            display: inline-block;
+        }
+        
+        .el-menu-item.is-active {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <el-container style="height: 100vh;">
-            <el-header style="background:#1989fa;color:#fff;text-align:center;line-height:60px;">
-                <h1>CoPaw 多用户实例管理系统</h1>
+    <div id="app" v-cloak>
+        <!-- 加载中提示 -->
+        <div class="loading-overlay" v-if="!appLoaded">
+            <div style="text-align: center; color: white;">
+                <div style="font-size: 32px; margin-bottom: 16px;">🖥️</div>
+                <div style="font-size: 24px; margin-bottom: 8px;">CoPaw 管理系统</div>
+                <div style="font-size: 14px; opacity: 0.8;">正在加载...</div>
+            </div>
+        </div>
+        
+        <!-- 主应用 -->
+        <el-container style="height: 100vh;" v-show="appLoaded">
+            <!-- 头部 -->
+            <el-header class="header-gradient" style="padding: 0 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.3);">
+                <div style="color: #fff;">
+                    <div style="font-size: 20px; font-weight: 600; letter-spacing: 2px;">
+                        🖥️ CoPaw 多用户实例管理系统
+                    </div>
+                    <div style="font-size: 12px; color: #a0aec0;">Multi-User Instance Management Platform</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; color: #fff;">
+                    <span class="status-dot"></span>
+                    <span style="color: #67c23a; font-weight: 500;">系统运行中</span>
+                    <span style="margin-left: 12px; background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 4px; font-size: 12px;">v1.0.0</span>
+                </div>
             </el-header>
-
+            
             <el-container>
-                <el-aside width="220px" style="background:#f5f7fa;">
-                    <el-menu default-active="1" @select="handleMenuSelect">
+                <!-- 侧边栏 -->
+                <el-aside width="200px" class="aside-gradient">
+                    <el-menu 
+                        :default-active="activeTab" 
+                        @select="handleMenuSelect"
+                        background-color="transparent"
+                        text-color="#a0aec0"
+                        active-text-color="#fff"
+                        style="border-right: none;">
                         <el-menu-item index="1">
-                            <el-icon><User /></el-icon>
+                            <span style="margin-right: 8px;">👤</span>
                             <span>用户管理</span>
                         </el-menu-item>
                         <el-menu-item index="2">
-                            <el-icon><Server /></el-icon>
+                            <span style="margin-right: 8px;">📦</span>
                             <span>实例管理</span>
                         </el-menu-item>
                         <el-menu-item index="3">
-                            <el-icon><FolderOpened /></el-icon>
+                            <span style="margin-right: 8px;">💾</span>
                             <span>备份管理</span>
                         </el-menu-item>
                         <el-menu-item index="4">
-                            <el-icon><DataAnalysis /></el-icon>
+                            <span style="margin-right: 8px;">📊</span>
                             <span>资源监控</span>
                         </el-menu-item>
+                        <el-menu-item index="5">
+                            <span style="margin-right: 8px;">📚</span>
+                            <span>API 文档</span>
+                        </el-menu-item>
                     </el-menu>
+                    
+                    <!-- 统计卡片 -->
+                    <div style="padding: 16px;">
+                        <div class="metrics-box" style="margin-bottom: 12px;">
+                            <div class="metrics-value">{{ stats.totalInstances }}</div>
+                            <div class="metrics-label">总实例数</div>
+                        </div>
+                        <div class="metrics-box" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                            <div class="metrics-value">{{ stats.runningInstances }}</div>
+                            <div class="metrics-label">运行中</div>
+                        </div>
+                    </div>
                 </el-aside>
-
-                <el-main style="padding:20px;">
+                
+                <!-- 主内容区 -->
+                <el-main style="background: #f5f7fa; padding: 20px;">
+                    <!-- 消息提示 -->
+                    <el-alert
+                        v-if="message"
+                        :title="message.title"
+                        :description="message.content"
+                        :type="message.type"
+                        closable
+                        @close="message = null"
+                        style="margin-bottom: 20px;">
+                    </el-alert>
+                    
                     <!-- 用户管理 -->
-                    <el-card v-if="activeTab === '1'" title="用户管理" style="margin-bottom:20px;">
-                        <el-form :inline="true" :model="userForm" style="margin-bottom:20px;">
-                            <el-form-item label="用户ID">
-                                <el-input v-model="userForm.userId" style="width:200px;"></el-input>
-                            </el-form-item>
-                            <el-form-item label="用户名">
-                                <el-input v-model="userForm.userName" style="width:200px;"></el-input>
-                            </el-form-item>
+                    <el-card v-if="activeTab === '1'" style="margin-bottom: 20px;">
+                        <template #header>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 600;">👤 用户管理</span>
+                                <el-tag type="info" size="small">创建/登录/登出/删除用户</el-tag>
+                            </div>
+                        </template>
+                        
+                        <el-form :model="userForm" label-width="100px">
+                            <el-row :gutter="20">
+                                <el-col :span="12">
+                                    <el-form-item label="用户ID">
+                                        <el-input v-model="userForm.userId" placeholder="请输入用户ID"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="12">
+                                    <el-form-item label="用户名">
+                                        <el-input v-model="userForm.userName" placeholder="请输入用户名（注册时需要）"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            
                             <el-form-item>
-                                <el-button type="primary" @click="registerUser">注册用户</el-button>
-                                <el-button type="success" @click="loginUser">用户登录</el-button>
-                                <el-button type="warning" @click="logoutUser">用户登出</el-button>
-                                <el-button type="danger" @click="deleteUser">删除用户</el-button>
+                                <el-button type="primary" @click="registerUser" :loading="loading.register">
+                                    注册用户
+                                </el-button>
+                                <el-button type="success" @click="loginUser" :loading="loading.login">
+                                    登录用户
+                                </el-button>
+                                <el-button type="warning" @click="logoutUser" :loading="loading.logout">
+                                    登出用户
+                                </el-button>
+                                <el-button type="danger" @click="deleteUser" :loading="loading.delete">
+                                    删除用户
+                                </el-button>
                             </el-form-item>
                         </el-form>
-                        <el-alert
-                            v-if="message"
-                            :title="message.title"
-                            :description="message.content"
-                            :type="message.type"
-                            closable
-                            @close="message = null"
-                        ></el-alert>
                     </el-card>
-
+                    
                     <!-- 实例管理 -->
-                    <el-card v-if="activeTab === '2'" title="实例管理" style="margin-bottom:20px;">
-                        <el-button type="primary" @click="listInstances">刷新实例列表</el-button>
-                        <el-table :data="instanceList" border style="width:100%;margin-top:10px;">
-                            <el-table-column prop="id" label="实例ID"></el-table-column>
-                            <el-table-column prop="user_id" label="所属用户"></el-table-column>
-                            <el-table-column prop="status" label="状态"></el-table-column>
-                            <el-table-column prop="url" label="访问地址"></el-table-column>
+                    <el-card v-if="activeTab === '2'">
+                        <template #header>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 600;">📦 实例管理</span>
+                                <el-button type="primary" size="small" @click="listInstances" :loading="loading.list">
+                                    刷新列表
+                                </el-button>
+                            </div>
+                        </template>
+                        
+                        <el-table :data="instanceList" border style="width: 100%;">
+                            <el-table-column prop="container_id" label="实例ID" width="180"></el-table-column>
+                            <el-table-column prop="container_name" label="名称" width="200"></el-table-column>
+                            <el-table-column prop="status" label="状态" width="100">
+                                <template #default="scope">
+                                    <el-tag :type="scope.row.status === 'running' ? 'success' : 'danger'">
+                                        {{ scope.row.status }}
+                                    </el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="port" label="端口" width="100"></el-table-column>
+                            <el-table-column prop="user_id" label="用户ID" width="150"></el-table-column>
+                            <el-table-column label="操作">
+                                <template #default="scope">
+                                    <el-button type="primary" size="small" @click="openInstance(scope.row)">
+                                        访问
+                                    </el-button>
+                                </template>
+                            </el-table-column>
                         </el-table>
+                        
+                        <el-empty v-if="instanceList.length === 0" description="暂无实例数据"></el-empty>
                     </el-card>
-
+                    
                     <!-- 备份管理 -->
-                    <el-card v-if="activeTab === '3'" title="备份管理" style="margin-bottom:20px;">
-                        <el-form :inline="true" :model="backupForm">
+                    <el-card v-if="activeTab === '3'">
+                        <template #header>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 600;">💾 备份管理</span>
+                            </div>
+                        </template>
+                        
+                        <el-form :model="backupForm" label-width="100px" style="margin-bottom: 20px;">
                             <el-form-item label="用户ID">
-                                <el-input v-model="backupForm.userId" style="width:200px;"></el-input>
+                                <el-input v-model="backupForm.userId" placeholder="请输入要备份的用户ID" style="width: 300px;"></el-input>
                             </el-form-item>
                             <el-form-item>
-                                <el-button type="primary" @click="listBackups">查看备份</el-button>
-                                <el-button type="success" @click="createBackup">创建备份</el-button>
+                                <el-button type="primary" @click="listBackups" :loading="loading.listBackups">
+                                    查看备份
+                                </el-button>
+                                <el-button type="success" @click="createBackup" :loading="loading.createBackup">
+                                    创建备份
+                                </el-button>
                             </el-form-item>
                         </el-form>
-                        <el-table :data="backupList" border style="width:100%;margin-top:10px;">
-                            <el-table-column prop="path" label="备份路径"></el-table-column>
-                            <el-table-column prop="create_time" label="创建时间"></el-table-column>
+                        
+                        <el-table :data="backupList" border style="width: 100%;">
+                            <el-table-column prop="name" label="备份名称"></el-table-column>
+                            <el-table-column prop="size" label="大小" width="120"></el-table-column>
+                            <el-table-column prop="created_at" label="创建时间" width="200"></el-table-column>
                         </el-table>
+                        
+                        <el-empty v-if="backupList.length === 0 && backupForm.userId" description="该用户暂无备份"></el-empty>
                     </el-card>
-
+                    
                     <!-- 资源监控 -->
-                    <el-card v-if="activeTab === '4'" title="资源监控" style="margin-bottom:20px;">
-                        <el-form :inline="true" :model="metricsForm">
+                    <el-card v-if="activeTab === '4'">
+                        <template #header>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 600;">📊 资源监控</span>
+                            </div>
+                        </template>
+                        
+                        <el-form :model="metricsForm" label-width="100px" style="margin-bottom: 20px;">
                             <el-form-item label="用户ID">
-                                <el-input v-model="metricsForm.userId" style="width:200px;"></el-input>
+                                <el-input v-model="metricsForm.userId" placeholder="请输入用户ID" style="width: 300px;"></el-input>
                             </el-form-item>
                             <el-form-item>
-                                <el-button type="primary" @click="getMetrics">获取监控数据</el-button>
+                                <el-button type="primary" @click="getMetrics" :loading="loading.metrics">
+                                    获取监控数据
+                                </el-button>
                             </el-form-item>
                         </el-form>
-                        <el-row v-if="metricsData" style="margin-top:15px;" gutter="20">
-                            <el-col :span="6"><div class="metrics-box">{{ metricsData.cpu_usage }}%</div><div class="metrics-label">CPU</div></el-col>
-                            <el-col :span="6"><div class="metrics-box">{{ metricsData.mem_usage }}%</div><div class="metrics-label">内存</div></el-col>
-                            <el-col :span="6"><div class="metrics-box">{{ metricsData.disk_usage }}%</div><div class="metrics-label">磁盘</div></el-col>
-                            <el-col :span="6"><div class="metrics-box">{{ metricsData.uptime }}</div><div class="metrics-label">运行时长(分)</div></el-col>
-                        </el-row>
+                        
+                        <div v-if="metricsData" style="padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                            <el-row :gutter="20">
+                                <el-col :span="8">
+                                    <div class="metrics-box">
+                                        <div class="metrics-value">{{ metricsData.cpu_usage || 0 }}%</div>
+                                        <div class="metrics-label">CPU 使用率</div>
+                                        <el-progress :percentage="metricsData.cpu_usage || 0" :show-text="false" style="margin-top: 10px;"></el-progress>
+                                    </div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="metrics-box" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                                        <div class="metrics-value">{{ metricsData.memory_usage/1024/1024 || 0 }}MB</div>
+                                        <div class="metrics-label">内存使用量</div>
+                                        <el-progress :percentage="metricsData.memory_usage/1024/1024 || 0" :show-text="false" style="margin-top: 10px;"></el-progress>
+                                    </div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="metrics-box" style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);">
+                                        <div class="metrics-value">{{ metricsData.memory_percent || 0 }}%</div>
+                                        <div class="metrics-label">内存使用率</div>
+                                        <el-progress :percentage="metricsData.memory_percent || 0" :show-text="false" style="margin-top: 10px;"></el-progress>
+                                    </div>
+                                </el-col>
+                            </el-row>
+                        </div>
+                        
+                        <el-empty v-if="!metricsData" description="请输入用户ID获取监控数据"></el-empty>
+                    </el-card>
+                    
+                    <!-- API 文档 -->
+                    <el-card v-if="activeTab === '5'">
+                        <template #header>
+                            <span style="font-weight: 600;">📚 API 接口文档</span>
+                        </template>
+                        
+                        <el-table :data="apiList" border style="width: 100%;">
+                            <el-table-column label="方法" width="100">
+                                <template #default="scope">
+                                    <el-tag :type="getMethodType(scope.row.method)" size="small">
+                                        {{ scope.row.method }}
+                                    </el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="path" label="接口路径" min-width="280">
+                                <template #default="scope">
+                                    <code style="background: #f5f7fa; padding: 4px 8px; border-radius: 4px; font-size: 13px;">
+                                        {{ scope.row.path }}
+                                    </code>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="description" label="功能描述" min-width="200"></el-table-column>
+                        </el-table>
                     </el-card>
                 </el-main>
             </el-container>
@@ -120,76 +350,256 @@
 
     <script>
         const { createApp } = Vue;
-
-        createApp({
+        
+        const app = createApp({
             data() {
                 return {
+                    appLoaded: false,
                     activeTab: '1',
-                    userForm: { userId: 'user001', userName: 'testuser' },
-                    backupForm: { userId: 'user001' },
-                    metricsForm: { userId: 'user001' },
                     message: null,
+                    
+                    userForm: { userId: '', userName: '' },
+                    backupForm: { userId: '' },
+                    metricsForm: { userId: '' },
+                    
+                    loading: {
+                        register: false,
+                        login: false,
+                        logout: false,
+                        delete: false,
+                        list: false,
+                        listBackups: false,
+                        createBackup: false,
+                        metrics: false
+                    },
+                    
                     instanceList: [],
                     backupList: [],
-                    metricsData: null
+                    metricsData: null,
+                    
+                    stats: { totalInstances: 0, runningInstances: 0, stoppedInstances: 0 },
+                    
+                    apiList: [
+                        { method: 'POST', path: '/admin/users/{user_id}/register', description: '用户注册 - 创建CoPaw容器实例' },
+                        { method: 'POST', path: '/admin/users/{user_id}/login', description: '用户登录 - 启动用户容器' },
+                        { method: 'POST', path: '/admin/users/{user_id}/logout', description: '用户登出 - 停止用户容器' },
+                        { method: 'DELETE', path: '/admin/users/{user_id}', description: '删除用户 - 删除容器和数据' },
+                        { method: 'GET', path: '/admin/instances', description: '获取所有实例列表' },
+                        { method: 'GET', path: '/admin/backups/{user_id}', description: '列出用户备份' },
+                        { method: 'POST', path: '/admin/backups/{user_id}/create', description: '创建用户备份' },
+                        { method: 'GET', path: '/admin/metrics/{user_id}', description: '获取用户资源监控' }
+                    ]
                 };
             },
+            
             mounted() {
-                for (const [k, cmp] of Object.entries(ElementPlusIconsVue)) {
-                    this._instance.appContext.components[k] = cmp;
-                }
+                // 模拟加载延迟
+                setTimeout(() => {
+                    this.appLoaded = true;
+                }, 500);
+                
+                // 初始化加载实例列表
+                this.listInstances();
             },
+            
             methods: {
-                handleMenuSelect(i) { this.activeTab = i; },
+                handleMenuSelect(index) {
+                    this.activeTab = index;
+                },
+                
+                showMessage(title, content, type) {
+                    this.message = { title, content, type };
+                },
+                
+                getMethodType(method) {
+                    const types = {
+                        'GET': 'success',
+                        'POST': 'primary',
+                        'PUT': 'warning',
+                        'DELETE': 'danger'
+                    };
+                    return types[method] || 'info';
+                },
+                
                 async registerUser() {
-                    const uid = this.userForm.userId;
-                    const name = this.userForm.userName;
-                    const res = await fetch(`/admin/users/${uid}/register?user_name=${name}`, { method: 'POST' });
-                    const d = await res.json();
-                    this.msg(d.success ? '成功' : '失败', d.success ? '注册成功' : d.detail, d.success ? 'success' : 'danger');
+                    if (!this.userForm.userId || !this.userForm.userName) {
+                        this.showMessage('提示', '请填写用户ID和用户名', 'warning');
+                        return;
+                    }
+                    this.loading.register = true;
+                    try {
+                        const response = await fetch(`/admin/users/${this.userForm.userId}/register?user_name=${encodeURIComponent(this.userForm.userName)}`, {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            this.showMessage('成功', `用户注册成功！端口: ${data.data.port}`, 'success');
+                            this.listInstances();
+                        } else {
+                            this.showMessage('失败', data.detail || '注册失败', 'error');
+                        }
+                    } catch (error) {
+                        this.showMessage('错误', error.message, 'error');
+                    }
+                    this.loading.register = false;
                 },
+                
                 async loginUser() {
-                    const r = await fetch(`/admin/users/${this.userForm.userId}/login`, { method: 'POST' });
-                    const d = await r.json();
-                    this.msg('登录', d.success ? '成功：' + d.url : d.detail, d.success ? 'success' : 'danger');
+                    if (!this.userForm.userId) {
+                        this.showMessage('提示', '请填写用户ID', 'warning');
+                        return;
+                    }
+                    this.loading.login = true;
+                    try {
+                        const response = await fetch(`/admin/users/${this.userForm.userId}/login`, {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            this.showMessage('成功', `用户登录成功！OSClaw访问地址: ${data.url}`, 'success');
+                            this.listInstances();
+                        } else {
+                            this.showMessage('失败', data.detail || '登录失败', 'error');
+                        }
+                    } catch (error) {
+                        this.showMessage('错误', error.message, 'error');
+                    }
+                    this.loading.login = false;
                 },
+                
                 async logoutUser() {
-                    const r = await fetch(`/admin/users/${this.userForm.userId}/logout`, { method: 'POST' });
-                    const d = await r.json();
-                    this.msg('登出', d.success ? '成功' : d.detail, d.success ? 'success' : 'danger');
+                    if (!this.userForm.userId) {
+                        this.showMessage('提示', '请填写用户ID', 'warning');
+                        return;
+                    }
+                    this.loading.logout = true;
+                    try {
+                        const response = await fetch(`/admin/users/${this.userForm.userId}/logout`, {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            this.showMessage('成功', '用户登出成功', 'success');
+                            this.listInstances();
+                        } else {
+                            this.showMessage('失败', data.detail || '登出失败', 'error');
+                        }
+                    } catch (error) {
+                        this.showMessage('错误', error.message, 'error');
+                    }
+                    this.loading.logout = false;
                 },
+                
                 async deleteUser() {
-                    const r = await fetch(`/admin/users/${this.userForm.userId}`, { method: 'DELETE' });
-                    const d = await r.json();
-                    this.msg('删除', d.success ? '成功' : d.detail, d.success ? 'success' : 'danger');
+                    if (!this.userForm.userId) {
+                        this.showMessage('提示', '请填写用户ID', 'warning');
+                        return;
+                    }
+                    this.loading.delete = true;
+                    try {
+                        const response = await fetch(`/admin/users/${this.userForm.userId}`, {
+                            method: 'DELETE'
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            this.showMessage('成功', '用户删除成功', 'success');
+                            this.listInstances();
+                        } else {
+                            this.showMessage('失败', data.detail || '删除失败', 'error');
+                        }
+                    } catch (error) {
+                        this.showMessage('错误', error.message, 'error');
+                    }
+                    this.loading.delete = false;
                 },
+                
                 async listInstances() {
-                    const r = await fetch('/admin/instances');
-                    const d = await r.json();
-                    this.instanceList = d.success ? d.data : [];
-                    this.msg('实例', '刷新成功', 'success');
+                    this.loading.list = true;
+                    try {
+                        const response = await fetch('/admin/instances');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.instanceList = data.data || [];
+                            this.stats.totalInstances = this.instanceList.length;
+                            this.stats.runningInstances = this.instanceList.filter(i => i.status === 'running').length;
+                            this.stats.stoppedInstances = this.stats.totalInstances - this.stats.runningInstances;
+                        }
+                    } catch (error) {
+                        console.error('获取实例列表失败:', error);
+                    }
+                    this.loading.list = false;
                 },
+                
                 async listBackups() {
-                    const r = await fetch(`/admin/backups/${this.backupForm.userId}`);
-                    const d = await r.json();
-                    this.backupList = d.success ? d.data : [];
-                    this.msg('备份', '加载成功', 'success');
+                    if (!this.backupForm.userId) {
+                        this.showMessage('提示', '请填写用户ID', 'warning');
+                        return;
+                    }
+                    this.loading.listBackups = true;
+                    try {
+                        const response = await fetch(`/admin/backups/${this.backupForm.userId}`);
+                        const data = await response.json();
+                        if (data.success) {
+                            this.backupList = data.data || [];
+                            this.showMessage('成功', `找到 ${this.backupList.length} 个备份`, 'success');
+                        }
+                    } catch (error) {
+                        this.showMessage('错误', error.message, 'error');
+                    }
+                    this.loading.listBackups = false;
                 },
+                
                 async createBackup() {
-                    const r = await fetch(`/admin/backups/${this.backupForm.userId}/create`, { method: 'POST' });
-                    const d = await r.json();
-                    this.msg('备份', d.success ? '创建成功' : d.detail, d.success ? 'success' : 'danger');
-                    this.listBackups();
+                    if (!this.backupForm.userId) {
+                        this.showMessage('提示', '请填写用户ID', 'warning');
+                        return;
+                    }
+                    this.loading.createBackup = true;
+                    try {
+                        const response = await fetch(`/admin/backups/${this.backupForm.userId}/create`, {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            this.showMessage('成功', `备份创建成功: ${data.backup_path}`, 'success');
+                            this.listBackups();
+                        }
+                    } catch (error) {
+                        this.showMessage('错误', error.message, 'error');
+                    }
+                    this.loading.createBackup = false;
                 },
+                
                 async getMetrics() {
-                    const r = await fetch(`/admin/metrics/${this.metricsForm.userId}`);
-                    const d = await r.json();
-                    this.metricsData = d.success ? d.data : null;
-                    this.msg('监控', '获取成功', 'success');
+                    if (!this.metricsForm.userId) {
+                        this.showMessage('提示', '请填写用户ID', 'warning');
+                        return;
+                    }
+                    this.loading.metrics = true;
+                    try {
+                        const response = await fetch(`/admin/metrics/${this.metricsForm.userId}`);
+                        const data = await response.json();
+                        if (data.success) {
+                            this.metricsData = data.data.current;
+                            this.showMessage('成功', '监控数据获取成功', 'success');
+                        }
+                    } catch (error) {
+                        this.showMessage('错误', error.message, 'error');
+                    }
+                    this.loading.metrics = false;
                 },
-                msg(title, content, type) { this.message = { title, content, type }; }
+                
+                openInstance(row) {
+                    if (row.port) {
+                        window.open(`http://127.0.0.1:${row.port}`, '_blank');
+                    }
+                }
             }
-        }).use(ElementPlus).mount('#app');
+        });
+        
+        // 使用 Element Plus
+        app.use(ElementPlus);
+        app.mount('#app');
     </script>
 </body>
 </html>
